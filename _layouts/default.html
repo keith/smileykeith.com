@@ -54,17 +54,11 @@
 
       <footer>
         <div id="searchStuff" class="four columns">
-          <!-- <form action="http://search.smileykeith.com/" id="search" method="get">
-          <input type="search" id="field" placeholder="Search&hellip;" name="query">
-          <input type="hidden" name="type" value="and" />
-          <input type="hidden" name="results" value="50" />
-          <input type="hidden" name="search" value="1" />
-          <input type="submit" style="visibility: hidden;" />
-          </form> -->
-          <form method="get" id="search" action="http://duckduckgo.com/">
-            <input type="hidden" name="sites" value="http://smileykeith.com/"/>
-            <input type="search" id="field" name="q" maxlength="255" placeholder="Search&hellip;" />
-            <input type="submit" value="DuckDuckGo Search" style="visibility: hidden;" />
+          <form id="search" action="http://google.com/search" method="get">
+            <fieldset role="search">
+              <input type="hidden" name="q" value="site:smileykeith.com" />
+              <input id="field" type="search" name="q" maxlength="255" placeholder="Search&hellip;"/>
+            </fieldset>
           </form>
         </div>
         <div>
