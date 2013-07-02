@@ -634,11 +634,16 @@ footer:hover {
 }
 
 form#search {
-/*	background:red;*/
 /*	margin:0 auto;*/
 	border-radius:5px;
 	width:255px;
 	margin: 0 auto;
+  outline:none;
+}
+
+#field {
+  color: black;
+  outline: none;
 }
 
 div#searchStuff {

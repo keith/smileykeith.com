@@ -93,6 +93,10 @@ input[type="search"] {
 	border:solid 1px #93a1a1;
 }
 
+#field {
+  color: #93a1a1;
+}
+
 pre {
 	background-color:#eee7d6;
 	border:none;
