@@ -1,46 +1,101 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>{{ page.title }}</title>
-        <meta name="viewport" content="width=device-width">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+    <title>{{ page.title }}</title>
 
-        <!-- syntax highlighting CSS -->
-        <link rel="stylesheet" href="/css/syntax.css">
+    <meta name="author" content="Keith Smliey">
+    <link rel="author" href="https://plus.google.com/114321628813035573740/">
+    <link rel="icon" href="http://smileykeith.com/img/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="http://smileykeith.com/img/favicon.png" type="image/x-icon">
 
-        <!-- Custom CSS -->
-        <link rel="stylesheet" href="/css/main.css">
+    <!-- Thank you http://mathiasbynens.be/notes/touch-icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://smileykeith.com/touchicons/apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="http://smileykeith.com/touchicons/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="http://smileykeith.com/touchicons/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="http://smileykeith.com/touchicons/apple-touch-icon-precomposed.png">
 
-    </head>
-    <body>
+		<!--[if lt IE 9]>
+			<script type="text/javascript" language="Javascript" src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
 
-        <div class="container">
-          <div class="site">
-            <div class="header">
-              <h1 class="title"><a href="/">{{ site.name }}</a></h1>
-              <a class="extra" href="/">home</a>
-            </div>
-     
-                {{ content }}
+    <!-- syntax highlighting CSS -->
+    <!-- <link rel="stylesheet" href="/css/syntax.css"> -->
 
-            <div class="footer">
-              <div class="contact">
-                <p>
-                  Your Name<br />
-                  What You Are<br />
-                  your@email.com
-                </p>
-              </div>
-              <div class="contact">
-                <p>
-                  <a href="http://github.com/yourusername/">github.com/yourusername</a><br />
-                  <a href="http://twitter.com/yourusername/">twitter.com/yourusername</a><br />
-                </p>
-              </div>
-            </div>
+    <!-- Custom CSS -->
+    <!-- <link rel="stylesheet" href="/css/main.css"> -->
+
+		<link rel="stylesheet" type="text/css" href="/css/style.min.css" title="default">
+		<link rel="alternate stylesheet" type="text/css" href="/css/slight.min.css" title="slight"> <!-- Add alternate when safari is updated to fix bug https://bugs.webkit.org/show_bug.cgi?id=24354  -->
+		<link rel="alternate stylesheet" type="text/css" href="/css/sdark.min.css" title="sdark">
+
+		<script src="/js/styleswitcher.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="/js/highlight.pack.js" type="text/javascript" charset="utf-8"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+		<script>
+			function checkUser() {
+				if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
+				 		document.getElementById('themeSwitcher').style.display = 'none';
+					}
+				}
+		</script>
+
+  </head>
+  <body onload="checkUser()">
+    <section>
+      <header>
+        <div id="masthead">
+            <h1><a href="/">Keith Smiley</a></h1>
+
+            <p id="description"><a href="https://alpha.app.net/smileykeith">ADN</a> | <a href="https://twitter.com/SmileyKeith">Twitter</a> | <a href="http://smileykeith.com/projects">Projects</a> | <a href="https://github.com/Keithbsmiley" title="Open source = awesome">GitHub</a></p>
+        </div>
+      </header>
+
+      <section>
+
+      </section>
+
+      <footer>
+
+      </footer>
+    </section>
+
+    <div class="container">
+      <div class="site">
+        <div class="header">
+          <h1 class="title"><a href="/">{{ site.name }}</a></h1>
+          <a class="extra" href="/">home</a>
+        </div>
+  
+            {{ content }}
+
+        <div class="footer">
+          <div class="contact">
+            <p>
+              Your Name<br />
+              What You Are<br />
+              your@email.com
+            </p>
           </div>
-        </div> <!-- /container -->
+          <div class="contact">
+            <p>
+              <a href="http://github.com/yourusername/">github.com/yourusername</a><br />
+              <a href="http://twitter.com/yourusername/">twitter.com/yourusername</a><br />
+            </p>
+          </div>
+        </div>
+      </div>
+    </div> <!-- /container -->
 
-    </body>
+								<p><a href="http://keith.so/">Colophon</a> | <a href="&#109;&#97;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#x6b;&#101;&#x69;&#x74;&#104;&#x40;&#115;&#x6d;&#105;&#x6c;&#101;&#x79;&#x6b;&#101;&#x69;&#x74;&#104;&#x2e;&#x63;&#111;&#x6d;" title="I'll respond. Promise.">Email</a> | <a href="http://feeds.feedburner.com/SmileyKeith" title="RSS, something Apple should not kill.">RSS</a></p>
+								<p>&copy; Keith Smiley | <a href="http://www.marco.org/secondcrack" target="_blank">Second Crack</a></p>
+								<p id="themeSwitcher"><a href="#" onclick="setActiveStyleSheet('default'); return false;" title="Default white theme">Default</a> | <a href="#" onclick="setActiveStyleSheet('slight'); return false;" title="Light theme perfect for daily reading">Solarized Light</a> | <a href="#" onclick="setActiveStyleSheet('sdark'); hljs.initHighlighting();" title="Dark theme ideal for nightowls">Solarized Dark</a></p>
+
+		<script src="/js/mousetrap.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="/js/plugins.min.js" type="text/javascript" charset="utf-8"></script>
+    
+  </body>
 </html>
+

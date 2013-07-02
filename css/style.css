@@ -1,0 +1,1089 @@
+/* 
+html5doctor.com Reset Stylesheet
+v1.6.1
+Last Updated: 2010-09-17
+Author: Richard Clark - http://richclarkdesign.com 
+Twitter: @rich_clark
+*/
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code,
+del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var,
+b, i,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video {
+    margin:0;
+    padding:0;
+    border:0;
+    outline:0;
+    font-size:100%;
+    vertical-align:baseline;
+    background:transparent;
+}
+
+body {
+    line-height:1;
+}
+
+article,aside,details,figcaption,figure,
+footer,header,hgroup,menu,nav,section { 
+    display:block;
+}
+
+nav ul {
+    list-style:none;
+}
+
+blockquote, q {
+    quotes:none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content:'';
+    content:none;
+}
+
+a {
+    margin:0;
+    padding:0;
+    font-size:100%;
+    vertical-align:baseline;
+    background:transparent;
+}
+
+abbr[title], dfn[title] {
+    border-bottom:1px dotted;
+    cursor:help;
+}
+
+table {
+    border-collapse:collapse;
+    border-spacing:0;
+}
+
+input, select {
+    vertical-align:middle;
+}
+/* END RESET */
+
+/* #Base 960 Grid
+================================================== */
+
+    .container                                  { position: relative; width: 620px; margin: 0 auto; padding: 0; }
+    .container .column,
+    .container .columns                         { float: left; display: inline; margin-left: 10px; margin-right: 10px; }
+    .row                                        { margin-bottom: 20px; }
+
+    /* Nested Column Classes */
+    .column.alpha, .columns.alpha               { margin-left: 0; }
+    .column.omega, .columns.omega               { margin-right: 0; }
+
+    /* Base Grid */
+    .container .one.column,
+    .container .one.columns                     { width: 40px;  }
+    .container .two.columns                     { width: 100px; }
+    .container .three.columns                   { width: 160px; }
+    .container .four.columns                    { width: 220px; }
+    .container .five.columns                    { width: 280px; }
+    .container .six.columns                     { width: 340px; }
+    .container .seven.columns                   { width: 400px; }
+    .container .eight.columns                   { width: 460px; }
+    .container .nine.columns                    { width: 520px; }
+    .container .ten.columns                     { width: 580px; }
+    .container .eleven.columns                  { width: 640px; }
+    .container .twelve.columns                  { width: 700px; }
+    .container .thirteen.columns                { width: 760px; }
+    .container .fourteen.columns                { width: 820px; }
+    .container .fifteen.columns                 { width: 880px; }
+    .container .sixteen.columns                 { width: 940px; }
+
+    .container .one-third.column                { width: 300px; }
+    .container .two-thirds.column               { width: 620px; }
+
+    /* Offsets */
+    .container .offset-by-one                   { padding-left: 60px;  }
+    .container .offset-by-two                   { padding-left: 120px; }
+    .container .offset-by-three                 { padding-left: 180px; }
+    .container .offset-by-four                  { padding-left: 240px; }
+    .container .offset-by-five                  { padding-left: 300px; }
+    .container .offset-by-six                   { padding-left: 360px; }
+    .container .offset-by-seven                 { padding-left: 420px; }
+    .container .offset-by-eight                 { padding-left: 480px; }
+    .container .offset-by-nine                  { padding-left: 540px; }
+    .container .offset-by-ten                   { padding-left: 600px; }
+    .container .offset-by-eleven                { padding-left: 660px; }
+    .container .offset-by-twelve                { padding-left: 720px; }
+    .container .offset-by-thirteen              { padding-left: 780px; }
+    .container .offset-by-fourteen              { padding-left: 840px; }
+    .container .offset-by-fifteen               { padding-left: 900px; }
+
+/*  #Mobile (Portrait)
+================================================== */
+
+    /* Note: Design for a width of 320px */
+
+    @media only screen and (max-width: 767px) {
+        .container { width: 300px; }
+        .container .columns,
+        .container .column { margin: 0; }
+
+        .container .one.column,
+        .container .one.columns,
+        .container .two.columns,
+        .container .three.columns,
+        .container .four.columns,
+        .container .five.columns,
+        .container .six.columns,
+        .container .seven.columns,
+        .container .eight.columns,
+        .container .nine.columns,
+        .container .ten.columns,
+        .container .eleven.columns,
+        .container .twelve.columns,
+        .container .thirteen.columns,
+        .container .fourteen.columns,
+        .container .fifteen.columns,
+        .container .sixteen.columns,
+        .container .one-third.column,
+        .container .two-thirds.column  { width: 300px; }
+
+        /* Offsets */
+        .container .offset-by-one,
+        .container .offset-by-two,
+        .container .offset-by-three,
+        .container .offset-by-four,
+        .container .offset-by-five,
+        .container .offset-by-six,
+        .container .offset-by-seven,
+        .container .offset-by-eight,
+        .container .offset-by-nine,
+        .container .offset-by-ten,
+        .container .offset-by-eleven,
+        .container .offset-by-twelve,
+        .container .offset-by-thirteen,
+        .container .offset-by-fourteen,
+        .container .offset-by-fifteen { padding-left: 0; }
+
+    }
+
+
+/* #Mobile (Landscape)
+================================================== */
+
+    /* Note: Design for a width of 480px */
+
+    @media only screen and (min-width: 480px) and (max-width: 767px) {
+        .container { width: 420px; }
+        .container .columns,
+        .container .column { margin: 0; }
+
+        .container .one.column,
+        .container .one.columns,
+        .container .two.columns,
+        .container .three.columns,
+        .container .four.columns,
+        .container .five.columns,
+        .container .six.columns,
+        .container .seven.columns,
+        .container .eight.columns,
+        .container .nine.columns,
+        .container .ten.columns,
+        .container .eleven.columns,
+        .container .twelve.columns,
+        .container .thirteen.columns,
+        .container .fourteen.columns,
+        .container .fifteen.columns,
+        .container .sixteen.columns,
+        .container .one-third.column,
+        .container .two-thirds.column { width: 420px; }
+    }
+
+
+/* #Clearing
+================================================== */
+
+    /* Self Clearing Goodness */
+    .container:after { content: "\0020"; display: block; height: 0; clear: both; visibility: hidden; }
+
+    /* Use clearfix class on parent to clear nested columns,
+    or wrap each row of columns in a <div class="row"> */
+    .clearfix:before,
+    .clearfix:after,
+    .row:before,
+    .row:after {
+      content: '\0020';
+      display: block;
+      overflow: hidden;
+      visibility: hidden;
+      width: 0;
+      height: 0; }
+    .row:after,
+    .clearfix:after {
+      clear: both; }
+    .row,
+    .clearfix {
+      zoom: 1; }
+
+    /* You can also use a <br class="clear" /> to clear columns */
+    .clear {
+      clear: both;
+      display: block;
+      overflow: hidden;
+      visibility: hidden;
+      width: 0;
+      height: 0;
+    }
+
+
+
+
+
+
+
+
+
+
+/*
+ * HTML5 Boilerplate
+ * Detailed information about this CSS: h5bp.com/css
+ *
+ * ==|== normalize ==========================================================
+ */
+
+/* =============================================================================
+   HTML5 display definitions
+   ========================================================================== */
+
+article, aside, details, figcaption, figure, footer, header, hgroup, nav, section { display: block; }
+audio, canvas, video { display: inline-block; *display: inline; *zoom: 1; }
+audio:not([controls]) { display: none; }
+[hidden] { display: none; }
+
+
+/* =============================================================================
+   Typography
+   ========================================================================== */
+
+abbr[title] { border-bottom: 1px dotted; }
+b, strong { font-weight: bold; }
+dfn { font-style: italic; }
+
+/* Redeclare monospace font family: h5bp.com/j */
+pre, code, kbd, samp { font-family: monospace, serif; _font-family: 'courier new', monospace; font-size: 1em; }
+
+/* Improve readability of pre-formatted text in all browsers */
+pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; } /* comment this line for scrolling code */
+
+q { quotes: none; }
+q:before, q:after { content: ""; content: none; }
+
+small { font-size: 85%; }
+
+/* Position subscript and superscript content without affecting line-height: h5bp.com/k */
+sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
+sup { top: -0.5em; }
+sub { bottom: -0.25em; }
+
+/* Lists */
+ul, ol { margin: 1em 0; padding: 0 0 0 40px; }
+dd { margin: 0 0 0 40px; }
+nav ul, nav ol { list-style: none; list-style-image: none; margin: 0; padding: 0; }
+
+svg:not(:root) { overflow: hidden; }
+figure { margin: 0; }
+
+/* Forms */
+form { margin: 0; }
+fieldset { border: 0; margin: 0; padding: 0; }
+
+/* Indicate that 'label' will shift focus to the associated form element */
+label { cursor: pointer; }
+
+/*
+ * 1. Correct color not inheriting in IE6/7/8/9
+ * 2. Correct alignment displayed oddly in IE6/7
+ */
+
+legend { border: 0; *margin-left: -7px; padding: 0; white-space: normal; }
+
+/*
+ * 1. Correct font-size not inheriting in all browsers
+ * 2. Remove margins in FF3/4 S5 Chrome
+ * 3. Define consistent vertical alignment display in all browsers
+ */
+
+button, input, select, textarea { font-size: 100%; margin: 0; vertical-align: baseline; *vertical-align: middle; }
+
+/*
+ * 1. Define line-height as normal to match FF3/4 (set using !important in the UA stylesheet)
+ */
+
+button, input { line-height: normal; }
+
+/*
+ * 1. Display hand cursor for clickable form elements
+ * 2. Allow styling of clickable form elements in iOS
+ * 3. Correct inner spacing displayed oddly in IE7 (doesn't effect IE6)
+ */
+
+button, input[type="button"], input[type="reset"], input[type="submit"] { cursor: pointer; -webkit-appearance: button; *overflow: visible; }
+
+/*
+ * Re-set default cursor for disabled elements
+ */
+
+button[disabled], input[disabled] { cursor: default; }
+
+/*
+ * Consistent box sizing and appearance
+ */
+
+input[type="checkbox"], input[type="radio"] { box-sizing: border-box; padding: 0; *width: 13px; *height: 13px; }
+
+/*
+ * Remove inner padding and border in FF3/4: h5bp.com/l
+ */
+
+button::-moz-focus-inner, input::-moz-focus-inner { border: 0; padding: 0; }
+
+/*
+ * 1. Remove default vertical scrollbar in IE6/7/8/9
+ * 2. Allow only vertical resizing
+ */
+
+textarea { overflow: auto; vertical-align: top; resize: vertical; }
+
+/* Colors for form validity */
+input:valid, textarea:valid {  }
+input:invalid, textarea:invalid { background-color: #f0dddd; }
+
+
+/* Tables */
+table { border-collapse: collapse; border-spacing: 0; }
+td { vertical-align: top; }
+
+/* Chrome Frame Prompt */
+.chromeframe { margin: 0.2em 0; background: #ccc; color: black; padding: 0.2em 0; }
+
+
+/* Begin custom styles */
+html {
+	overflow-y: scroll;
+	font-size: 100%;
+	-webkit-text-size-adjust: 100%;
+	-ms-text-size-adjust: 100%;
+}
+
+body {
+	font-family: Georgia;
+	background: #fff;
+	color:#222;
+	-webkit-text-stroke: 1px transparent;
+	-webkit-font-smoothing: antialiased; /* ^ Fix for webkit rendering thin fonts */
+	-webkit-text-size-adjust: 100%;
+	text-rendering: optimizelegibility; /* may be supported eventually... */
+	font-size: 16px;
+	line-height: 1.5;
+}
+
+
+::-moz-selection { background: #2b6a7e; color: #eee; text-shadow: none; }
+::selection { background:#2b6a7e;
+	color: #eee;
+	text-shadow: none; }
+a::selection { color:#eee8d5; }
+
+
+a, a:visited {	
+	color:#2b6a7e;
+	text-decoration:none;
+	border-bottom: 1px dotted #ddd;
+	font-weight: normal;
+	font-style: normal;
+}
+a:hover, a:active { outline: 0; }
+a:hover {	
+	transition: .3s;
+	-moz-transition: .3s;
+	-webkit-transition: .3s;
+	-o-transition: .3s;
+	color:#d93234;
+	background:#f5f5f5;
+}
+a:visited { }
+a:focus { outline: thin dotted; }
+a:active { position:relative; top:1px; }
+
+ins {
+    text-decoration:none;
+	border-bottom: 1px dashed #ccc;
+}
+
+mark {
+    background-color:#ff9;
+    color:#000; 
+    font-style:italic;
+    font-weight:bold;
+}
+
+del {
+    text-decoration: line-through;
+}
+
+#topBar {
+	height:8px;
+	display:block;
+	width:100%;
+	background:#2b6a7e;
+	border-bottom:none;
+	-webkit-box-shadow: 0 0 5px #555;
+	-moz-box-shadow: 0 0 5px #555;
+	box-shadow:0 0 5px #555;
+	position:fixed;
+	z-index:1;
+}
+
+#topBar:hover { }
+#topBar:active { top:0; }
+
+hr {
+    display:block;
+    height:1px;
+    border:0;   
+    border-top:1px dotted #ccc;
+    margin:1em 0;
+    padding:0;
+}
+
+header { }
+
+p { }
+
+#mastheadbackground {
+	height:140px;
+	margin-bottom:-130px;
+}
+
+section#posts { }
+
+#masthead {
+	padding-top:20px;
+	height:110px;
+	margin-bottom:60px;
+	border-bottom:1px dotted #ccc;
+}
+
+#masthead:hover {
+
+}
+
+#masthead h1 {
+	text-align:center;
+}
+
+#masthead h1 a, #masthead h1 a:visited {
+	font-size:36px;
+	border-bottom:none;
+	color:#323b41;
+	font-weight:bold;
+}
+
+#masthead h1 a:hover {
+/*	background:none;*/
+}
+
+p#description {
+	text-align:center;
+	padding-top:18px;
+}
+
+.centeredText {
+    text-align: center;
+}
+
+article {
+	padding: 0px 0px 100px;
+	line-height: 1.8;
+}
+
+article header {
+	margin-bottom:30px;
+}
+
+article h2 {
+	font-size:20px;
+	margin:30px 0 10px;
+}
+
+article header h2 {
+	font-size:24px;
+	font-weight:normal;
+}
+
+article h3 {
+	margin:20px 0 10px;
+}
+
+article h4 {
+	margin:20px 0 10px;
+}
+
+article header a {
+	font-size:24px;
+}
+
+article header p {
+	color:#aaa;
+	font-style:italic;
+}
+
+
+nav#archives {
+	margin:40px 0px;
+}
+
+nav#archives h3 {
+	font-size:22px;
+	margin-bottom:10px;
+	font-weight:normal;
+}
+
+.permalink {
+	font-size:18px;
+}
+
+article header h2 a, article header h2 a:visited {
+	border-bottom:none;
+	color:#222;
+}
+
+article header h2 a:hover {
+	color:#d93234;
+}
+
+article.link h2 a, article.link h2 a:visited {
+	color:#2b6a7e;
+	
+	text-decoration:none;
+	border-bottom: 1px dotted #ccc;
+	font-weight: normal;
+	font-style: normal;
+}
+
+article.link h2 a:hover {
+	color:#0b3641;
+	color:#d93234;
+}
+
+pre, code { font:14px Monaco, Courier, monospace; }
+
+pre {
+	text-wrap:none;
+	margin:12px 0;
+/*	background-color:#eee;*/
+	border:1px solid #ddd;
+	padding:4px;
+	line-height:1.5em;
+	color:#444;
+	overflow:auto;
+	-webkit-box-shadow:#ddd 0 1px 2px inset;
+	-moz-box-shadow:#ddd 0 1px 2px inset;
+/*	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;*/
+}
+pre code {
+	padding:0;
+	background-color:#eee;
+	border:none;
+}
+
+code {
+	background-color:#f8f8ff;
+	color:#444;
+	padding:0 2px;
+	border:1px solid #dedede;
+}
+
+
+footer {
+	height:120px;
+	text-align:center;
+	border-top:1px dotted #ccc;
+	padding-top: 30px;
+	margin-bottom:30px;
+	opacity:0.75;
+	transition: .3s;
+	-moz-transition: .3s;
+	-webkit-transition: .3s;
+	-o-transition: .3s;
+	width:100%;
+}
+
+footer p {
+}
+
+footer:hover {
+	opacity:1;
+}
+
+form#search {
+/*	background:red;*/
+/*	margin:0 auto;*/
+	border-radius:5px;
+	width:255px;
+	margin: 0 auto;
+}
+
+div#searchStuff {
+/*	width:255px;
+	margin: 0 auto;*/
+}
+
+img {
+    border: 0;
+    -ms-interpolation-mode: bicubic;
+    vertical-align: middle;
+
+	border: 8px solid #fff;
+	box-shadow:0 0 5px #555;
+	max-width:100%;
+	height:auto;
+	display:block;
+	margin: 20px auto;
+}
+
+ul {
+	list-style:circle;
+}
+
+ol {
+/*	list-style:upper-roman;*/
+}
+
+ol.footnotes li {
+	margin-bottom:15px;
+}
+
+blockquote { 
+	font-size:14px;
+    margin: 0 18px 18px 18px;
+    color:#555;
+    padding-left:15px;
+    border-left:2px solid #ddd;
+}
+
+.linkarrow {
+	font-size:20px;
+}
+
+input[type="search"] { -webkit-appearance: textfield; -moz-box-sizing: content-box; -webkit-box-sizing: content-box; box-sizing: content-box; }
+input[type="search"]::-webkit-search-decoration, input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
+input[type="search"] {
+	-webkit-transition-property: background-color, color;
+	-webkit-transition-duration: 0.4s;
+	background:#fff;
+/*	border-radius: 15px;*/
+	font-size:12px;
+	height: 20px;
+	border:solid 1px #ccc;
+	padding:2px 8px;
+	width: 175px;
+}
+
+
+
+div#keith {
+	width:620px;
+	height:329px;
+	background-image: url(http://172.16.1.10:8888/media/timeless/Me.png);
+}
+
+
+
+
+
+
+
+
+
+
+/* Highlight.js Styles */
+pre code {
+  display: block; padding: 0.5em;
+  background: #fff; color: black;
+}
+
+pre .comment,
+pre .template_comment,
+pre .javadoc,
+pre .comment * {
+  color: rgb(0,106,0);
+}
+
+pre .keyword,
+pre .literal,
+pre .nginx .title {
+  color: rgb(170,13,145);
+}
+pre .method,
+pre .list .title,
+pre .tag .title,
+pre .setting .value,
+pre .winutils,
+pre .tex .command,
+pre .http .title,
+pre .request,
+pre .status {
+  color: #008;
+}
+
+pre .envvar,
+pre .tex .special {
+  color: #660;
+}
+
+pre .string {
+  color: rgb(196,26,22);
+}
+pre .tag .value,
+pre .cdata,
+pre .filter .argument,
+pre .attr_selector,
+pre .apache .cbracket,
+pre .date,
+pre .regexp {
+  color: #080;
+}
+
+pre .sub .identifier,
+pre .pi,
+pre .tag,
+pre .tag .keyword,
+pre .decorator,
+pre .ini .title,
+pre .shebang,
+pre .input_number,
+pre .hexcolor,
+pre .rules .value,
+pre .css .value .number,
+pre .symbol,
+pre .ruby .symbol .string,
+pre .ruby .symbol .keyword,
+pre .ruby .symbol .keymethods,
+pre .number,
+pre .css .function {
+  color: rgb(28,0,207);
+}
+
+pre .class .title,
+pre .haskell .type,
+pre .smalltalk .class,
+pre .javadoctag,
+pre .yardoctag,
+pre .phpdoc,
+pre .typename,
+pre .tag .attribute,
+pre .doctype,
+pre .class .id,
+pre .built_in,
+pre .setting,
+pre .params {
+  color: rgb(92,38,153);
+}
+
+pre .variable {
+ color: rgb(63,110,116);
+}
+pre .css .tag,
+pre .rules .property,
+pre .pseudo,
+pre .subst {
+  color: #000;
+}
+
+pre .css .class, pre .css .id {
+  color: #9B703F;
+}
+
+pre .value .important {
+  color: #ff7700;
+  font-weight: bold;
+}
+
+pre .rules .keyword {
+  color: #C5AF75;
+}
+
+pre .annotation,
+pre .apache .sqbracket,
+pre .nginx .built_in {
+  color: #9B859D;
+}
+
+pre .preprocessor,
+pre .preprocessor * {
+  color: rgb(100,56,32);
+}
+
+pre .tex .formula {
+  background-color: #EEE;
+  font-style: italic;
+}
+
+pre .diff .header,
+pre .chunk {
+  color: #808080;
+  font-weight: bold;
+}
+
+pre .diff .change {
+  background-color: #BCCFF9;
+}
+
+pre .addition {
+  background-color: #BAEEBA;
+}
+
+pre .deletion {
+  background-color: #FFC8BD;
+}
+
+pre .comment .yardoctag {
+  font-weight: bold;
+}
+
+pre .method .id {
+  color: #000;
+}
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+Sunburst-like style (c) Vasily Polovnyov <vast@whiteants.net>
+
+*/
+
+pre code::selection {
+  display: block; padding: 0.5em; color: #f8f8f8;
+}
+
+pre .comment::selection,
+pre .template_comment::selection,
+pre .javadoc::selection {
+  color: #aeaeae;
+  font-style: italic;
+}
+
+pre .keyword::selection,
+pre .ruby .function .keyword::selection,
+pre .request::selection,
+pre .status::selection,
+pre .nginx .title::selection {
+  color: #E28964;
+}
+
+pre .function .keyword::selection,
+pre .sub .keyword::selection,
+pre .method::selection,
+pre .list .title::selection {
+  color: #99CF50;
+}
+
+pre .string::selection,
+pre .tag .value::selection,
+pre .cdata::selection,
+pre .filter .argument::selection,
+pre .attr_selector::selection,
+pre .apache .cbracket::selection,
+pre .date::selection,
+pre .tex .command::selection {
+  color: #65B042;
+}
+
+pre .subst::selection {
+  color: #DAEFA3;
+}
+
+pre .regexp::selection {
+  color: #E9C062;
+}
+
+pre .title::selection,
+pre .sub .identifier::selection,
+pre .pi::selection,
+pre .tag::selection,
+pre .tag .keyword::selection,
+pre .decorator::selection,
+pre .shebang::selection,
+pre .input_number::selection {
+  color: #89BDFF;
+}
+
+pre .class .title::selection,
+pre .haskell .type::selection,
+pre .smalltalk .class::selection,
+pre .javadoctag::selection,
+pre .yardoctag::selection,
+pre .phpdoc::selection {
+  text-decoration: underline;
+}
+
+pre .symbol::selection,
+pre .ruby .symbol .string::selection,
+pre .ruby .symbol .keyword::selection,
+pre .ruby .symbol .keymethods::selection,
+pre .number::selection {
+  color: #3387CC;
+}
+
+pre .params::selection,
+pre .variable::selection {
+  color: #3E87E3;
+}
+
+pre .css .tag::selection,
+pre .rules .property::selection,
+pre .pseudo::selection,
+pre .tex .special::selection {
+  color: #CDA869;
+}
+
+pre .css .class::selection {
+  color: #9B703F;
+}
+
+pre .rules .keyword::selection {
+  color: #C5AF75;
+}
+
+pre .rules .value::selection {
+  color: #CF6A4C;
+}
+
+pre .css .id::selection {
+  color: #8B98AB;
+}
+
+pre .annotation::selection,
+pre .apache .sqbracket::selection,
+pre .nginx .built_in::selection {
+  color: #9B859D;
+}
+
+pre .preprocessor::selection {
+  color: #8996A8;
+}
+
+pre .hexcolor::selection,
+pre .css .value .number::selection {
+  color: #DD7B3B;
+}
+
+pre .css .function::selection {
+  color: #DAD085;
+}
+
+pre .diff .header::selection,
+pre .chunk::selection,
+pre .tex .formula::selection {
+  background-color: #0E2231;
+  color: #F8F8F8;
+  font-style: italic;
+}
+
+pre .diff .change::selection {
+  background-color: #4A410D;
+  color: #F8F8F8;
+}
+
+pre .addition::selection {
+  background-color: #253B22;
+  color: #F8F8F8;
+}
+
+pre .deletion::selection {
+  background-color: #420E09;
+  color: #F8F8F8;
+}
+
+.instapaperButton {
+	display:none;
+}
+
+
+
+
+
+
+
+
+
+@media (-webkit-min-device-pixel-ratio: 2) {
+	  div#keith {
+/*	    background-size: 620px 329px;*/
+		background: url(http://172.168.1.10:8888/media/timeless/Me@2x.png);
+	}
+}
+
+
+/* ==|== non-semantic helper classes ========================================
+   Please define your styles before this section.
+   ========================================================================== */
+
+/* For image replacement */
+.ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; *line-height: 0; }
+.ir br { display: none; }
+
+/* Hide from both screenreaders and browsers: h5bp.com/u */
+.hidden { display: none !important; visibility: hidden; }
+
+/* Hide only visually, but have it available for screenreaders: h5bp.com/v */
+.visuallyhidden { border: 0; clip: rect(0 0 0 0); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; }
+
+/* Extends the .visuallyhidden class to allow the element to be focusable when navigated to via the keyboard: h5bp.com/p */
+.visuallyhidden.focusable:active, .visuallyhidden.focusable:focus { clip: auto; height: auto; margin: 0; overflow: visible; position: static; width: auto; }
+
+/* Hide visually and from screenreaders, but maintain layout */
+.invisible { visibility: hidden; }
+
+/* Contain floats: h5bp.com/q */
+.clearfix:before, .clearfix:after { content: ""; display: table; }
+.clearfix:after { clear: both; }
+.clearfix { *zoom: 1; }
+
+
+/* ==|== print styles ======================================================= TODO
+   Print styles.
+   Inlined to avoid required HTTP connection: h5bp.com/r
+   ========================================================================== */
+
+@media print {
+  * { background: transparent !important; color: black !important; box-shadow:none !important; text-shadow: none !important; filter:none !important; -ms-filter: none !important; } /* Black prints faster: h5bp.com/s */
+  a, a:visited { text-decoration: underline; }
+  a[href]:after { content: " (" attr(href) ")"; }
+  abbr[title]:after { content: " (" attr(title) ")"; }
+  .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after { content: ""; }  /* Don't show links for images, or javascript/internal links */
+/*  pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }*/
+  thead { display: table-header-group; } /* h5bp.com/t */
+  tr, img { page-break-inside: avoid; }
+  img { max-width: 100% !important; }
+  @page { margin: 0.5cm; }
+  p, h2, h3 { orphans: 3; widows: 3; }
+  h2, h3 { page-break-after: avoid; }
+}
