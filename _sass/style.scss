@@ -586,21 +586,16 @@ pre, code { font:14px Monaco, Courier, monospace; }
 pre {
 	text-wrap:none;
 	margin:12px 0;
-/*	background-color:#eee;*/
 	border:1px solid #ddd;
 	padding:4px;
 	line-height:1.5em;
 	color:#444;
 	overflow:auto;
-	-webkit-box-shadow:#ddd 0 1px 2px inset;
-	-moz-box-shadow:#ddd 0 1px 2px inset;
-/*	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;*/
 }
+
 pre code {
-	padding:0;
-	background-color:#eee;
+  display: block; padding: 0.5em;
+  background: white;
 	border:none;
 }
 
