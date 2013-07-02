@@ -21,22 +21,16 @@
 			<script type="text/javascript" language="Javascript" src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 		<![endif]-->
 
-    <!-- syntax highlighting CSS -->
-    <!-- <link rel="stylesheet" href="/css/syntax.css"> -->
-
-    <!-- Custom CSS -->
-    <!-- <link rel="stylesheet" href="/css/main.css"> -->
-
-		<link rel="stylesheet" type="text/css" href="/css/style.min.css" title="default">
-		<link rel="alternate stylesheet" type="text/css" href="/css/slight.min.css" title="slight"> <!-- Add alternate when safari is updated to fix bug https://bugs.webkit.org/show_bug.cgi?id=24354  -->
-		<link rel="alternate stylesheet" type="text/css" href="/css/sdark.min.css" title="sdark">
+		<link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
+		<link rel="alternate stylesheet" type="text/css" href="/css/slight.css" title="slight"> <!-- Add alternate when safari is updated to fix bug https://bugs.webkit.org/show_bug.cgi?id=24354  -->
+		<link rel="alternate stylesheet" type="text/css" href="/css/sdark.css" title="sdark">
 
 		<script src="/js/styleswitcher.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src="/js/highlight.pack.js" type="text/javascript" charset="utf-8"></script>
 		<script>hljs.initHighlightingOnLoad();</script>
 		<script>
 			function checkUser() {
-				if( /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent) ) {
+				if(/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
 				 		document.getElementById('themeSwitcher').style.display = 'none';
 					}
 				}
@@ -44,58 +38,45 @@
 
   </head>
   <body onload="checkUser()">
-    <section>
-      <header>
-        <div id="masthead">
-            <h1><a href="/">Keith Smiley</a></h1>
+		<a href="/" id="topBar"></a>
+    <div id="mastheadbackground">&nbsp;</div>
+    <!-- <section> -->
+    <section id="posts" class="container">
+      <div id="masthead">
+        <h1><a href="/">Keith Smiley</a></h1>
 
-            <p id="description"><a href="https://alpha.app.net/smileykeith">ADN</a> | <a href="https://twitter.com/SmileyKeith">Twitter</a> | <a href="http://smileykeith.com/projects">Projects</a> | <a href="https://github.com/Keithbsmiley" title="Open source = awesome">GitHub</a></p>
-        </div>
-      </header>
+        <p id="description"><a href="https://alpha.app.net/smileykeith">ADN</a> | <a href="https://twitter.com/SmileyKeith">Twitter</a> | <a href="http://smileykeith.com/projects">Projects</a> | <a href="https://github.com/Keithbsmiley" title="Open source = awesome">GitHub</a></p>
+      </div>
 
       <section>
-
+        {{ content }}
       </section>
 
       <footer>
-
+        <div id="searchStuff" class="four columns">
+          <!-- <form action="http://search.smileykeith.com/" id="search" method="get">
+          <input type="search" id="field" placeholder="Search&hellip;" name="query">
+          <input type="hidden" name="type" value="and" />
+          <input type="hidden" name="results" value="50" />
+          <input type="hidden" name="search" value="1" />
+          <input type="submit" style="visibility: hidden;" />
+          </form> -->
+          <form method="get" id="search" action="http://duckduckgo.com/">
+            <input type="hidden" name="sites" value="http://smileykeith.com/"/>
+            <input type="search" id="field" name="q" maxlength="255" placeholder="Search&hellip;" />
+            <input type="submit" value="DuckDuckGo Search" style="visibility: hidden;" />
+          </form>
+        </div>
+        <div>
+          <p><a href="http://keith.so/">Colophon</a> | <a href="&#109;&#97;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#x6b;&#101;&#x69;&#x74;&#104;&#x40;&#115;&#x6d;&#105;&#x6c;&#101;&#x79;&#x6b;&#101;&#x69;&#x74;&#104;&#x2e;&#x63;&#111;&#x6d;" title="I'll respond. Promise.">Email</a> | <a href="http://feeds.feedburner.com/SmileyKeith" title="RSS, something Apple should not kill.">RSS</a></p>
+          <p>&copy; Keith Smiley | <a href="http://www.marco.org/secondcrack" target="_blank">Second Crack</a></p>
+          <p id="themeSwitcher"><a href="#" onclick="setActiveStyleSheet('default'); return false;" title="Default white theme">Default</a> | <a href="#" onclick="setActiveStyleSheet('slight'); return false;" title="Light theme perfect for daily reading">Solarized Light</a> | <a href="#" onclick="setActiveStyleSheet('sdark'); hljs.initHighlighting();" title="Dark theme ideal for nightowls">Solarized Dark</a></p>
+        </div>
       </footer>
     </section>
 
-    <div class="container">
-      <div class="site">
-        <div class="header">
-          <h1 class="title"><a href="/">{{ site.name }}</a></h1>
-          <a class="extra" href="/">home</a>
-        </div>
-  
-            {{ content }}
-
-        <div class="footer">
-          <div class="contact">
-            <p>
-              Your Name<br />
-              What You Are<br />
-              your@email.com
-            </p>
-          </div>
-          <div class="contact">
-            <p>
-              <a href="http://github.com/yourusername/">github.com/yourusername</a><br />
-              <a href="http://twitter.com/yourusername/">twitter.com/yourusername</a><br />
-            </p>
-          </div>
-        </div>
-      </div>
-    </div> <!-- /container -->
-
-								<p><a href="http://keith.so/">Colophon</a> | <a href="&#109;&#97;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#x6b;&#101;&#x69;&#x74;&#104;&#x40;&#115;&#x6d;&#105;&#x6c;&#101;&#x79;&#x6b;&#101;&#x69;&#x74;&#104;&#x2e;&#x63;&#111;&#x6d;" title="I'll respond. Promise.">Email</a> | <a href="http://feeds.feedburner.com/SmileyKeith" title="RSS, something Apple should not kill.">RSS</a></p>
-								<p>&copy; Keith Smiley | <a href="http://www.marco.org/secondcrack" target="_blank">Second Crack</a></p>
-								<p id="themeSwitcher"><a href="#" onclick="setActiveStyleSheet('default'); return false;" title="Default white theme">Default</a> | <a href="#" onclick="setActiveStyleSheet('slight'); return false;" title="Light theme perfect for daily reading">Solarized Light</a> | <a href="#" onclick="setActiveStyleSheet('sdark'); hljs.initHighlighting();" title="Dark theme ideal for nightowls">Solarized Dark</a></p>
-
 		<script src="/js/mousetrap.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src="/js/plugins.min.js" type="text/javascript" charset="utf-8"></script>
-    
   </body>
 </html>
 
