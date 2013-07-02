@@ -1,0 +1,4 @@
+name: Your New Jekyll Site
+pygments: true
+excerpt_separator: "readmore"
+permalink: /:year/:month/:day/:title/
