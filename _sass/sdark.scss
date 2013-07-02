@@ -4,107 +4,107 @@
 ::selection { background:#839496; color:#93a1a1; text-shadow: none; }
 
 body {
-	color:#849496;
-	background:#032B36;
+  color:#849496;
+  background:#032B36;
 }
 
-a, a:visited {	
-	color:#667b82;	
-	border-bottom: 1px solid #596e75;
+a, a:visited {  
+  color:#667b82;  
+  border-bottom: 1px solid #596e75;
 }
 
 a:hover {
-	color:#eee7d6;
-	background:#596e75;
+  color:#eee7d6;
+  background:#596e75;
 }
 
 #topBar {
-	background:#93a1a1;
-	-webkit-box-shadow:0 0 5px #4d676c;
-	-moz-box-shadow: 0 0 5px #4d676c;
-	box-shadow:0 0 5px #4d676c;
+  background:#93a1a1;
+  -webkit-box-shadow:0 0 5px #4d676c;
+  -moz-box-shadow: 0 0 5px #4d676c;
+  box-shadow:0 0 5px #4d676c;
 }
 
 #masthead h1 a, #masthead h1 a:visited {
-	color:#93a1a1;
+  color:#93a1a1;
 }
 
 #masthead h1 a:hover {
-	color:#eee7d6;
+  color:#eee7d6;
 }
 
 article header h2 a, article header h2 a:visited {
-	color:#596e75;
+  color:#596e75;
 }
 
 article header h2 a:hover {
-	color:#eee7d6;
+  color:#eee7d6;
 }
 
 mark {
-	background:#b38819;
-	color:#032b35;
+  background:#b38819;
+  color:#032b35;
 }
 
 ins {
     text-decoration:none;
-	border-bottom: 1px dotted #596e75;
+  border-bottom: 1px dotted #596e75;
 }
 
 blockquote { 
-	color:#667b82;
+  color:#667b82;
     border-left:2px solid #849496;
 }
 
 img { /* TODO */
-	border: none;
-	border: 8px solid #0b3641;
-/*	border: 4px solid #032B36;*/
-/*	box-shadow:0 0 5px #555;*/
-/*	box-shadow:0 0 5px #eee7d6;*/
-/*	box-shadow:0 0 5px #839496;*/
-	box-shadow:none;
+  border: none;
+  border: 8px solid #0b3641;
+/*  border: 4px solid #032B36;*/
+/*  box-shadow:0 0 5px #555;*/
+/*  box-shadow:0 0 5px #eee7d6;*/
+/*  box-shadow:0 0 5px #839496;*/
+  box-shadow:none;
 }
 
 pre {
-	background-color:#0b3641;
-	border:none;
-	-webkit-box-shadow: none;
-	-moz-box-shadow: none;
-	box-shadow: none;
+  background-color:#0b3641;
+  border:none;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
 }
 
 code {
-	background-color:#002b36;
-	color:#849496;
-	border:2px solid #0b3641;
+  background-color:#002b36;
+  color:#849496;
+  border:2px solid #0b3641;
 }
 
 article.link h2 a, article.link h2 a:visited {
-	color:#596e75;
-	border-bottom: 1px solid #596e75;
+  color:#596e75;
+  border-bottom: 1px solid #596e75;
 }
 
 article.link h2 a:hover {
-	color:#eee7d6;
-	background:#596e75;
+  color:#eee7d6;
+  background:#596e75;
 }
 
 footer {
-	border-top: 1px solid #596e75;
+  border-top: 1px solid #596e75;
 }
 
 hr {
-	border-top: 1px solid #596e75;
+  border-top: 1px solid #596e75;
 }
 
 #masthead {
-	border-bottom: 1px solid #596e75;
+  border-bottom: 1px solid #596e75;
 }
 
 input[type="search"] {
-	background:#032b36;
-	border:solid 1px #596e75;
+  background:#032b36;
+  border:solid 1px #596e75;
 }
 
 #field {
@@ -112,14 +112,14 @@ input[type="search"] {
 }
 
 pre code {
-	display: block;
-	padding: 0.5em;
-	background: #002b36;
-	color: #839496;
+  display: block;
+  padding: 0.5em;
+  background: #002b36;
+  color: #839496;
 }
 
 pre code::selection {
-	color: #657b83;
+  color: #657b83;
 }
 
 pre .comment,
@@ -136,8 +136,8 @@ pre .doctype::selection,
 pre .pi::selection,
 pre .lisp .string::selection,
 pre .javadoc::selection {
-	color: #586e75;
-	font-style: italic;
+  color: #586e75;
+  font-style: italic;
 }
 
 pre .keyword,
@@ -156,7 +156,7 @@ pre .css .tag::selection,
 pre .request::selection,
 pre .status::selection,
 pre .nginx .title::selection {
-	color: #859900;
+  color: #859900;
 }
 
 pre .number,
@@ -175,7 +175,7 @@ pre .phpdoc::selection,
 pre .tex .formula::selection,
 pre .regexp::selection,
 pre .hexcolor::selection {
-	color: #2aa198;
+  color: #2aa198;
 }
 
 pre .title,
@@ -198,7 +198,7 @@ pre .identifier::selection,
 pre .title .keymethods::selection,
 pre .vhdl .literal::selection,
 pre .id::selection {
-	color: #268bd2;
+  color: #268bd2;
 }
 
 pre .attribute,
@@ -219,7 +219,7 @@ pre .constant::selection,
 pre .class .title::selection,
 pre .parent::selection,
 pre .haskell .type::selection {
-	color: #b58900;
+  color: #b58900;
 }
 
 pre .preprocessor,
@@ -244,19 +244,19 @@ pre .attr_selector::selection,
 pre .important::selection,
 pre .subst::selection,
 pre .cdata::selection {
-	color: #cb4b16;
+  color: #cb4b16;
 }
 
 pre .deletion, pre .deletion::selection {
-	color: #dc322f;
+  color: #dc322f;
 }
 
 pre .tex .formula {
-	background: #073642;
+  background: #073642;
 }
 
 pre .tex .formula::selection {
-	background: #eee8d5;
+  background: #eee8d5;
 }
 
 .highlight {
