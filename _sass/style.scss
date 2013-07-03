@@ -166,18 +166,17 @@ article header h2 a, article header h2 a:visited {
   }
 }
 
-article.link h2 a, article.link h2 a:visited {
+article.link h2 a, article.link h2 a:visited, h2.link a, h2.link a:visited {
   color:#2b6a7e;
   
   text-decoration:none;
   border-bottom: 1px dotted #ccc;
   font-weight: normal;
   font-style: normal;
-}
 
-article.link h2 a:hover {
-  color:#0b3641;
-  color:#d93234;
+  &:hover {
+    color:#d93234;
+  }
 }
 
 .permalink {
