@@ -243,11 +243,6 @@ form#search {
   outline: none;
 }
 
-div#searchStuff {
-/*  width:255px;
-  margin: 0 auto;*/
-}
-
 img {
   border: 0;
   -ms-interpolation-mode: bicubic;
@@ -275,19 +270,14 @@ ol.footnotes li {
 
 blockquote { 
   font-size:14px;
-    margin: 0 18px 18px 18px;
-    color:#555;
-    padding-left:15px;
-    border-left:2px solid #ddd;
+  margin: 0 18px 18px 18px;
+  color:#555;
+  padding-left:15px;
+  border-left:2px solid #ddd;
 }
 
 .linkarrow {
   font-size:20px;
-}
-
-
-.instapaperButton {
-  display:none;
 }
 
 input[type="search"] { -webkit-appearance: textfield; -moz-box-sizing: content-box; -webkit-box-sizing: content-box; box-sizing: content-box; }
