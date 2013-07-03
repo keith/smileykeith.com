@@ -381,14 +381,14 @@ html {
 }
 
 body {
-  font-family: Georgia;
+  font-family: Merriweather, Georgia, serif;
   background: #fff;
   color:#222;
   -webkit-text-stroke: 1px transparent;
   -webkit-font-smoothing: antialiased; /* ^ Fix for webkit rendering thin fonts */
   -webkit-text-size-adjust: 100%;
   text-rendering: optimizelegibility; /* may be supported eventually... */
-  font-size: 20px;
+  font-size: 19px;
   line-height: 1.5;
 }
 
@@ -484,6 +484,7 @@ section#posts { }
 }
 
 #masthead h1 {
+  font-family: Georgia, serif;
   text-align:center;
 }
 
@@ -581,7 +582,9 @@ article.link h2 a:hover {
   color:#d93234;
 }
 
-pre, code { font:14px Monaco, Courier, monospace; }
+pre, code {
+ font: 15px Monaco, Courier, monospace;
+}
 
 pre {
   text-wrap:none;
@@ -605,7 +608,6 @@ code {
   padding:0 2px;
   border:1px solid #dedede;
 }
-
 
 footer {
   font-size: 16px;
