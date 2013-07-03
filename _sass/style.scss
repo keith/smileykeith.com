@@ -160,10 +160,10 @@ article {
 article header h2 a, article header h2 a:visited {
   border-bottom:none;
   color:#222;
-}
 
-article header h2 a:hover {
-  color:#d93234;
+  &:hover {
+    color:#d93234;
+  }
 }
 
 article.link h2 a, article.link h2 a:visited {
