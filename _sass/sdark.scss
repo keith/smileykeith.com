@@ -9,29 +9,26 @@ body {
   background: $base03;
 }
 
+#topBar {
+  background: $base1;
+}
+
 a, a:visited {  
-  color:#667b82;  
-  border-bottom: 1px solid #596e75;
+  color: $base00;
+  border-bottom: 1px solid $base01;
 }
 
 a:hover {
-  color:#eee7d6;
-  background:#596e75;
-}
-
-#topBar {
-  background:#93a1a1;
-  -webkit-box-shadow:0 0 5px #4d676c;
-  -moz-box-shadow: 0 0 5px #4d676c;
-  box-shadow:0 0 5px #4d676c;
+  color: $base2;
+  background: $base01;
 }
 
 #masthead h1 a, #masthead h1 a:visited {
-  color:#93a1a1;
+  color: $base1;
 }
 
 #masthead h1 a:hover {
-  color:#eee7d6;
+  color: $base2;
 }
 
 article header h2 a, article header h2 a:visited {
