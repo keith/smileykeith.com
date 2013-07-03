@@ -1,11 +1,12 @@
 @import "style.css";
+@import "solarized";
 
 ::-moz-selection { background-color: #1e3f45; color: #93a1a1; text-shadow: none; }
 ::selection { background:#839496; color:#93a1a1; text-shadow: none; }
 
 body {
-  color:#849496;
-  background:#032B36;
+  color: $base0;
+  background: $base03;
 }
 
 a, a:visited {  
