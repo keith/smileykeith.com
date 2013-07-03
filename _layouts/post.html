@@ -2,14 +2,25 @@
 layout: default
 ---
 
+{% if page.link %}
+<article class="link">
+{% else %}
 <article>
+{% endif %}
   <header>
-    <h2>{{ page.title }}</h2>
+    {% if page.link %}
+      <h2>
+        <a href="{{ page.link }}">{{ page.title }}</a>
+        <span class="linkarrow">&rarr;</span>
+      </h2>
+    {% else %}
+      <h2>{{ page.title }}</h2>
+    {% endif %}
     <p>
       <time datetime="{{ page.date }}" pubdate="pubdate">
         {{ page.date | date_to_string }}
       </time>
-      <a class="permalink" title="Permalink" href="{{ post.url }}">&infin;</a>
+      <a class="permalink" title="Permalink" href="{{ page.url }}">&infin;</a>
     </p>
   </header>
 
