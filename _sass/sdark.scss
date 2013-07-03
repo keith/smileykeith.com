@@ -23,24 +23,40 @@ a:hover {
   background: $base01;
 }
 
-#masthead h1 a {
+#masthead h1 a,#masthead h1 a:visited {
   color: $base1;
 
   &:hover {
     color: $base2;
   }
+}
 
-  &:visited {
-    color: $base1;
+@mixin title-links {
+  a, a:visited {
+    color: $base0;
+
+    &:hover {
+      color: $base2;
+    }
   }
 }
 
-article header h2 a, article header h2 a:visited {
-  color:#596e75;
+article header h2 {
+  @include title-links;
 }
 
-article header h2 a:hover {
-  color:#eee7d6;
+article.link h2 a, article.link h2 a:visited {
+  color:#596e75;
+  border-bottom: 1px solid #596e75;
+
+  &:hover {
+    color:#eee7d6;
+    background:#596e75;
+  }
+}
+
+time {
+  color: $base01;
 }
 
 mark {
@@ -49,13 +65,13 @@ mark {
 }
 
 ins {
-    text-decoration:none;
+  text-decoration:none;
   border-bottom: 1px dotted #596e75;
 }
 
 blockquote { 
   color:#667b82;
-    border-left:2px solid #849496;
+  border-left:2px solid #849496;
 }
 
 img { /* TODO */
@@ -82,15 +98,6 @@ code {
   border:2px solid #0b3641;
 }
 
-article.link h2 a, article.link h2 a:visited {
-  color:#596e75;
-  border-bottom: 1px solid #596e75;
-}
-
-article.link h2 a:hover {
-  color:#eee7d6;
-  background:#596e75;
-}
 
 footer {
   border-top: 1px solid #596e75;
