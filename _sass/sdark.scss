@@ -23,12 +23,16 @@ a:hover {
   background: $base01;
 }
 
-#masthead h1 a, #masthead h1 a:visited {
+#masthead h1 a {
   color: $base1;
-}
 
-#masthead h1 a:hover {
-  color: $base2;
+  &:hover {
+    color: $base2;
+  }
+
+  &:visited {
+    color: $base1;
+  }
 }
 
 article header h2 a, article header h2 a:visited {
