@@ -532,20 +532,6 @@ article {
   }
 }
 
-nav#archives {
-  margin:40px 0px;
-}
-
-nav#archives h3 {
-  font-size:22px;
-  margin-bottom:10px;
-  font-weight:normal;
-}
-
-.permalink {
-  font-size:18px;
-}
-
 article header h2 a, article header h2 a:visited {
   border-bottom:none;
   color:#222;
@@ -567,6 +553,20 @@ article.link h2 a, article.link h2 a:visited {
 article.link h2 a:hover {
   color:#0b3641;
   color:#d93234;
+}
+
+nav#archives {
+  margin:40px 0px;
+
+  h3 {
+    font-size:22px;
+    margin-bottom:10px;
+    font-weight:normal;
+  }
+}
+
+.permalink {
+  font-size:18px;
 }
 
 pre, code {
@@ -609,13 +609,10 @@ footer {
   -webkit-transition: .3s;
   -o-transition: .3s;
   width:100%;
-}
 
-footer p {
-}
-
-footer:hover {
-  opacity:1;
+  &:hover {
+    opacity:1;
+  }
 }
 
 form#search {
@@ -637,9 +634,9 @@ div#searchStuff {
 }
 
 img {
-    border: 0;
-    -ms-interpolation-mode: bicubic;
-    vertical-align: middle;
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+  vertical-align: middle;
 
   border: 8px solid #fff;
   box-shadow:0 0 5px #555;
@@ -673,6 +670,10 @@ blockquote {
   font-size:20px;
 }
 
+.instapaperButton {
+  display:none;
+}
+
 input[type="search"] { -webkit-appearance: textfield; -moz-box-sizing: content-box; -webkit-box-sizing: content-box; box-sizing: content-box; }
 input[type="search"]::-webkit-search-decoration, input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 input[type="search"] {
@@ -687,6 +688,7 @@ input[type="search"] {
   width: 175px;
 }
 
+// Github pygments CSS
 .highlight {
   .hll { background-color: #ffffcc; }
   .c { color: #999988; font-style: italic; } /* Comment */
@@ -749,10 +751,6 @@ input[type="search"] {
   .vg { color: #008080; } /* Name.Variable.Global */
   .vi { color: #008080; } /* Name.Variable.Instance */
   .il { color: #009999; } /* Literal.Number.Integer.Long */
-}
-
-.instapaperButton {
-  display:none;
 }
 
 
