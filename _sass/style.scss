@@ -125,10 +125,6 @@ p#description {
   padding-top:18px;
 }
 
-.centeredText {
-    text-align: center;
-}
-
 article {
   padding: 0px 0px 100px;
   line-height: 1.8;
@@ -182,16 +178,6 @@ article.link h2 a, article.link h2 a:visited {
 article.link h2 a:hover {
   color:#0b3641;
   color:#d93234;
-}
-
-nav#archives {
-  margin:40px 0px;
-
-  h3 {
-    font-size:22px;
-    margin-bottom:10px;
-    font-weight:normal;
-  }
 }
 
 .permalink {
