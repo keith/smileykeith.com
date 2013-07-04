@@ -3,4 +3,5 @@ pygments: true
 excerpt_separator: "readmore"
 permalink: /:year/:month/:day/:title/
 exclude: ['rakefile.rb']
+markdown: rdiscount
 
