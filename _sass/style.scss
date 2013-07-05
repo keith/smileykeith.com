@@ -103,7 +103,6 @@ section#posts { }
   padding-top:20px;
   height:110px;
   margin-bottom:60px;
-  border-bottom:1px dotted #ccc;
 
   h1 {
     font-family: Georgia, serif;
@@ -116,6 +115,13 @@ section#posts { }
       font-weight:bold;
     }
   }
+}
+
+.borderlands {
+  width: 100%;
+  height: 0px;
+  margin-top: 10px;
+  border-bottom:1px dotted #ccc;
 }
 
 p#description {
