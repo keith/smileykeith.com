@@ -58,18 +58,18 @@ time {
 }
 
 mark {
-  background:#b38819;
-  color:#032b35;
+  background: $base0;
+  color: $base03;
 }
 
 ins {
   text-decoration:none;
-  border-bottom: 1px dotted #596e75;
+  border-bottom: 1px dotted $base01;
 }
 
 blockquote { 
-  color:#667b82;
-  border-left:2px solid #849496;
+  color: $base0;
+  border-left:2px solid $base02;
 }
 
 img { /* TODO */
@@ -83,7 +83,7 @@ img { /* TODO */
 }
 
 pre {
-  background-color:#0b3641;
+  background-color: $base02;
   border:none;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
@@ -91,22 +91,32 @@ pre {
 }
 
 code {
-  background-color:#002b36;
-  color:#849496;
-  border:2px solid #0b3641;
+  background-color: $base03;
+  color: $base0;
+  border:2px solid $base02;
 }
 
 
 footer {
-  border-top: 1px solid #596e75;
+  border-top: 1px solid $base01;
 }
 
 hr {
-  border-top: 1px solid #596e75;
+  border-top: 1px solid $base01;
+}
+
+#borderlands {
+  width: 100%;
+  // display: block;
+  height: 0px;
+  // background: $base01;
+  margin-top: 10px;
+// #masthead {
+  border-bottom: 1px solid $base01;
 }
 
 #masthead {
-  border-bottom: 1px solid #596e75;
+  border-bottom: none;
 }
 
 input[type="search"] {
