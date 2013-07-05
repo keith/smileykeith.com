@@ -50,19 +50,17 @@ a:focus { outline: thin dotted; }
 a:active { position:relative; top:1px; }
 
 ins {
-    text-decoration:none;
+  text-decoration:none;
   border-bottom: 1px dashed #ccc;
 }
 
 mark {
-    background-color:#ff9;
-    color:#000; 
-    font-style:italic;
-    font-weight:bold;
+  background-color:#ff9;
+  color:#000; 
 }
 
 del {
-    text-decoration: line-through;
+  text-decoration: line-through;
 }
 
 #topBar {
