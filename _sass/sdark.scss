@@ -74,15 +74,29 @@ blockquote {
   border-left:2px solid $base02;
 }
 
+@mixin easeopacity($speed) {
+  transition: opacity $speed ease-out;
+  -moz-transition: opacity $speed ease-out;
+  -webkit-transition: opacity $speed ease-out;
+  -o-transition: opacity $speed ease-out;
+}
+
 img { /* TODO */
   border: none;
   border: 8px solid #0b3641;
 /*  border: 4px solid #032B36;*/
 /*  box-shadow:0 0 5px #555;*/
+  opacity: 0.5;
+  @include easeopacity(.3s);
 /*  box-shadow:0 0 5px #eee7d6;*/
 /*  box-shadow:0 0 5px #839496;*/
   box-shadow:none;
+
+  &:hover {
+    opacity: 1.0;
+  }
 }
+
 
 pre {
   background-color: $base02;
