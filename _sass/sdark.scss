@@ -1,11 +1,13 @@
 @import "style";
 @import "solarized";
 
+$textcolor: $base0;
+
 ::-moz-selection { background-color: #1e3f45; color: #93a1a1; text-shadow: none; }
 ::selection { background:#839496; color:#93a1a1; text-shadow: none; }
 
 body {
-  color: $base0;
+  color: $textcolor;
   background: $base03;
 }
 
@@ -33,7 +35,7 @@ a:hover {
 
 @mixin title-links {
   a, a:visited {
-    color: $base0;
+    color: $textcolor;
 
     &:hover {
       color: $base2;
@@ -58,7 +60,7 @@ time {
 }
 
 mark {
-  background: $base0;
+  background: $textcolor;
   color: $base03;
 }
 
@@ -68,7 +70,7 @@ ins {
 }
 
 blockquote { 
-  color: $base0;
+  color: $textcolor;
   border-left:2px solid $base02;
 }
 
@@ -92,7 +94,7 @@ pre {
 
 code {
   background-color: $base03;
-  color: $base0;
+  color: $textcolor;
   border:2px solid $base02;
 }
 
