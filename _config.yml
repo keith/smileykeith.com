@@ -5,6 +5,7 @@ feed: /atom.xml
 pygments: true
 excerpt_separator: "readmore"
 permalink: /:year/:month/:day/:title/
+include: ['.htaccess']
 exclude: ['rakefile.rb']
 markdown: rdiscount
 
