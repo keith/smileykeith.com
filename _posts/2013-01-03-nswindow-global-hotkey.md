@@ -10,7 +10,7 @@ I found that once I had the shortcut working I was having a hard time dealing wi
 
 My solution was adding `NSNumber`s acting as booleans to keep track of the value allowing me to avoid `else` statements altogether and use `else if`s instead.
 
-{% highlight objc linenos %}
+{% highlight objc %}
 - (void)showHideMainWindow {
     NSNumber *wasActive = @NO;
     if ([[NSRunningApplication currentApplication] isActive]) {

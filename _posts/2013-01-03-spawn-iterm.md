@@ -6,7 +6,7 @@ date: 2013-01-03 12:34
 
 I've recently been searching around for a good way to 'spawn' an [iTerm](http://www.iterm2.com/) window (no I don't use tabs in iTerm), at the `pwd` in my current iTerm window. I couldn't find any good way to do it so I jumped in to AppleScript Editor and made something happen.
 
-{% highlight applescript linenos %}
+{% highlight applescript %}
 on run argv
 	tell application "iTerm"
 		set t to make new terminal
