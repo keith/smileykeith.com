@@ -1,0 +1,48 @@
+---
+layout: nil
+---
+<?xml version="1.0" encoding="utf-8"?>
+  <feed xmlns="http://www.w3.org/2005/Atom">
+	
+  <title type="text" xml:lang="en"><![CDATA[{{ site.name }}]]></title>
+  {% if site.description %}
+    <subtitle type="html">
+      <![CDATA[{{ site.description }}]]>
+    </subtitle>
+  {% endif %}
+  <updated>{{ site.time | date_to_xmlschema }}</updated>
+  <link type="application/atom+xml" href="{{ site.feed }}" rel="self"/>
+  <link type="text" href="{{ site.url }}" rel="alternate"/>
+  <id>{{ site.url }}</id>
+  <generator uri="http://jekyllrb.com/" version="1.0.3">
+    Jekyll
+  </generator>
+	
+	{% for post in site.posts limit:20 %}
+    <entry>
+      {% if post.author %}
+        <author>
+          <name><![CDATA[{{ post.author }}]]></name>
+        </author>
+        <rights>Copyright (c) {{ site.time | year }} {{ post.author }}; all rights reserved.</rights>
+      {% elsif site.author %}
+        <author>
+          <name><![CDATA[{{ site.author }}]]></name>
+        </author>
+        <rights>Copyright (c) {{ site.time | year }} {{ site.author }}; all rights reserved.</rights>
+      {% endif %}
+
+      <title><![CDATA[{{ post.title }}]]></title>
+      <link rel="alternate" href="{{ site.url }}{{ post.url }}"/>
+      {% if post.updated %}
+        <updated>{{ post.updated | date_to_xmlschema }}</updated>
+        <published>{{ post.date | date_to_xmlschema }}</published>
+      {% else %}
+        <updated>{{ post.date | date_to_xmlschema }}</updated>
+        <published>{{ post.date | date_to_xmlschema }}</published>
+      {% endif %}
+      <id>{{ site.url }}{{ post.id }}</id>
+      <content type="html"><![CDATA[{{ post.content | xml_escape }}]]></content>
+    </entry>
+	{% endfor %}
+</feed>
