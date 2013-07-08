@@ -21,6 +21,11 @@ body {
   line-height: 1.5;
 }
 
+@media only screen and (max-width: 767px) {
+  body {
+    font-size: 16px;
+  }
+}
 
 ::-moz-selection { background: #2b6a7e; color: #eee; text-shadow: none; }
 ::selection { background:#2b6a7e;
