@@ -5,3 +5,5 @@ permalink: /:year/:month/:day/:title/
 exclude: ['rakefile.rb']
 markdown: rdiscount
 
+paginate: 5
+
