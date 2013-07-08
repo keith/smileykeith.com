@@ -6,11 +6,15 @@ task :default => :build
 
 desc "Build the site"
 task :build do
+  puts "Pulling down submodules..."
   puts %x[git submodule update --init --recursive]
+
+  puts "Compiling sass..."
   puts %x[sass _sass/style.scss css/style.css --style=compressed]
   puts %x[sass _sass/sdark.scss css/sdark.css --style=compressed]
   puts %x[sass _sass/slight.scss css/slight.css --style=compressed]
 
+  puts "Building site..."
   puts %x[jekyll build]
 end
 
