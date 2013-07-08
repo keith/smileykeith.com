@@ -30,7 +30,7 @@ layout: default
   {% if paginator.next_page %}
     <div class="older">
       <span class="pagearrow">&larr;</span>
-      <a href="{{ paginator.next_page_path }}">Older</a>
+      <a href="/page{{ paginator.next_page }}">Older</a>
     </div>
   {% else %}
     <div class="older">&nbsp;</div>
@@ -48,7 +48,7 @@ layout: default
       </div>
     {% else %}
       <div class="newer">
-        <a href="{{ paginator.previous_page_path }}">Newer</a>
+        <a href="/page{{ paginator.previous_page }}">Newer</a>
         <span class="pagearrow">&rarr;</span>
       </div>
     {% endif %}
