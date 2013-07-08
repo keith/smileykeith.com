@@ -251,8 +251,8 @@ img {
   -ms-interpolation-mode: bicubic;
   vertical-align: middle;
 
-  border: 8px solid #fff;
-  box-shadow:0 0 5px #555;
+  border: 8px solid clear;
+  // box-shadow:0 0 5px #555;
   max-width:100%;
   height:auto;
   display:block;
