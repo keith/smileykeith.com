@@ -1,4 +1,4 @@
-@import "style";
+@import "global";
 @import "solarized";
 
 body {
@@ -58,7 +58,7 @@ blockquote {
 }
 
 img {
-  border: 8px solid clear;
+  // border: 8px solid clear;
 }
 
 article.link h2 a, article.link h2 a:visited {
@@ -192,4 +192,6 @@ pre code {
   .il, .il::selection { color: #2AA198; } /* Literal.Number.Integer.Long */
   .lineno, .lineno::selection { color: red; }
 }
+
+@import "print";
 

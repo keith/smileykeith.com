@@ -1,4 +1,4 @@
-@import "style";
+@import "global";
 @import "solarized";
 
 $textcolor: $base0;
@@ -84,7 +84,7 @@ blockquote {
 
 img { /* TODO */
   border: none;
-  border: 8px solid clear;
+  // border: 8px solid clear;
 /*  border: 4px solid #032B36;*/
 /*  box-shadow:0 0 5px #555;*/
   opacity: 0.5;
@@ -214,4 +214,6 @@ pre code {
   .il, .il::selection { color: #2AA198; } /* Literal.Number.Integer.Long */
   .lineno, .lineno::selection { color: red; }
 }
+
+@import "print";
 
