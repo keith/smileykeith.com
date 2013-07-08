@@ -2,7 +2,7 @@
 layout: default
 ---
 
-{% for post in site.posts %}
+{% for post in paginator.posts %}
 <article>
   <header>
     {% if post.link %}
@@ -24,4 +24,36 @@ layout: default
   {{ post.content }}
 </article>
 {% endfor %}
+
+<!-- Pagination links -->
+<div class="pagination">
+  {% if paginator.next_page %}
+    <div class="older">
+      <span class="pagearrow">&larr;</span>
+      <a href="{{ paginator.next_page_path }}">Older</a>
+    </div>
+  {% else %}
+    <div class="older">&nbsp;</div>
+  {% endif %}
+
+  <div class="pagearchive">
+    <a href="/archives/">Blog Archive</a>
+  </div>
+
+  {% if paginator.previous_page %}
+    {% if paginator.previous_page == 1 %}
+      <div class="newer">
+        <a href="/">Newer</a>
+        <span class="pagearrow">&rarr;</span>
+      </div>
+    {% else %}
+      <div class="newer">
+        <a href="{{ paginator.previous_page_path }}">Newer</a>
+        <span class="pagearrow">&rarr;</span>
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="newer">&nbsp;</div>
+  {% endif %}
+</div>
 
