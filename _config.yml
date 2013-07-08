@@ -1,4 +1,7 @@
 name: Keith Smiley
+author: Keith Smiley
+url: http://smileykeith.com
+feed: http://smileykeith.com/atom.xml
 pygments: true
 excerpt_separator: "readmore"
 permalink: /:year/:month/:day/:title/
