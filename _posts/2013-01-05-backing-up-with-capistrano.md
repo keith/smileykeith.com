@@ -26,5 +26,8 @@ end
 Then I added this to my crontab on my local machine by running `crontab -e` and adding the line:
 
 {% highlight bash %}
-@weekly cap -f ~/path/to/Capfile backup
+@weekly /Users/ksmiley/.rbenv/shims/cap -f ~/path/to/Capfile backup
 {% endhighlight %}
+
+I included the path to the Capistrano executable since cron (on OS X) executes tasks with `sh`, which isn't setup with my `$PATH`. 
+
