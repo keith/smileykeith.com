@@ -17,6 +17,7 @@ end
 ssh_user       = "ksmiley@66.175.208.254"
 ssh_port       = "22"
 document_root  = "/srv/www/smileykeith.com/blog"
+public_dir     = "_site" # compiled site directory
 
 desc "Deploy website via rsync"
 task :deploy do
