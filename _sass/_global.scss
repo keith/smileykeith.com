@@ -192,19 +192,22 @@ pre, code {
 }
 
 pre {
-  text-wrap:none;
-  margin:12px 0;
-  border:1px solid #ddd;
-  padding:4px;
+  border: 1px solid #ddd;
+  color: #444;
   line-height:1.5em;
-  color:#444;
-  overflow:auto;
+  margin:12px 0;
+  overflow: auto;
+  padding: 2px;
+  white-space: pre;
+  width: inherit;
+  word-wrap: normal;
 }
 
 pre code {
-  display: block; padding: 0.5em;
+  display: block;
+  padding: 0.5em;
   background: white;
-  border:none;
+  border: none;
 }
 
 code {
