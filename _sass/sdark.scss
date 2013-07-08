@@ -101,10 +101,10 @@ img { /* TODO */
 
 pre {
   // background-color: $base02;
-  border: 3px solid $base02;
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  box-shadow: none;
+  border: 2px solid $base02;
+  // -webkit-box-shadow: none;
+  // -moz-box-shadow: none;
+  // box-shadow: none;
 }
 
 code {
@@ -212,7 +212,7 @@ pre code {
   .vg, .vg::selection { color: #268BD2; } /* Name.Variable.Global */
   .vi, .vi::selection { color: #268BD2; } /* Name.Variable.Instance */
   .il, .il::selection { color: #2AA198; } /* Literal.Number.Integer.Long */
-  .lineno, .lineno::selection { color: red; }
+  .lineno, .lineno::selection { color: $base01; }
 }
 
 @import "print";

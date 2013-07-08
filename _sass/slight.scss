@@ -100,9 +100,9 @@ input[type="search"] {
 
 pre {
   border: 2px solid #eee7d6;
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  box-shadow: none;
+  // -webkit-box-shadow: none;
+  // -moz-box-shadow: none;
+  // box-shadow: none;
 }
 
 code {
@@ -192,7 +192,7 @@ pre code {
   .vg, .vg::selection { color: #268BD2; } /* Name.Variable.Global */
   .vi, .vi::selection { color: #268BD2; } /* Name.Variable.Instance */
   .il, .il::selection { color: #2AA198; } /* Literal.Number.Integer.Long */
-  .lineno, .lineno::selection { color: red; }
+  .lineno, .lineno::selection { color: $base1; }
 }
 
 @import "print";
