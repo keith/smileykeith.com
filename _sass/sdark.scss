@@ -100,8 +100,8 @@ img { /* TODO */
 
 
 pre {
-  background-color: $base02;
-  border:none;
+  // background-color: $base02;
+  border: 3px solid $base02;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
   box-shadow: none;
@@ -138,12 +138,12 @@ input[type="search"] {
 pre code {
   display: block;
   padding: 0.5em;
-  background: #002b36;
-  color: #839496;
+  background: $bgcolor;
+  color: $textcolor;
 }
 
 .highlight {
-  background-color: #ffffcc;
+  background-color: $bgcolor;
   .c, .c::selection { color: #586E75; } /* Comment */
   .err, .err::selection { color: #93A1A1; } /* Error */
   .g, .g::selection { color: #93A1A1; } /* Generic */

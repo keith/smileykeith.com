@@ -1,9 +1,12 @@
 @import "global";
 @import "solarized";
 
+$textcolor: $base0;
+$bgcolor: $base3;
+
 body {
   color:#0b3641;
-  background:#fdf6e3;
+  background: $bgcolor;
 }
 
 ::-moz-selection { background-color: #0b3641; color:fdf6e3; text-shadow: none; }
@@ -96,8 +99,7 @@ input[type="search"] {
 }
 
 pre {
-  background-color:#eee7d6;
-  border:none;
+  border: 2px solid #eee7d6;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
   box-shadow: none;
@@ -121,7 +123,7 @@ pre code {
 // }
 
 .highlight {
-  background-color: #ffffcc;
+  background-color: $bgcolor;
   .c, .c::selection { color: #586E75; } /* Comment */
   .err, .err::selection { color: #93A1A1; } /* Error */
   .g, .g::selection { color: #93A1A1; } /* Generic */
