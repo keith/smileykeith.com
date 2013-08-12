@@ -4,7 +4,7 @@ title: "Terminal Shortcut in OS X"
 date: 2013-02-08 09:59
 ---
 
-One of my favorite defaults in some Linux distros is the ability to use <CTRL><ALT>T to open a new terminal window. I wanted to enable this same functionality in OS X using [Quicksilver](http://qsapp.com/). I did this using [iTerm 2](http://www.iterm2.com/) but you can do it with the default Terminal if that's what you want.
+One of my favorite defaults in some Linux distros is the ability to use CTRL+ALT+T to open a new terminal window. I wanted to enable this same functionality in OS X using [Quicksilver](http://qsapp.com/). I did this using [iTerm 2](http://www.iterm2.com/) but you can do it with the default Terminal if that's what you want.
 
 1. Enable the `Terminal` and `iTerm2` Quicksilver plugins.
 ![Quicksilver plugins](/images/qs-terminal/qs-plugins.png)
@@ -19,3 +19,4 @@ One of my favorite defaults in some Linux distros is the ability to use <CTRL><A
 ![Quicksilver CLI](/images/qs-terminal/qs-cli.png)
 
 You're done! Now you can easily press your hotkey and pull up a new iTerm/Terminal window whenever and wherever.
+
