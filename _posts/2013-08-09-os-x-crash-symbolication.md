@@ -61,7 +61,7 @@ the small number of times I call that method I was quickly able to assume where
 the issue was but I still wanted to see exactly what methods of mine were being
 called first.
 
-This brings me to `atos` the command line too Apple provides to symbolicate
+This brings me to `atos` the command line tool Apple provides to symbolicate
 these reports. This is where my experience differs with most of what I found
 online. My usage looked like this:
 
