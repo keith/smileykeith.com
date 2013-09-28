@@ -33,16 +33,16 @@ body {
   text-shadow: none; }
 a::selection { color:#eee8d5; }
 
-
-a, a:visited {  
+a, a:visited {
   color:#2b6a7e;
   text-decoration:none;
   border-bottom: 1px dotted #ddd;
   font-weight: normal;
   font-style: normal;
 }
+
 a:hover, a:active { outline: 0; }
-a:hover { 
+a:hover {
   transition: .3s;
   -moz-transition: .3s;
   -webkit-transition: .3s;
@@ -61,7 +61,7 @@ ins {
 
 mark {
   background-color:#ff9;
-  color:#000; 
+  color:#000;
 }
 
 del {
@@ -87,7 +87,7 @@ del {
 hr {
     display:block;
     height:1px;
-    border:0;   
+    border:0;
     border-top:1px dotted #ccc;
     margin:1em 0;
     padding:0;
@@ -175,7 +175,6 @@ article header h2 a, article header h2 a:visited {
 
 article.link h2 a, article.link h2 a:visited, h2.link a, h2.link a:visited {
   color:#2b6a7e;
-  
   text-decoration:none;
   border-bottom: 1px dotted #ccc;
   font-weight: normal;
@@ -267,9 +266,6 @@ img {
   border: 0;
   -ms-interpolation-mode: bicubic;
   vertical-align: middle;
-
-  // border: 8px solid clear;
-  // box-shadow:0 0 5px #555;
   max-width:100%;
   height:auto;
   display:block;
@@ -280,15 +276,11 @@ ul {
   list-style:circle;
 }
 
-ol {
-/*  list-style:upper-roman;*/
-}
-
 ol.footnotes li {
   margin-bottom:15px;
 }
 
-blockquote { 
+blockquote {
   font-size: 14px;
   margin: 0 18px 18px 18px;
   color: #555;
