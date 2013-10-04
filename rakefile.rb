@@ -22,7 +22,7 @@ end
 
 ssh_user       = "ksmiley@66.175.208.254"
 ssh_port       = "22"
-document_root  = "/srv/www/smileykeith.com/blog"
+document_root  = "/sites/smileykeith.com/public"
 public_dir     = "_site" # compiled site directory
 
 desc "Deploy website via rsync"
