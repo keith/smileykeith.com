@@ -31,7 +31,7 @@ use.
 So I decided to set this up on my [Linode VPS](http://www.linode.com/?r=c190426bf1ff0f144b48997675bae8b32d339824) which is running Ubuntu 10.04.
 As stated in the original file comment they recommend using the
 `httpd.conf` file for your custom configuration like this. But
-[apparently](http://stackoverflow.com/a/11687212/902968) that file could be 
+[apparently](http://stackoverflow.com/a/11687212/902968) that file could be
 overwritten on updates of Apache which would be pretty annoying. Luckily
 the default Apache config file (`apache2.conf` on 10.04) includes the
 contents of the `conf.d` folder which is in the same location. By
@@ -45,7 +45,7 @@ includes my entire sites directory.
 
 Besides the speed increased gained by using a global `.htaccess` file
 this allows you to have much shorter custom files for site specific
-configuration. For example only required configuration for one of my sites 
+configuration. For example only required configuration for one of my sites
 was the `ErrorDocument`s. Now my `.htaccess` file went from 300+ lines
 to
 
@@ -54,4 +54,3 @@ ErrorDocument 403 /403.php
 ErrorDocument 404 /404.php
 ErrorDocument 500 /500.php
 {% endhighlight %}
-
