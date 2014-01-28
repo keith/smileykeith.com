@@ -36,4 +36,3 @@ layout: nil
     </entry>
   {% endfor %}
 </feed>
-
