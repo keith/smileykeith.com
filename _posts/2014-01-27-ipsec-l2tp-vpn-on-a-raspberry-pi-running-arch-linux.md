@@ -4,11 +4,11 @@ title: "IPSEC/L2TP VPN on a Raspberry Pi running Arch Linux"
 date: 2014-01-27 20:49
 ---
 
-After you buy a Raspberry Pi, or two, you need to figure out what to use
-them for. While you'll get a ton of *interesting* ideas, while I didn't
-particularly find any of them more useful than as a [thought
-exercise](http://arstechnica.com/information-technology/2012/12/10-raspberry-pi-creations-that-show-how-amazing-the-tiny-pc-can-be/),
-making a VPN stood out as an actually useful configuration.
+After you buy a Raspberry Pi, or two, you need to figure out what to use them
+for. While you'll get a ton of *interesting* ideas from Googling "uses for a
+Raspberry Pi," I didn't particularly find them any more than a [thought
+exercise](http://arstechnica.com/information-technology/2012/12/10-raspberry-pi-creations-that-show-how-amazing-the-tiny-pc-can-be/).
+Making a VPN stood out as an actually useful configuration.
 
 Originally when I got my (accidentally chosen) Model A, I spent a little
 while going through [this
@@ -20,26 +20,26 @@ functional VPN running on Arch Linux.
 
 I started out by following [this
 guide](https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_on_a_Raspberry_Pi_with_Arch_Linux.html)
-hoping that it would get me a functioning VPN without too much work.
-Most of this setup will be based on that article with some tweaks for
-what I had to do to make the settings stick.  Unfortunately while it
-worked after the setup the configuration did not persist after restart.
-For this configuration, like I said earlier, this time around I wanted
-to use the ARM version of Arch Linux rather than Raspbian for the
-install. You can download the Raspberry Pi compatible Arch image from
-their [downloads page](http://www.raspberrypi.org/downloads). I'm not
-sure I would recommend Arch for people who haven't installed it before
-or at least gotten through their [Beginners'
-Guide](https://wiki.archlinux.org/index.php/Beginners'_Guide). The ARM
-Image, and the normal image, don't come with a GUI, perfect for this use
-of the Pi.
+hoping that it would get me a functioning VPN without too much work.  Most of
+this setup will be based on that article with some tweaks for what I had to do
+to make the settings stick.  Unfortunately while it worked after the setup the
+configuration did not persist after restart.  For this configuration, like I
+said earlier, I wanted to use the ARM version of Arch Linux rather than
+Raspbian for the install. You can download the Raspberry Pi compatible Arch
+image from their [downloads page](http://www.raspberrypi.org/downloads). I'm
+not sure I would recommend Arch for people who haven't installed it before or
+at least gotten through their [Beginners'
+Guide](https://wiki.archlinux.org/index.php/Beginners'_Guide). The ARM Image,
+like the normal image, doesn't come with a GUI, perfect for this use of the Pi.
 
-I'm not going to bother with making sure this works before restarting,
-since that doesn't seem like much of an issue with actual usage. I
-wouldn't recommend doing much configuration before doing this intial
-setup. I did this the first time and after an hour of configuration my
-VPN did not work correctly, I ended up nuking the work I had done and
-starting over. Start by installing the necessary components.
+I'm not going to bother with making sure this works before restarting, since
+that doesn't seem like much of an issue with actual usage (although you can
+just run the scripts we create and it should work fine). I wouldn't recommend
+doing much configuration before doing this intial setup. I did this the first
+time and after an hour of configuration my VPN did not work correctly, I ended
+up nuking the work I had done and starting over.
+
+Start by installing the necessary components:
 
 ```
 pacman -Sy openswan xl2tpd ppp lsof python2
@@ -47,7 +47,7 @@ pacman -Sy openswan xl2tpd ppp lsof python2
 
 You need to do some configuration of the firewall and redirects:
 
-```
+{% highlight bash %}
 echo "net.ipv4.ip_forward = 1" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.conf.all.accept_redirects = 0" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.conf.all.send_redirects = 0" |  tee -a /etc/sysctl.conf
@@ -55,14 +55,14 @@ echo "net.ipv4.conf.default.rp_filter = 0" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.conf.default.accept_source_route = 0" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.conf.default.send_redirects = 0" |  tee -a /etc/sysctl.conf
 echo "net.ipv4.icmp_ignore_bogus_error_responses = 1" |  tee -a /etc/sysctl.conf
-```
+{% endhighlight %}
 
-To make these settings persist we need to create a script that gets
-launched by systemd each time we restart the system. As recommended in
-the original article, and being a [Homebrew]() user I created the script
-in `/usr/local/bin/vpn-boot.sh`:
+To make these settings persist we need to create a script that gets launched by
+systemd each time we restart the system. As recommended in the original
+article, and being a [Homebrew](http://brew.sh/) user I created the script in
+`/usr/local/bin/vpn-boot.sh`:
 
-```
+{% highlight bash %}
 #!/usr/bin/bash
 
 iptables --table nat --append POSTROUTING --jump MASQUERADE
@@ -73,7 +73,7 @@ for vpn in /proc/sys/net/ipv4/conf/*; do
 done
 
 sysctl -p
-```
+{% endhighlight %}
 
 There are a few things that differ here to the original article. First
 the hashbang path was changed since the default $PATH on the ARM version
@@ -81,11 +81,11 @@ of Arch didn't include `/bin`. I would run `which -a bash` on your
 install to make sure this works for you. This obviously doesn't have
 to be changed, but I think it's better in the long run. I also added
 `sysctl -p` since these settings didn't seemed to be applied otherwise.
-You must make this script executable with something like:
+Then you must make this script executable with something like:
 
-```
+{% highlight bash %}
 chmod +x /usr/local/bin/vpn-boot.sh
-```
+{% endhighlight %}
 
 Since Arch uses systemd to this script has to be launched by creating a
 service to be ran through systemd. You can create this file in
@@ -104,13 +104,12 @@ ExecStart=/usr/local/bin/vpn-boot.sh
 WantedBy=multi-user.target
 ```
 
-As you can see in this script I added a few things from the original
-article. I wanted to make sure that the boot command would launch after
-the network settings had been established and before the other VPN
-software was launched. I'm not sure how much of these changes would be
-required for systemd to do what I wanted it to but the order really
-seemed to matter for me here. After you create this service enable it
-within systemd with:
+I added a few things here as well. I wanted to make sure that the boot command
+would launch after the network settings had been established and before the
+other VPN software was launched. I'm not sure how many of these changes would
+be required for systemd to do what I wanted it to but the order really seemed
+to matter for here. After you create this service enable it within systemd
+with:
 
 ```
 systemctl enable vpnboot.service
@@ -137,7 +136,7 @@ conn L2TP-PSK-noNAT
   keylife=1h
   type=transport
   # Your server's IP (I used my internal IP, assuming you're using NAT)
-  left=172.16.1.90
+  left=172.16.1.1
   leftprotoport=17/1701
   right=%any
   rightprotoport=17/%any
@@ -160,7 +159,7 @@ systemctl enable openswan
 ```
 
 I also edited the openswan service file in
-`/etc/systemd/system/multi-user.target.wants`:
+`/etc/systemd/system/multi-user.target.wants/openswan.service`:
 
 ```
 [Unit]
@@ -233,7 +232,7 @@ The other guide also recommends creating the xl2tpd control folder with:
 mkdir /var/run/xl2tpd/
 ```
 
-No we need to create/edit `/etc/ppp/options.xl2tpd`:
+Now we need to create/edit `/etc/ppp/options.xl2tpd`:
 
 ```
 ipcp-accept-local
@@ -262,7 +261,7 @@ account required        pam_unix.so
 session required        pam_unix.so
 ```
 
-`/etc/ppp/pap-secrets`:
+And `/etc/ppp/pap-secrets`:
 
 ```
 *       l2tpd           ""              *
@@ -275,10 +274,9 @@ run:
 netctl enable eth0
 ```
 
-You'll probably want to disable any other netctl systemd functions that
-are enabled by default. Check
-`/etc/systemd/system/mutli-user.target.wants` to check for other
-`netctl` profiles.
+You'll probably want to disable any other netctl systemd functions that are
+enabled by default. Check `/etc/systemd/system/mutli-user.target.wants` to for
+other `netctl` profiles.
 
 So at this point you should be able to enable VPN clients using the
 super secret keys you enabled before and the username and passwords
@@ -290,8 +288,10 @@ adduser vpnuser
 usermod -s /sbin/nologin vpnuser
 ```
 
-This disallows users from being able to be used for login which is
-probably more secure for your VPN (although not required).
+This disallows users from being able to be used for login which is probably
+more secure for your VPN (although not required). For testing you can use the
+root/root defualt user and a less secure key, although you should *definitely*
+change these before allowing access to the outside world.
 
 ### Troubleshooting
 
