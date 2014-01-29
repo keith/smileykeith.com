@@ -267,6 +267,15 @@ And `/etc/ppp/pap-secrets`:
 *       l2tpd           ""              *
 ```
 
+If you'd like you can also restrict the users accounts that can access
+the vpn. This way you can separate your login user from your VPN users
+who can have much stronger passwords. You'd do that in your
+`/etc/ppp/pap-secrets`:
+
+```
+vpnuser   l2tpd         ""              *
+```
+
 To enable the startup of the default netctl eth0 interface you need to
 run:
 
@@ -284,8 +293,7 @@ you've created previously. You can create new users for specifically VPN
 usage with something like this:
 
 ```
-adduser vpnuser
-usermod -s /sbin/nologin vpnuser
+useradd -s /sbin/nologin vpnuser
 ```
 
 This disallows users from being able to be used for login which is probably
