@@ -27,11 +27,9 @@
       <script type="text/javascript" language="Javascript" src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <link rel="stylesheet" type="text/css" href="/css/main.css" title="default">
+    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
   </head>
   <body>
-    <a href="/" id="topBar"></a>
-    <div id="mastheadbackground">&nbsp;</div>
     <section class="container">
       <div id="masthead">
         <h1><a href="/">Keith Smiley</a></h1>
@@ -40,29 +38,27 @@
            <a href="https://twitter.com/SmileyKeith">Twitter</a>
            | <a href="https://github.com/Keithbsmiley" title="Open source = awesome">GitHub</a>
         </p>
-
-        <div class="borderlands"></div>
       </div>
 
       <section class="content">
         {{ content }}
       </section>
 
-      <footer class="eleven columns">
-        <div class="four columns">
-          <form id="search" action="http://google.com/search" method="get">
-            <fieldset role="search">
-              <input type="hidden" name="q" value="site:smileykeith.com" />
-              <input id="field" type="search" name="q" maxlength="255" placeholder="Search&hellip;"/>
-              <input type="submit" value="Google" style="visibility: hidden;" />
-            </fieldset>
-          </form>
-        </div>
-        <div>
-          <p><a href="http://keith.so/">Colophon</a> | <a href="&#x6d;&#97;&#105;&#108;&#x74;&#111;&#58;&#x6b;&#x65;&#x69;&#116;&#x68;&#x62;&#115;&#109;&#105;&#108;&#x65;&#x79;&#64;&#103;&#109;&#97;&#x69;&#x6c;&#46;&#99;&#111;&#109;" title="I'll respond. Promise.">Email</a> | <a href="{{ site.feed }}" title="RSS Feed">RSS</a></p>
-          <p>&copy; Keith Smiley | <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></p>
-        </div>
-      </footer>
+      {% comment %} <footer> {% endcomment %}
+      {% comment %}   <div class="four columns"> {% endcomment %}
+      {% comment %}     <form id="search" action="http://google.com/search" method="get"> {% endcomment %}
+      {% comment %}       <fieldset role="search"> {% endcomment %}
+      {% comment %}         <input type="hidden" name="q" value="site:smileykeith.com" /> {% endcomment %}
+      {% comment %}         <input id="field" type="search" name="q" maxlength="255" placeholder="Search&hellip;"/> {% endcomment %}
+      {% comment %}         <input type="submit" value="Google" style="visibility: hidden;" /> {% endcomment %}
+      {% comment %}       </fieldset> {% endcomment %}
+      {% comment %}     </form> {% endcomment %}
+      {% comment %}   </div> {% endcomment %}
+      {% comment %}   <div> {% endcomment %}
+      {% comment %}     <p><a href="http://keith.so/">Colophon</a> | <a href="&#x6d;&#97;&#105;&#108;&#x74;&#111;&#58;&#x6b;&#x65;&#x69;&#116;&#x68;&#x62;&#115;&#109;&#105;&#108;&#x65;&#x79;&#64;&#103;&#109;&#97;&#x69;&#x6c;&#46;&#99;&#111;&#109;" title="I'll respond. Promise.">Email</a> | <a href="{{ site.feed }}" title="RSS Feed">RSS</a></p> {% endcomment %}
+      {% comment %}     <p>&copy; Keith Smiley | <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></p> {% endcomment %}
+      {% comment %}   </div> {% endcomment %}
+      {% comment %} </footer> {% endcomment %}
     </section>
 
     <script>
@@ -73,4 +69,3 @@
     </script>
   </body>
 </html>
-

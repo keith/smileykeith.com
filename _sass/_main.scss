@@ -1,0 +1,25 @@
+body {
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+a {
+  text-decoration: none;
+}
+
+#masthead {
+  margin: 20px 0;
+  text-align: center;
+}
+
+article header {
+  h2 {
+    font-size: 24px;
+  }
+
+  time {
+    font-weight: bold;
+    color: #aaa;
+    font-size: 16px;
+  }
+}
