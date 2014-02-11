@@ -27,32 +27,17 @@
       <script type="text/javascript" language="Javascript" src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
-    <link rel="alternate stylesheet" type="text/css" href="/css/slight.css" title="slight"> <!-- Add alternate when safari is updated to fix bug https://bugs.webkit.org/show_bug.cgi?id=24354  -->
-    <link rel="alternate stylesheet" type="text/css" href="/css/sdark.css" title="sdark">
-    <link href='https://fonts.googleapis.com/css?family=Merriweather' rel='stylesheet' type='text/css'>
-
-    <script src="/js/styleswitcher.min.js" type="text/javascript" charset="utf-8"></script>
-    <script>
-      function checkUser() {
-        if(/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
-            document.getElementById('themeSwitcher').style.display = 'none';
-          }
-        }
-    </script>
-
+    <link rel="stylesheet" type="text/css" href="/css/main.css" title="default">
   </head>
-  <body onload="checkUser()">
+  <body>
     <a href="/" id="topBar"></a>
     <div id="mastheadbackground">&nbsp;</div>
-    <!-- <section> -->
     <section class="container">
       <div id="masthead">
         <h1><a href="/">Keith Smiley</a></h1>
 
         <p id="description">
-          <a href="https://alpha.app.net/smileykeith" rel="me">ADN</a>
-           | <a href="https://twitter.com/SmileyKeith">Twitter</a>
+           <a href="https://twitter.com/SmileyKeith">Twitter</a>
            | <a href="https://github.com/Keithbsmiley" title="Open source = awesome">GitHub</a>
         </p>
 
@@ -76,17 +61,10 @@
         <div>
           <p><a href="http://keith.so/">Colophon</a> | <a href="&#x6d;&#97;&#105;&#108;&#x74;&#111;&#58;&#x6b;&#x65;&#x69;&#116;&#x68;&#x62;&#115;&#109;&#105;&#108;&#x65;&#x79;&#64;&#103;&#109;&#97;&#x69;&#x6c;&#46;&#99;&#111;&#109;" title="I'll respond. Promise.">Email</a> | <a href="{{ site.feed }}" title="RSS Feed">RSS</a></p>
           <p>&copy; Keith Smiley | <a href="http://jekyllrb.com/" target="_blank">Jekyll</a></p>
-            <p id="themeSwitcher">
-              <a href="#" onclick="setActiveStyleSheet('default'); return false;" title="Default white theme">Default</a>
-               | <a href="#" onclick="setActiveStyleSheet('slight'); return false;" title="Light theme perfect for evening reading">Solarized Light</a>
-               | <a href="#" onclick="setActiveStyleSheet('sdark');" title="Dark theme ideal for nightowls">Solarized Dark</a>
-             </p>
         </div>
       </footer>
     </section>
 
-    <script src="/js/mousetrap.min.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/js/plugins.min.js" type="text/javascript" charset="utf-8"></script>
     <script>
         var _gaq=[['_setAccount','UA-10630305-13'],['_trackPageview']];
         (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
