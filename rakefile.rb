@@ -13,8 +13,6 @@ task :build do
 
   puts "Compiling sass..."
   puts %x[sass _sass/style.scss css/style.css --style=compressed]
-  puts %x[sass _sass/sdark.scss css/sdark.css --style=compressed]
-  puts %x[sass _sass/slight.scss css/slight.css --style=compressed]
 
   puts "Building site..."
   puts %x[jekyll build]
@@ -65,4 +63,3 @@ task :new, :title do |t, args|
     post.puts "---"
   end
 end
-
