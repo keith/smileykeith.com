@@ -1,25 +1,137 @@
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700);
+
+$red: #E74C3C;
+$code-color: #444;
+
 body {
+  font-family: 'Source Sans Pro', sans-serif;
   font-size: 20px;
-  line-height: 1.5;
+  line-height: 35px;
 }
 
-a {
+p {
+  margin-bottom: 30px;
+}
+
+a, a:hover, a:visited {
+  color: $red;
   text-decoration: none;
 }
 
-#masthead {
-  margin: 20px 0;
-  text-align: center;
+a:hover {
+  border-bottom: 1px dashed $red;
 }
 
-article header {
-  h2 {
-    font-size: 24px;
+blockquote {
+  font-size: 16px;
+  margin: 0 18px 18px 18px;
+  color: #555;
+  padding-left: 15px;
+  border-left: 2px solid #ddd;
+}
+
+pre, code {
+ font: 15px Monaco, Courier, monospace;
+}
+
+pre {
+  border: 1px solid #ddd;
+  color: $code-color;
+  color: red;
+  line-height: 1.5em;
+  margin: 12px 0;
+  overflow: auto;
+  padding: 2px;
+  white-space: pre;
+  width: inherit;
+  word-wrap: normal;
+}
+
+pre code {
+  display: block;
+  padding: 0.5em;
+  background: white;
+  border: none;
+}
+
+code {
+  display: inline-block;
+  color: $code-color;
+  padding: 3px;
+  border: 1px solid #ddd;
+}
+
+img {
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+  vertical-align: middle;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 20px auto;
+}
+
+ul {
+  list-style: circle;
+}
+
+#masthead {
+  margin: 30px 0;
+  text-align: right;
+}
+
+article {
+  header {
+    font-weight: bold;
+
+    h2 {
+      font-size: 26px;
+    }
+
+    p {
+      color: #aaa;
+      font-size: 16px;
+    }
+  }
+}
+
+.post {
+  margin-bottom: 60px;
+}
+
+.linkarrow,.pagearrow {
+  font-size: 18px;
+}
+
+.pagination {
+  margin-bottom: 10px;
+  margin-left: 2%;
+  width: 100%;
+  height: 60px;
+  display: block;
+
+  div {
+    float: left;
+    min-width: 33%;
   }
 
-  time {
-    font-weight: bold;
-    color: #aaa;
-    font-size: 16px;
+  .pagearchive {
+    display: block;
+    text-align: center;
   }
+
+  .older {
+    display: block;
+    text-align: left;
+  }
+
+  .newer {
+    display: block;
+    text-align: right;
+  }
+}
+
+.blogarchive {
+  margin-bottom: 50px;
+  text-align: center;
 }
