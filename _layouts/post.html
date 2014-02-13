@@ -7,7 +7,7 @@ layout: default
 {% else %}
 <article>
 {% endif %}
-  <header>
+  <header class="seven columns">
     {% if page.link %}
       <h2>
         <a href="{{ page.link }}">{{ page.title }}</a>
@@ -24,9 +24,11 @@ layout: default
     </p>
   </header>
 
-  {{ content }}
+  <div class="post ten columns">
+    {{ content }}
+  </div>
 </article>
 
-<div class="blogarchive">
+<div class="ten columns blogarchive">
   <a href="/archives/">Blog Archive</a>
 </div>
