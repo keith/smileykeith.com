@@ -2,6 +2,7 @@
 
 $red: #E74C3C;
 $code-color: #444;
+$header-links: #aaa;
 
 body {
   font-family: 'Source Sans Pro', sans-serif;
@@ -78,6 +79,15 @@ ul {
 #masthead {
   margin: 30px 0;
   text-align: right;
+  color: $header-links;
+
+  a, a:visited {
+    color: $header-links;
+  }
+
+  a:hover {
+    border-bottom: 1px solid #ddd;
+  }
 }
 
 article {
