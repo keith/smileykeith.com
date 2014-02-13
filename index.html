@@ -4,7 +4,7 @@ layout: default
 
 {% for post in paginator.posts %}
 <article>
-  <header>
+  <header class="seven columns">
     {% if post.link %}
       <h2 class="link">
         <a href="{{ post.link }}">{{ post.title }}</a>
@@ -21,12 +21,14 @@ layout: default
     </p>
   </header>
 
-  {{ post.content }}
+  <div class="post ten columns">
+    {{ post.content }}
+  </div>
 </article>
 {% endfor %}
 
 <!-- Pagination links -->
-<div class="pagination">
+<div class="pagination ten columns">
   {% if paginator.next_page %}
     <div class="older">
       <span class="pagearrow">&larr;</span>
