@@ -159,7 +159,7 @@ systemctl enable openswan
 ```
 
 I also edited the openswan service file in
-`/etc/systemd/system/multi-user.target.wants/openswan.service`:
+`/etc/systemd/system/multi-user.target.wants/openswan.service`
 
 ```
 [Unit]
