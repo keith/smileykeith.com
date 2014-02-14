@@ -19,7 +19,10 @@ since 2009. As recommended in the [canonical how to
 article](http://bastibe.de/2011-12-04-how-to-make-tagbar-work-with-objective-c.html)
 you can attempt to use the trunk version of ctags and just define the
 Tagbar settings. For me, this ended up producing a ton of
-mis-categorized duplicates.
+mis-categorized duplicates. I also opened and closed [an
+issue](https://github.com/majutsushi/tagbar/issues/193) on the Tagbar
+Github repo hoping that Objective-C support will be added by default in
+the future.
 
 The only other resource I could find about this issue was [this
 gist](https://gist.github.com/yamaya/5598909). It uses regex to define
