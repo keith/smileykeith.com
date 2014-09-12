@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+  
+    <title>Automated Google Reader Backups - Keith Smiley</title>
+  
+
+    <meta name="author" content="Keith Smiley">
+    <link rel="author" href="https://plus.google.com/114321628813035573740/">
+    <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/atom.xml">
+
+    <link rel="icon" href="/images/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon">
+
+    <!-- Thank you http://mathiasbynens.be/notes/touch-icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/touchicons/apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/touchicons/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/touchicons/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/images/touchicons/apple-touch-icon-precomposed.png">
+
+    <!--[if lt IE 9]>
+      <script type="text/javascript" language="Javascript" src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
+  </head>
+  <body>
+    <section class="container">
+      <div id="masthead">
+        <h1>
+          <a href="/">Keith Smiley</a>
+          - <a href="http://keith.so" title="Who is this guy?">Who?</a>
+        </h1>
+      </div>
+
+      <section class="content">
+        
+<article>
+
+  <header class="seven columns">
+    
+      <h2>Automated Google Reader Backups</h2>
+    
+    <p>
+      <time datetime="2013-02-01 12:30:00 -0800" pubdate="pubdate">
+        01 Feb 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/02/01/automated-google-reader-backups/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>I spend a lot of time in my RSS <a href="http://reederapp.com/">Reeder</a> (see what I did there?). I still find Google Reader to be the best and easiest way to manage my subscriptions, although I've been wanting to switch to <a href="http://feedafever.com/">Fever</a> for a while.</p>
+
+<p>One thing I wanted to do when I launched my new site (the one you're reading) was to have a downloadable up to date export of my Google Reader OPML file (which of course I never did). I looked around for good ways to automate this and I found a simple Python script to do it with (sorry I couldn't find it again for this post). I decided to rewrite it in Ruby and set it up on my server as an automated cron job.</p>
+
+<p>To run the script I came up with use something like:</p>
+
+<div class="highlight"><pre><code class="bash">ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword
+</code></pre></div>
+
+
+<p>To add it to your crontab (to run every Sunday at 1:01am) use something like:</p>
+
+<div class="highlight"><pre><code class="bash">1 1 * * 7 ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword
+</code></pre></div>
+
+
+
+
+<div class="highlight"><pre><code class="ruby"><span class="c1">#!/usr/bin/env ruby</span>
+
+<span class="c1">#</span>
+<span class="c1"># =&gt; This script will authorize your Google credentials and download your Google Reader subscriptions</span>
+<span class="c1"># =&gt; Usage: ./googleReaderOPML.rb GOOGLEUSERNAME PASSWORD</span>
+<span class="c1">#</span>
+
+<span class="c1"># The required networking shenanigans</span>
+<span class="nb">require</span> <span class="s1">&#39;uri&#39;</span>
+<span class="nb">require</span> <span class="s1">&#39;net/http&#39;</span>
+<span class="nb">require</span> <span class="s1">&#39;open-uri&#39;</span>
+
+<span class="nb">require</span> <span class="s1">&#39;rubygems&#39;</span>
+<span class="c1"># This requires the &#39;colorize&#39; gem. Install with &#39;[sudo] gem install colorize&#39;</span>
+<span class="nb">require</span> <span class="s1">&#39;colorize&#39;</span>
+
+
+<span class="c1"># The base Google URLs for callback, authentication, and subscription export</span>
+<span class="vg">$GOOGLE_URL</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com&quot;</span>
+<span class="vg">$LOGIN_URL</span> <span class="o">=</span> <span class="s2">&quot;https://www.google.com/accounts/ClientLogin&quot;</span>
+<span class="vg">$READER_URL</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/reader/subscriptions/export&quot;</span>
+
+<span class="c1"># The user agent string, for some reason this is required, feel free to change it</span>
+<span class="vg">$SOURCE</span> <span class="o">=</span> <span class="s2">&quot;keith.so&quot;</span>
+
+<span class="c1"># The default output filename, it is automatically overwritten if one already exists</span>
+<span class="vg">$FILE_NAME</span> <span class="o">=</span> <span class="s2">&quot;googlereadersubscriptions.opml&quot;</span>
+
+
+<span class="c1"># Make sure there is the correct number of arguments</span>
+<span class="k">if</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">count</span> <span class="o">!=</span> <span class="mi">2</span>
+    <span class="c1"># Print the instruction</span>
+    <span class="nb">puts</span> <span class="s2">&quot;Usage: ./</span><span class="si">#{</span> <span class="no">File</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">)</span> <span class="si">}</span><span class="s2"> USERNAME PASSWORD&quot;</span><span class="o">.</span><span class="n">red</span>
+    <span class="nb">exit</span>
+<span class="k">end</span>
+
+<span class="c1"># Build the request URL</span>
+<span class="n">uri</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="vg">$LOGIN_URL</span><span class="p">)</span>
+
+<span class="c1"># Setup the Parameters</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">Email</span><span class="p">:</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">first</span><span class="p">,</span> <span class="ss">Passwd</span><span class="p">:</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">last</span><span class="p">,</span> <span class="ss">service</span><span class="p">:</span> <span class="s2">&quot;reader&quot;</span><span class="p">,</span> <span class="ss">source</span><span class="p">:</span> <span class="vg">$SOURCE</span><span class="p">,</span> <span class="ss">continue</span><span class="p">:</span> <span class="vg">$GOOGLE_URL</span> <span class="p">}</span>
+
+<span class="c1"># Add the user-agent string, my website (feel free to replace it) to the headers</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;User-agent&quot;</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span> <span class="p">}</span>
+
+<span class="c1"># Encode the parameters into the url</span>
+<span class="n">uri</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">encode_www_form</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+<span class="c1"># Create a new NET:HTTP object with the request URL</span>
+<span class="n">http</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">uri</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">uri</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+
+<span class="c1"># Require HTTPS without this net/http will not be happy with you</span>
+<span class="n">http</span><span class="o">.</span><span class="n">use_ssl</span> <span class="o">=</span> <span class="kp">true</span>
+
+<span class="c1"># Execute the request</span>
+<span class="n">request</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">::</span><span class="no">Get</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">uri</span><span class="o">.</span><span class="n">request_uri</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+
+<span class="c1"># Get the data from the request</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+<span class="c1"># Check for valid response code, should ONLY be 200</span>
+<span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">code</span> <span class="o">!=</span> <span class="s1">&#39;200&#39;</span>
+    <span class="nb">puts</span> <span class="s2">&quot;Google returned </span><span class="si">#{</span> <span class="n">response</span><span class="o">.</span><span class="n">code</span> <span class="si">}</span><span class="s2">, check your username and password&quot;</span><span class="o">.</span><span class="n">red</span>
+    <span class="nb">exit</span>
+<span class="k">end</span>
+
+<span class="c1"># split each token into a different item then load them each into a hash with the key as the token key</span>
+<span class="n">auth_hash</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">.</span><span class="n">new</span>
+<span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sr">/\n/</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">token</span><span class="o">|</span>
+    <span class="n">split_array</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+    <span class="n">auth_hash</span><span class="o">[</span><span class="n">split_array</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">downcase</span><span class="o">]</span> <span class="o">=</span> <span class="n">split_array</span><span class="o">.</span><span class="n">last</span>
+<span class="k">end</span>
+
+<span class="c1"># Create a header hash for the request of the XML file</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;user-agent&quot;</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span><span class="p">,</span> <span class="s2">&quot;cookie&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;Name=SID;SID=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="o">[</span><span class="s1">&#39;sid&#39;</span><span class="o">]</span> <span class="si">}</span><span class="s2">;Domain=.google.com;Path=/;Expires=160000000000&quot;</span><span class="p">,</span> <span class="s2">&quot;authorization&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;GoogleLogin auth=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="o">[</span><span class="s1">&#39;auth&#39;</span><span class="o">]</span> <span class="si">}</span><span class="s2">&quot;</span> <span class="p">}</span>
+
+<span class="c1"># Open the URL for the Google Reader export with the setup headers</span>
+<span class="n">request</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="vg">$READER_URL</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+
+<span class="c1"># Open the received XML feeds file</span>
+<span class="n">google_reader_file</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="c1"># Read the entire feeds file into &#39;subscriptions&#39;</span>
+<span class="n">subscriptions</span> <span class="o">=</span> <span class="n">google_reader_file</span><span class="o">.</span><span class="n">read</span>
+
+<span class="c1"># Close the downloaded file</span>
+<span class="n">google_reader_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="c1"># Open a new file with the global filename to write to, overwrite it if it exists</span>
+<span class="n">subscriptions_file</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$FILE_NAME</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+<span class="c1"># Verify the file was created</span>
+<span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="n">subscriptions_file</span><span class="p">)</span>
+    <span class="c1"># Write the subscriptions to the file and close it</span>
+    <span class="n">subscriptions_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">)</span>
+    <span class="n">subscriptions_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># Display a success message</span>
+    <span class="nb">puts</span> <span class="s2">&quot;Wrote Google Reader subscriptions to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">green</span>
+<span class="k">else</span>
+    <span class="c1"># If the file wasn&#39;t created print an error</span>
+    <span class="nb">puts</span> <span class="s2">&quot;Couldn&#39;t write to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2"> (the process running this script may not have sufficient privileges&quot;</span><span class="o">.</span><span class="n">red</span>
+<span class="k">end</span>
+</code></pre></div>
+
+
+
+
+  </div>
+</article>
+
+<div class="ten columns blogarchive">
+  <a href="/archives/">Blog Archive</a>
+</div>
+
+      </section>
+    </section>
+
+    <script>
+        var _gaq=[['_setAccount','UA-10630305-13'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src='//www.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+    </script>
+  </body>
+</html>

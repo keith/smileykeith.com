@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+  
+    <title>Keith Smiley</title>
+  
+
+    <meta name="author" content="Keith Smiley">
+    <link rel="author" href="https://plus.google.com/114321628813035573740/">
+    <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/atom.xml">
+
+    <link rel="icon" href="/images/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon">
+
+    <!-- Thank you http://mathiasbynens.be/notes/touch-icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/touchicons/apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/touchicons/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/touchicons/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/images/touchicons/apple-touch-icon-precomposed.png">
+
+    <!--[if lt IE 9]>
+      <script type="text/javascript" language="Javascript" src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
+  </head>
+  <body>
+    <section class="container">
+      <div id="masthead">
+        <h1>
+          <a href="/">Keith Smiley</a>
+          - <a href="http://keith.so" title="Who is this guy?">Who?</a>
+        </h1>
+      </div>
+
+      <section class="content">
+        
+<article>
+  <header class="seven columns">
+    
+      <h2><a href="/2014/02/22/pgp-encryption-with-mutt/">PGP encryption with Mutt</a></h2>
+    
+    <p>
+      <time datetime="2014-02-22 18:25:00 -0800" pubdate="pubdate">
+        22 Feb 2014
+      </time>
+      <a class="permalink" title="Permalink" href="/2014/02/22/pgp-encryption-with-mutt/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>Modern email protocols were <a href="https://en.wikipedia.org/wiki/Email_privacy#Risks_to_user">never
+meant</a> to be
+secure.</p>
+
+<p>While there is some theoretical benefit from interacting with your email
+over HTTPS, if the recipient happens to be have the same email provider
+and the email never leaves the encrypted server, true</p>
+
+<p>Unfortunately just interacting with your email over HTTPS doesn't
+secure your communications as much as you should probably want.</p>
+
+<p>The idea that by interacting with your email over HTTPS your
+communications are more secure is an absolute fallacy.</p>
+
+<p>When it comes to encrypting your email
+<a href="https://en.wikipedia.org/wiki/Pretty_Good_Privacy">PGP</a> seems like the
+only option worth mentioning. The major downside to PGP is the setup and
+the general complexity of how it works. While this makes it a great
+cryptographic solution, it makes it difficult for it to become widely
+used.</p>
+
+<p>While this guide will focus on PGP usage with mutt, there is probably
+some extension for your native email client of choice. If you are not
+familiar with mutt I would recommend <a href="http://stevelosh.com/blog/2012/10/the-homely-mutt/">The Homely
+Mutt</a> to set it up
+on your system. There are other, possibly easier, ways to get everything
+setup but having used Mutt's native IMAP support previously I would
+definitely recommend Steve's method.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
+      <h2><a href="/2014/02/14/vim-tagbar-with-objective-c/">Vim TagBar with Objective-C</a></h2>
+    
+    <p>
+      <time datetime="2014-02-14 13:53:00 -0800" pubdate="pubdate">
+        14 Feb 2014
+      </time>
+      <a class="permalink" title="Permalink" href="/2014/02/14/vim-tagbar-with-objective-c/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>When working with large files in Vim,
+<a href="http://majutsushi.github.io/tagbar/">Tagbar</a> has become an invaluable
+part of my workflow. It provides a succinct list of methods, modules,
+variables and other language specific constructs. When I started trying
+to spend more time in Vim writing Objective-C I was disappointed to see
+that, out of the box, it was not supported.</p>
+
+<p>Hopefully in the future it won't be difficult to set this up in Vim.
+Currently ctags <a href="https://svn.code.sf.net/p/ctags/code/trunk/objc.c">already
+has</a> built in support
+for Objective-C. Unfortunately there hasn't been a release of ctags
+since 2009. As recommended in the <a href="http://bastibe.de/2011-12-04-how-to-make-tagbar-work-with-objective-c.html">canonical how to
+article</a>
+you can attempt to use the trunk version of ctags and just define the
+Tagbar settings. For me, this ended up producing a ton of
+mis-categorized duplicates. I also opened and closed <a href="https://github.com/majutsushi/tagbar/issues/193">an
+issue</a> on the Tagbar
+Github repo hoping that Objective-C support will be added by default in
+the future.</p>
+
+<p>The only other resource I could find about this issue was <a href="https://gist.github.com/yamaya/5598909">this
+gist</a>. It uses regex to define
+Objective-C to ctags and then match it with Tagbar. I improved it a
+little bit and came up with this. Put this file anywhere you want, you
+will define its path in your vimrc.</p>
+
+<pre><code>--langdef=objc
+--langmap=objc:.m..mm..h
+--regex-objc=/\@interface[[:space:]]+([[:alnum:]_]+)/\1/i,interface/
+--regex-objc=/\@implementation[[:space:]]+([[:alnum:]_]+)/\1/I,implementation/
+--regex-objc=/\@protocol[[:space:]]+([[:alnum:]_]+)/\1/P,protocol/
+--regex-objc=/\@property[[:space:]]+\([[:alnum:],[:space:]]+\)[[:space:]]+[[:alnum:]_]+[[:space:]]+\*?([[:alnum:]_]+)/\1/p,property/
+--regex-objc=/([-+])[[:space:]]*\([[:alpha:]_][^)]*\)[[:space:]]*([[:alpha:]_][^:;{]+).*/\1\2/M,method definition/
+--regex-objc=/^[^#@[:space:]][^=]*[[:space:]]([[:alpha:]_][[:alnum:]_]*)[[:space:]]*=/\1/c,constant/
+--regex-objc=/^[[:space:]]*typedef[[:space:]][^;]+[[:space:]]([[:alpha:]_][[:alnum:]]*)[[:space:]]*;/\1/t,typedef/
+--regex-objc=/^[[:space:]]*NS_ENUM\([[:alnum:]]+[[:space:]]*,[[:space:]]([[:alnum:]]+)\)/\1/e,enum/
+--regex-objc=/^#pragma[[:space:]]+mark[[:space:]]+-?[[:space:]]+([[:alnum:][:space:]]+)/\1/g,pragma/
+</code></pre>
+
+<p>Then in your vimrc:</p>
+
+<div class="highlight"><pre><code class="vim"><span class="k">let</span> <span class="k">g</span>:tagbar_type_objc <span class="p">=</span> {
+  \ <span class="s1">&#39;ctagstype&#39;</span>: <span class="s1">&#39;objc&#39;</span><span class="p">,</span>
+  \ <span class="s1">&#39;ctagsargs&#39;</span>: [
+    \ <span class="s1">&#39;-f&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;-&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;--excmd=pattern&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;--extra=&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;--format=2&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;--fields=nksaSmt&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;--options=&#39;</span> . expand<span class="p">(</span><span class="s1">&#39;~/.vim/objctags&#39;</span><span class="p">),</span>
+    \ <span class="s1">&#39;--objc-kinds=-N&#39;</span><span class="p">,</span>
+  \ ]<span class="p">,</span>
+  \ <span class="s1">&#39;sro&#39;</span>: <span class="s1">&#39; &#39;</span><span class="p">,</span>
+  \ <span class="s1">&#39;kinds&#39;</span>: [
+    \ <span class="s1">&#39;c:constant&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;e:enum&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;t:typedef&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;i:interface&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;P:protocol&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;p:property&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;I:implementation&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;M:method&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;g:pragma&#39;</span><span class="p">,</span>
+  \ ]<span class="p">,</span>
+\ }
+</code></pre></div>
+
+
+<p>Replace the <code>~/.vim/objctags</code> with the path where you chose to put the
+first file. Please let me know if you see any way that this could be
+improved.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
+      <h2><a href="/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux/">IPSEC/L2TP VPN on a Raspberry Pi running Arch Linux</a></h2>
+    
+    <p>
+      <time datetime="2014-01-27 20:49:00 -0800" pubdate="pubdate">
+        27 Jan 2014
+      </time>
+      <a class="permalink" title="Permalink" href="/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>After you buy a Raspberry Pi, or two, you need to figure out what to use them
+for. While you'll get a ton of <em>interesting</em> ideas from Googling "uses for a
+Raspberry Pi," I didn't particularly find them any more than a <a href="http://arstechnica.com/information-technology/2012/12/10-raspberry-pi-creations-that-show-how-amazing-the-tiny-pc-can-be/">thought
+exercise</a>.
+Making a VPN stood out as an actually useful configuration.</p>
+
+<p>Originally when I got my (accidentally chosen) Model A, I spent a little
+while going through <a href="http://willitscript.com/post/40357408648/using-your-pi-as-a-l2tp-vpn-server">this
+guide</a>
+using Raspbian. That seemed to work fine until I recently purchased a
+Model B to replace it and couldn't reproduce the configuration. I
+decided to write the steps that I was finally able to use to get a
+functional VPN running on Arch Linux.</p>
+
+<p>I started out by following <a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_on_a_Raspberry_Pi_with_Arch_Linux.html">this
+guide</a>
+hoping that it would get me a functioning VPN without too much work.  Most of
+this setup will be based on that article with some tweaks for what I had to do
+to make the settings stick.  Unfortunately while it worked after the setup the
+configuration did not persist after restart.  For this configuration, like I
+said earlier, I wanted to use the ARM version of Arch Linux rather than
+Raspbian for the install. You can download the Raspberry Pi compatible Arch
+image from their <a href="http://www.raspberrypi.org/downloads">downloads page</a>. I'm
+not sure I would recommend Arch for people who haven't installed it before or
+at least gotten through their <a href="https://wiki.archlinux.org/index.php/Beginners'_Guide">Beginners'
+Guide</a>. The ARM Image,
+like the normal image, doesn't come with a GUI, perfect for this use of the Pi.</p>
+
+<p>I'm not going to bother with making sure this works before restarting, since
+that doesn't seem like much of an issue with actual usage (although you can
+just run the scripts we create and it should work fine). I wouldn't recommend
+doing much configuration before doing this intial setup. I did this the first
+time and after an hour of configuration my VPN did not work correctly, I ended
+up nuking the work I had done and starting over.</p>
+
+<p>Start by installing the necessary components:</p>
+
+<pre><code>pacman -Sy openswan xl2tpd ppp lsof python2
+</code></pre>
+
+<p>You need to do some configuration of the firewall and redirects:</p>
+
+<div class="highlight"><pre><code class="bash"><span class="nb">echo</span> <span class="s2">&quot;net.ipv4.ip_forward = 1&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.all.accept_redirects = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.all.send_redirects = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.default.rp_filter = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.default.accept_source_route = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.default.send_redirects = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.icmp_ignore_bogus_error_responses = 1&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+</code></pre></div>
+
+
+<p>To make these settings persist we need to create a script that gets launched by
+systemd each time we restart the system. As recommended in the original
+article, and being a <a href="http://brew.sh/">Homebrew</a> user I created the script in
+<code>/usr/local/bin/vpn-boot.sh</code>:</p>
+
+<div class="highlight"><pre><code class="bash"><span class="c">#!/usr/bin/bash</span>
+
+iptables --table nat --append POSTROUTING --jump MASQUERADE
+
+<span class="k">for </span>vpn in /proc/sys/net/ipv4/conf/*<span class="p">;</span> <span class="k">do</span>
+<span class="k">    </span><span class="nb">echo </span>0 &gt; <span class="nv">$vpn</span>/accept_redirects<span class="p">;</span>
+    <span class="nb">echo </span>0 &gt; <span class="nv">$vpn</span>/send_redirects<span class="p">;</span>
+<span class="k">done</span>
+
+sysctl -p
+</code></pre></div>
+
+
+<p>There are a few things that differ here to the original article. First
+the hashbang path was changed since the default $PATH on the ARM version
+of Arch didn't include <code>/bin</code>. I would run <code>which -a bash</code> on your
+install to make sure this works for you. This obviously doesn't have
+to be changed, but I think it's better in the long run. I also added
+<code>sysctl -p</code> since these settings didn't seemed to be applied otherwise.
+Then you must make this script executable with something like:</p>
+
+<div class="highlight"><pre><code class="bash">chmod +x /usr/local/bin/vpn-boot.sh
+</code></pre></div>
+
+
+<p>Since Arch uses systemd to this script has to be launched by creating a
+service to be ran through systemd. You can create this file in
+<code>/etc/systemd/system/vpnboot.service</code></p>
+
+<pre><code>[Unit]
+Description=VPN Settings at boot
+After=netctl@eth0.service
+Before=openswan.service xl2tpd.service
+
+[Service]
+ExecStart=/usr/local/bin/vpn-boot.sh
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>I added a few things here as well. I wanted to make sure that the boot command
+would launch after the network settings had been established and before the
+other VPN software was launched. I'm not sure how many of these changes would
+be required for systemd to do what I wanted it to but the order really seemed
+to matter for here. After you create this service enable it within systemd
+with:</p>
+
+<pre><code>systemctl enable vpnboot.service
+</code></pre>
+
+<p>I also made some changes to <code>/etc/ipsec.conf</code> (note the comments in the
+default file for some more info on these settings):</p>
+
+<pre><code>config setup
+  dumpdir=/var/run/pluto/
+  nat_traversal=yes
+  virtual_private=%v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v4:25.0.0.0/8,%v6:fd00::/8,%v6:fe80::/10
+  oe=off
+  protostack=netkey
+  plutoopts="--interface=eth0"
+
+conn L2TP-PSK-noNAT
+  authby=secret
+  pfs=no
+  auto=add
+  keyingtries=3
+  ikelifetime=8h
+  keylife=1h
+  type=transport
+  # Your server's IP (I used my internal IP, assuming you're using NAT)
+  left=172.16.1.1
+  leftprotoport=17/1701
+  right=%any
+  rightprotoport=17/%any
+  rightsubnetwithin=0.0.0.0/0
+  dpddelay=10
+  dpdtimeout=20
+  dpdaction=clear
+</code></pre>
+
+<p>Then for the <code>/etc/ipsec.secrets</code> (use the same server IP address):</p>
+
+<pre><code>%SameIP%  %any: PSK "super random key"
+</code></pre>
+
+<p>The make systemd start openswan on boot as well:</p>
+
+<pre><code>systemctl enable openswan
+</code></pre>
+
+<p>I also edited the openswan service file in
+<code>/etc/systemd/system/multi-user.target.wants/openswan.service</code></p>
+
+<pre><code>[Unit]
+Description=Openswan daemon
+After=netctl@eth0.service vpnboot.service
+Before=xl2tpd.service
+
+[Service]
+Type=forking
+ExecStart=/usr/lib/systemd/scripts/ipsec --start
+ExecStop=/usr/lib/systemd/scripts/ipsec --stop
+ExecReload=/usr/lib/systemd/scripts/ipsec --restart
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>As you can see I removed the original network dependency and added a new
+dependency of <a href="https://wiki.archlinux.org/index.php/Netctl">netctl's</a>
+default network interface (we haven't enabled this yet).</p>
+
+<p>Next for <code>/etc/xl2tpd/xl2tpd.conf</code>:</p>
+
+<pre><code>[global]
+ipsec saref = yes
+saref refinfo = 30
+
+[lns default]
+ip range = 172.16.1.70-172.16.1.89
+local ip = 172.16.1.1
+require authentication = yes
+ppp debug = yes
+pppoptfile = /etc/ppp/options.xl2tpd
+length bit = yes
+unix authentication = yes
+</code></pre>
+
+<p>Where <code>local ip</code> is the server's ip and the <code>ip range</code> is the range of
+IP addresses you want to use for VPN clients. You need to enable this
+service too with:</p>
+
+<pre><code>systemctl enable xl2tpd
+</code></pre>
+
+<p>I also edited the systemd file for xl2tpd at
+<code>/etc/systemd/system/multi-user.target.wants/xl2tpd.service</code>:</p>
+
+<pre><code>[Unit]
+Description=Level 2 Tunnel Protocol Daemon (L2TP)
+After=syslog.target netctl@eth0.service openswan.service
+Requires=openswan.service
+
+[Service]
+Type=simple
+PIDFile=/run/xl2tpd/xl2tpd.pid
+ExecStart=/usr/bin/xl2tpd -D
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>The other guide also recommends creating the xl2tpd control folder with:</p>
+
+<pre><code>mkdir /var/run/xl2tpd/
+</code></pre>
+
+<p>Now we need to create/edit <code>/etc/ppp/options.xl2tpd</code>:</p>
+
+<pre><code>ipcp-accept-local
+ipcp-accept-remote
+ms-dns 8.8.8.8
+ms-dns 8.8.4.4
+auth
+mtu 1200
+mru 1000
+crtscts
+hide-password
+modem
+name l2tpd
+proxyarp
+lcp-echo-interval 30
+lcp-echo-failure 4
+login
+</code></pre>
+
+<p><code>/etc/pam.d/ppp</code>:</p>
+
+<pre><code>auth    required        pam_nologin.so
+auth    required        pam_unix.so
+account required        pam_unix.so
+session required        pam_unix.so
+</code></pre>
+
+<p>And <code>/etc/ppp/pap-secrets</code>:</p>
+
+<pre><code>*       l2tpd           ""              *
+</code></pre>
+
+<p>If you'd like you can also restrict the users accounts that can access
+the vpn. This way you can separate your login user from your VPN users
+who can have much stronger passwords. You'd do that in your
+<code>/etc/ppp/pap-secrets</code>:</p>
+
+<pre><code>vpnuser   l2tpd         ""              *
+</code></pre>
+
+<p>To enable the startup of the default netctl eth0 interface you need to
+run:</p>
+
+<pre><code>netctl enable eth0
+</code></pre>
+
+<p>You'll probably want to disable any other netctl systemd functions that are
+enabled by default. Check <code>/etc/systemd/system/mutli-user.target.wants</code> to for
+other <code>netctl</code> profiles.</p>
+
+<p>So at this point you should be able to enable VPN clients using the
+super secret keys you enabled before and the username and passwords
+you've created previously. You can create new users for specifically VPN
+usage with something like this:</p>
+
+<pre><code>useradd -s /sbin/nologin vpnuser
+</code></pre>
+
+<p>This disallows users from being able to be used for login which is probably
+more secure for your VPN (although not required). For testing you can use the
+root/root defualt user and a less secure key, although you should <em>definitely</em>
+change these before allowing access to the outside world.</p>
+
+<h3>Troubleshooting</h3>
+
+<p>Undoubtedly you'll have to deal with something that doesn't work exactly
+how my setup works. The most useful things to seeing what was happening
+were these:</p>
+
+<pre><code>netstat -tulpan
+systemctl status openswan
+systemctl status xl2tpd
+journalctl -f
+</code></pre>
+
+<p>You can glance at some of the other guides to see what should be going
+on. You probably shouldn't see any red in the <code>openswan</code> status and you
+should see ports open under <code>pluto</code> with netstat. You can check out the
+<a href="http://linux.die.net/man/5/ipsec.conf">ipsec manpage</a> or the <a href="https://github.com/xelerance/Openswan/wiki/L2tp-ipsec-configuration-using-openswan-and-xl2tpd">openswan
+wiki
+page</a>
+for a little more information on some of the settings. Also I used <a href="http://www.freedesktop.org/software/systemd/man/systemd.service.html">this
+page</a>
+for some more info on how systemd settings work. Please let me know if
+there's anything here that could be done easier/better for this
+configuration.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
+      <h2><a href="/2013/09/03/iterm-theme-based-on-the-time-of-day/">iTerm theme based on the time of day</a></h2>
+    
+    <p>
+      <time datetime="2013-09-03 10:56:00 -0700" pubdate="pubdate">
+        03 Sep 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/09/03/iterm-theme-based-on-the-time-of-day/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>One of the great things about Vim's textual configuration is it's
+ability to contain logic based on outside factors. For the purpose of
+this post I'm referring to the ability to set your colorscheme based on
+the time of day with something like
+<a href="https://github.com/Keithbsmiley/dotfiles/blob/a34e432b59e26225ebdb05737b30729b7ea670d9/vimrc#L102-L108">this</a>.</p>
+
+<p>Having this functionality in Vim with the
+<a href="http://ethanschoonover.com/solarized">Solarized</a> theme at night really
+made me want this in <a href="http://www.iterm2.com/#/section/home">iTerm</a> as
+well. Unfortunately iTerm's conifguration doesn't allow anything similar
+to this. The closest you get is profiles which you can assign keyboard
+shortcuts to for quickly opening windows with different colorschemes.
+Luckily, thanks to this <a href="https://github.com/gnachman/iTerm2/pull/10">pull
+request</a> two years ago from
+<a href="https://twitter.com/junkiesxl">Piet Jaspers</a>, support was added for
+scripting iTerm's entire colorscheme with AppleScript. Using these
+AppleScript bindings I was able to create a
+<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/scripts/itermcolors.applescript">script</a>
+that changes the entire colorscheme of iTerm based on the time of day
+between Solarized light and dark. As you can see the
+<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/scripts/itermcolors.applescript#L27-L49">bulk</a>
+of this script is just setting different color attributes based on the
+theme you want. While you could do this conversion by hand to 65535
+flavored RGB, I made a
+tiny Objective-C app to automate the process which is <a href="https://github.com/Keithbsmiley/ColorConvert">on
+Github</a>. You can download
+the signed binary
+<a href="https://github.com/Keithbsmiley/ColorConvert/releases/tag/1.0">here</a>.</p>
+
+<p>Using this newly created AppleScript I then made a zsh
+<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/functions/colorize">function</a> so that I could call <code>colorize</code> from anywhere to update the color scheme of the current terminal.
+I also chose to do this at the end of my <code>.zshrc</code> <a href="https://github.com/Keithbsmiley/dotfiles/blob/763e6f3f2bbcd93775c70e0d9ed9878ac99896a3/zshrc#L51">here</a>.
+This way everytime I open a new session my theme is automatically set.</p>
+
+<p>If you have any input on how I could optimize this let me know.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
+      <h2><a href="/2013/08/14/global-htaccess/">Global htaccess</a></h2>
+    
+    <p>
+      <time datetime="2013-08-14 13:12:00 -0700" pubdate="pubdate">
+        14 Aug 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/08/14/global-htaccess/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>When starting a new web project one of the first things I do is download
+the most up to date <a href="http://html5boilerplate.com/">HTML5 Boilerplate</a>.
+It provides a great starting point for the HTML you need in a project.
+It also comes with an extremely complete <a href="https://github.com/h5bp/html5-boilerplate/blob/master/.htaccess">.htaccess</a>
+file. While this is very nice for a single site they recommend you do
+something different for multiple sites at <a href="https://github.com/h5bp/html5-boilerplate/blob/21c614849afc5b518685b68d81d2b0c8f7971f0a/.htaccess#L4-L6">the very top</a>.</p>
+
+<blockquote><p>(!) Using .htaccess files slows down Apache, therefore, if you have access
+to the main server config file (usually called httpd.conf), you should add
+this logic there: http://httpd.apache.org/docs/current/howto/htaccess.html.</p></blockquote>
+
+<p>This got me to their awesome collection of <a href="https://github.com/h5bp/server-configs">server configs</a>
+which has their, and in many ways the communities, recommended settings
+depending on your webserver. The <a href="https://github.com/h5bp/server-configs-apache">apache configs</a>
+have the same <code>.htaccess</code> file so I decided to dig into how to do this.</p>
+
+<p>They direct you to the <a href="http://httpd.apache.org/docs/current/howto/htaccess.html">apache article</a>
+about using <code>.htaccess</code> files which has a similar comment about their
+use.</p>
+
+<blockquote><p>You should avoid using .htaccess files completely if you have access to httpd main server config file
+Using .htaccess files slows down your Apache http server. Any directive that you can include in a
+.htaccess file is better set in a Directory block, as it will have the same effect with better performance.</p></blockquote>
+
+<p>So I decided to set this up on my <a href="http://www.linode.com/?r=c190426bf1ff0f144b48997675bae8b32d339824">Linode VPS</a> which is running Ubuntu 10.04.
+As stated in the original file comment they recommend using the
+<code>httpd.conf</code> file for your custom configuration like this. But
+<a href="http://stackoverflow.com/a/11687212/902968">apparently</a> that file could be
+overwritten on updates of Apache which would be pretty annoying. Luckily
+the default Apache config file (<code>apache2.conf</code> on 10.04) includes the
+contents of the <code>conf.d</code> folder which is in the same location. By
+creating a <code>foo.conf</code> file in that directory Apache should immediately
+load its contents. As mentioned in the comment from the Apache site the
+custom configuration needs to be wrapped in a <a href="http://httpd.apache.org/docs/current/mod/core.html#directory">Directory</a> block.
+The block expects you to provide a path to the files you want to be
+affected by the contained configuration. Since I wanted this to work for
+all the sites being served by Apache I simply used <code>/srv/www/*/</code> which
+includes my entire sites directory.</p>
+
+<p>Besides the speed increased gained by using a global <code>.htaccess</code> file
+this allows you to have much shorter custom files for site specific
+configuration. For example only required configuration for one of my sites
+was the <code>ErrorDocument</code>s. Now my <code>.htaccess</code> file went from 300+ lines
+to</p>
+
+<div class="highlight"><pre><code class="apache"><span class="nb">ErrorDocument</span> <span class="m">403</span> <span class="sx">/403.php</span>
+<span class="nb">ErrorDocument</span> <span class="m">404</span> <span class="sx">/404.php</span>
+<span class="nb">ErrorDocument</span> <span class="m">500</span> <span class="sx">/500.php</span>
+</code></pre></div>
+
+
+
+
+  </div>
+</article>
+
+
+<!-- Pagination links -->
+<div class="pagination ten columns">
+  
+    <div class="older">
+      <span class="pagearrow">&larr;</span>
+      <a href="/page2">Older</a>
+    </div>
+  
+
+  <div class="pagearchive">
+    <a href="/archives/">Blog Archive</a>
+  </div>
+
+  
+    <div class="newer">&nbsp;</div>
+  
+</div>
+
+      </section>
+    </section>
+
+    <script>
+        var _gaq=[['_setAccount','UA-10630305-13'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src='//www.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+    </script>
+  </body>
+</html>

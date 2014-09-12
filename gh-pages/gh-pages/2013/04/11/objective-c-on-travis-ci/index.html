@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+  
+    <title>Objective-C on Travis-CI - Keith Smiley</title>
+  
+
+    <meta name="author" content="Keith Smiley">
+    <link rel="author" href="https://plus.google.com/114321628813035573740/">
+    <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/atom.xml">
+
+    <link rel="icon" href="/images/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon">
+
+    <!-- Thank you http://mathiasbynens.be/notes/touch-icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/touchicons/apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/touchicons/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/touchicons/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/images/touchicons/apple-touch-icon-precomposed.png">
+
+    <!--[if lt IE 9]>
+      <script type="text/javascript" language="Javascript" src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
+  </head>
+  <body>
+    <section class="container">
+      <div id="masthead">
+        <h1>
+          <a href="/">Keith Smiley</a>
+          - <a href="http://keith.so" title="Who is this guy?">Who?</a>
+        </h1>
+      </div>
+
+      <section class="content">
+        
+<article>
+
+  <header class="seven columns">
+    
+      <h2>Objective-C on Travis-CI</h2>
+    
+    <p>
+      <time datetime="2013-04-11 15:58:00 -0700" pubdate="pubdate">
+        11 Apr 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/04/11/objective-c-on-travis-ci/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>Recently <a href="https://travis-ci.org/">Travis</a> added support for Objective-C and there for OS X and iOS projects for continuous integration testing. I gather that people have previously done this with self-hosted dedicated <a href="http://jenkins-ci.org/">Jenkins</a> machines but since Apple is so aggressive about dropping support for previous versions of the OS it seems like a pain to have to replace your build server every few years. Enter Travis, a great hosted <a href="http://en.wikipedia.org/wiki/Continuous_integration">continuous integration</a> server that hosts a huge amount of open source projects. I figured with this new support I could host some of my <a href="https://github.com/Keithbsmiley/KSADNTwitterFormatter">smaller</a> libraries just to set how well it worked. The initial setup process was a bit tedious but I eventually got it to work.</p>
+
+<h3>Assumtions:</h3>
+
+<ul>
+<li>You have a test framework already integrated with your project (I like <a href="https://github.com/petejkim/specta">Specta</a>/<a href="https://github.com/petejkim/expecta">Expecta</a>)</li>
+<li>You have your project on Github in a public repository. Travis offers a <a href="http://about.travis-ci.org/docs/user/travis-pro/">pro</a> account if you'd rather</li>
+</ul>
+
+
+<h3>Steps</h3>
+
+<ul>
+<li>Create a <code>.travis.yml</code> file in the root of your repository (leading dot is intentional). For many projects a file may just look like:</li>
+</ul>
+
+
+<div class="highlight"><pre><code class="yaml"><span class="l-Scalar-Plain">language</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">objective-c</span>
+</code></pre></div>
+
+
+<p><del>By default Travis runs <a href="https://gist.github.com/henrikhodne/73151fccea7af3201f63">this script</a> for Objective-C projects</del> I was informed <a href="https://twitter.com/henrikhodne/status/322665896806060032">on Twitter</a> that the current script that runs Objective-C projects is actually located <a href="https://github.com/travis-ci/travis-cookbooks/blob/osx/ci_environment/travis_build_environment/files/default/ci_user/travis-utils/osx-cibuild.sh">here</a>. It was originally created by <a href="https://github.com/jspahrsummers">Justin Spahr-Summers</a> <a href="https://github.com/jspahrsummers/objc-build-scripts">here</a>. This script seems to run my projects without any issue, they just occasionally require more initial setup (we'll get to that).</p>
+
+<ul>
+<li><p>Enable your repository in Travis' settings. From your <a href="https://travis-ci.org/profile">Travis profile page</a> (after signing in with Github) you should see a list of your repositories, you may have to press 'Sync now', where you can switch on the repository you're planning on adding.</p></li>
+<li><p>Configure your project within Xcode. As I assumed above you already have a test target setup. You do have to do a few things in Xcode to make everything work correctly.</p>
+
+<ol>
+<li>Go to 'Manage Schemes' in Xcode. <img src="/images/travis/manageschemes.png" alt="Manage Schemes" /></li>
+<li>Check the 'Shared' box for the scheme that needs to be run. <img src="/images/travis/shareschemes.png" alt="Shared Scheme" /></li>
+<li>Click 'Edit...' in the bottom left and go to your build action. <img src="/images/travis/editscheme.png" alt="Edit Scheme" /></li>
+<li>On the row of your Tests target check the box in the 'Run' column. <img src="/images/travis/runtest.png" alt="Run Test" /></li>
+</ol>
+</li>
+<li><p>At this point for a simple project or a project using <a href="http://cocoapods.org/">CocoaPods</a> you should be good to go. If Travis finds a <code>Podfile</code> in the root of your repository it automatically runs <code>pod install</code> to get your dependencies (from their <a href="http://about.travis-ci.org/docs/user/languages/objective-c/">docs</a>). Otherwise there are a ton of <a href="http://about.travis-ci.org/docs/user/build-configuration/">configuration options</a> for your <code>.travis.yml</code> depending on how your repo is setup.</p></li>
+</ul>
+
+
+<p>For one of my projects I created a <code>setup.sh</code> file at the root of my repo that looks like this:</p>
+
+<div class="highlight"><pre><code class="bash"><span class="c">#!/usr/bin/env bash</span>
+
+git submodule update --init --recursive
+<span class="nb">echo</span> <span class="s2">&quot;Setting up test frameworks...&quot;</span>
+<span class="nb">cd </span>Example/Vendor/Specta<span class="p">;</span> rake &gt; /dev/null
+<span class="nb">cd</span> ../Expecta<span class="p">;</span> rake &gt; /dev/null
+<span class="nb">echo</span> <span class="s2">&quot;Done&quot;</span>
+<span class="nb">cd</span> ../../../
+</code></pre></div>
+
+
+<p>This script which I run using the <code>before_install: ./setup.sh</code> option in my <code>.travis.yml</code> gets all my submodules, sets up Specta and Expecta and then goes back to the root directory for running. If you just have a few simple steps you can also have multiple <code>before_install</code> actions like:</p>
+
+<div class="highlight"><pre><code class="yaml"><span class="l-Scalar-Plain">before_install</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cd Example</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">make</span>
+</code></pre></div>
+
+
+<p>You can read more about other Travis configuration options in their <a href="http://about.travis-ci.org/docs/user/build-configuration/">documentation</a>.</p>
+
+  </div>
+</article>
+
+<div class="ten columns blogarchive">
+  <a href="/archives/">Blog Archive</a>
+</div>
+
+      </section>
+    </section>
+
+    <script>
+        var _gaq=[['_setAccount','UA-10630305-13'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src='//www.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+    </script>
+  </body>
+</html>

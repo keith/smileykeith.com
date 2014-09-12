@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+  
+    <title>Spawning iTerm Windows - Keith Smiley</title>
+  
+
+    <meta name="author" content="Keith Smiley">
+    <link rel="author" href="https://plus.google.com/114321628813035573740/">
+    <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/atom.xml">
+
+    <link rel="icon" href="/images/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon">
+
+    <!-- Thank you http://mathiasbynens.be/notes/touch-icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/touchicons/apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/touchicons/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/touchicons/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/images/touchicons/apple-touch-icon-precomposed.png">
+
+    <!--[if lt IE 9]>
+      <script type="text/javascript" language="Javascript" src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
+  </head>
+  <body>
+    <section class="container">
+      <div id="masthead">
+        <h1>
+          <a href="/">Keith Smiley</a>
+          - <a href="http://keith.so" title="Who is this guy?">Who?</a>
+        </h1>
+      </div>
+
+      <section class="content">
+        
+<article>
+
+  <header class="seven columns">
+    
+      <h2>Spawning iTerm Windows</h2>
+    
+    <p>
+      <time datetime="2013-01-03 12:34:00 -0800" pubdate="pubdate">
+        03 Jan 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/01/03/spawn-iterm/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>I've recently been searching around for a good way to 'spawn' an <a href="http://www.iterm2.com/">iTerm</a> window (no I don't use tabs in iTerm), at the <code>pwd</code> in my current iTerm window. I couldn't find any good way to do it so I jumped in to AppleScript Editor and made something happen.</p>
+
+<div class="highlight"><pre><code class="applescript"><span class="k">on</span> <span class="nb">run</span> <span class="nv">argv</span>
+    <span class="k">tell</span> <span class="nb">application</span> <span class="s2">&quot;iTerm&quot;</span>
+        <span class="k">set</span> <span class="nv">t</span> <span class="k">to</span> <span class="nb">make</span> <span class="nb">new</span> <span class="nv">terminal</span>
+        <span class="k">tell</span> <span class="nv">t</span>
+            <span class="nb">activate</span> <span class="nv">current</span> <span class="nv">session</span>
+            <span class="nb">launch</span> <span class="nv">session</span> <span class="s2">&quot;Default Session&quot;</span>
+            <span class="k">tell</span> <span class="nb">the</span> <span class="nb">last</span> <span class="nv">session</span>
+                <span class="nb">write</span> <span class="nb">text</span> <span class="s2">&quot;cd \&quot;&quot;</span> <span class="o">&amp;</span> <span class="nb">item</span> <span class="mi">1</span> <span class="k">of</span> <span class="nv">argv</span> <span class="o">&amp;</span> <span class="s2">&quot;\&quot;; clear; pwd&quot;</span>
+            <span class="k">end</span> <span class="k">tell</span>
+        <span class="k">end</span> <span class="k">tell</span>
+    <span class="k">end</span> <span class="k">tell</span>
+<span class="k">end</span> <span class="nb">run</span>
+</code></pre></div>
+
+
+<p>I then added it to my <a href="http://www.zsh.org/">zsh</a> aliases with:</p>
+
+<p><code>function spawn { osascript ~/Dropbox/Code/Applescript/Spawn/SpawniTerm.applescript $PWD }</code></p>
+
+<p>Now I can call <code>spawn</code> from any iTerm or Terminal window to open a new iTerm session wherever I called it from.</p>
+
+  </div>
+</article>
+
+<div class="ten columns blogarchive">
+  <a href="/archives/">Blog Archive</a>
+</div>
+
+      </section>
+    </section>
+
+    <script>
+        var _gaq=[['_setAccount','UA-10630305-13'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src='//www.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+    </script>
+  </body>
+</html>

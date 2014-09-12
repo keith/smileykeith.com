@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+  
+    <title>Global htaccess - Keith Smiley</title>
+  
+
+    <meta name="author" content="Keith Smiley">
+    <link rel="author" href="https://plus.google.com/114321628813035573740/">
+    <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/atom.xml">
+
+    <link rel="icon" href="/images/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon">
+
+    <!-- Thank you http://mathiasbynens.be/notes/touch-icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/touchicons/apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/touchicons/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/touchicons/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/images/touchicons/apple-touch-icon-precomposed.png">
+
+    <!--[if lt IE 9]>
+      <script type="text/javascript" language="Javascript" src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
+  </head>
+  <body>
+    <section class="container">
+      <div id="masthead">
+        <h1>
+          <a href="/">Keith Smiley</a>
+          - <a href="http://keith.so" title="Who is this guy?">Who?</a>
+        </h1>
+      </div>
+
+      <section class="content">
+        
+<article>
+
+  <header class="seven columns">
+    
+      <h2>Global htaccess</h2>
+    
+    <p>
+      <time datetime="2013-08-14 13:12:00 -0700" pubdate="pubdate">
+        14 Aug 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/08/14/global-htaccess/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>When starting a new web project one of the first things I do is download
+the most up to date <a href="http://html5boilerplate.com/">HTML5 Boilerplate</a>.
+It provides a great starting point for the HTML you need in a project.
+It also comes with an extremely complete <a href="https://github.com/h5bp/html5-boilerplate/blob/master/.htaccess">.htaccess</a>
+file. While this is very nice for a single site they recommend you do
+something different for multiple sites at <a href="https://github.com/h5bp/html5-boilerplate/blob/21c614849afc5b518685b68d81d2b0c8f7971f0a/.htaccess#L4-L6">the very top</a>.</p>
+
+<blockquote><p>(!) Using .htaccess files slows down Apache, therefore, if you have access
+to the main server config file (usually called httpd.conf), you should add
+this logic there: http://httpd.apache.org/docs/current/howto/htaccess.html.</p></blockquote>
+
+<p>This got me to their awesome collection of <a href="https://github.com/h5bp/server-configs">server configs</a>
+which has their, and in many ways the communities, recommended settings
+depending on your webserver. The <a href="https://github.com/h5bp/server-configs-apache">apache configs</a>
+have the same <code>.htaccess</code> file so I decided to dig into how to do this.</p>
+
+<p>They direct you to the <a href="http://httpd.apache.org/docs/current/howto/htaccess.html">apache article</a>
+about using <code>.htaccess</code> files which has a similar comment about their
+use.</p>
+
+<blockquote><p>You should avoid using .htaccess files completely if you have access to httpd main server config file
+Using .htaccess files slows down your Apache http server. Any directive that you can include in a
+.htaccess file is better set in a Directory block, as it will have the same effect with better performance.</p></blockquote>
+
+<p>So I decided to set this up on my <a href="http://www.linode.com/?r=c190426bf1ff0f144b48997675bae8b32d339824">Linode VPS</a> which is running Ubuntu 10.04.
+As stated in the original file comment they recommend using the
+<code>httpd.conf</code> file for your custom configuration like this. But
+<a href="http://stackoverflow.com/a/11687212/902968">apparently</a> that file could be
+overwritten on updates of Apache which would be pretty annoying. Luckily
+the default Apache config file (<code>apache2.conf</code> on 10.04) includes the
+contents of the <code>conf.d</code> folder which is in the same location. By
+creating a <code>foo.conf</code> file in that directory Apache should immediately
+load its contents. As mentioned in the comment from the Apache site the
+custom configuration needs to be wrapped in a <a href="http://httpd.apache.org/docs/current/mod/core.html#directory">Directory</a> block.
+The block expects you to provide a path to the files you want to be
+affected by the contained configuration. Since I wanted this to work for
+all the sites being served by Apache I simply used <code>/srv/www/*/</code> which
+includes my entire sites directory.</p>
+
+<p>Besides the speed increased gained by using a global <code>.htaccess</code> file
+this allows you to have much shorter custom files for site specific
+configuration. For example only required configuration for one of my sites
+was the <code>ErrorDocument</code>s. Now my <code>.htaccess</code> file went from 300+ lines
+to</p>
+
+<div class="highlight"><pre><code class="apache"><span class="nb">ErrorDocument</span> <span class="m">403</span> <span class="sx">/403.php</span>
+<span class="nb">ErrorDocument</span> <span class="m">404</span> <span class="sx">/404.php</span>
+<span class="nb">ErrorDocument</span> <span class="m">500</span> <span class="sx">/500.php</span>
+</code></pre></div>
+
+
+
+
+  </div>
+</article>
+
+<div class="ten columns blogarchive">
+  <a href="/archives/">Blog Archive</a>
+</div>
+
+      </section>
+    </section>
+
+    <script>
+        var _gaq=[['_setAccount','UA-10630305-13'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src='//www.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+    </script>
+  </body>
+</html>
