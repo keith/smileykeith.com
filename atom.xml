@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2014-09-11T22:46:10-07:00</updated>
+  <updated>2014-09-11T22:55:12-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -12,49 +12,6 @@
   <rights>Copyright (c) 2014 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
-  
-    <entry>
-      <title type="html"><![CDATA[PGP encryption with Mutt]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2014/02/22/pgp-encryption-with-mutt/" />
-      <id>http://smileykeith.com/2014/02/22/pgp-encryption-with-mutt</id>
-      <updated>2014-02-22T18:25:00-08:00</updated>
-      <author>
-        
-          <name><![CDATA[Keith Smiley]]></name>
-        
-      </author>
-      <content type="html">
-        <![CDATA[<p>Modern email protocols were <a href="https://en.wikipedia.org/wiki/Email_privacy#Risks_to_user">never
-meant</a> to be
-secure.</p>
-
-<p>While there is some theoretical benefit from interacting with your email
-over HTTPS, if the recipient happens to be have the same email provider
-and the email never leaves the encrypted server, true</p>
-
-<p>Unfortunately just interacting with your email over HTTPS doesn't
-secure your communications as much as you should probably want.</p>
-
-<p>The idea that by interacting with your email over HTTPS your
-communications are more secure is an absolute fallacy.</p>
-
-<p>When it comes to encrypting your email
-<a href="https://en.wikipedia.org/wiki/Pretty_Good_Privacy">PGP</a> seems like the
-only option worth mentioning. The major downside to PGP is the setup and
-the general complexity of how it works. While this makes it a great
-cryptographic solution, it makes it difficult for it to become widely
-used.</p>
-
-<p>While this guide will focus on PGP usage with mutt, there is probably
-some extension for your native email client of choice. If you are not
-familiar with mutt I would recommend <a href="http://stevelosh.com/blog/2012/10/the-homely-mutt/">The Homely
-Mutt</a> to set it up
-on your system. There are other, possibly easier, ways to get everything
-setup but having used Mutt's native IMAP support previously I would
-definitely recommend Steve's method.</p>
-]]>
-      </content>
-    </entry>
   
     <entry>
       <title type="html"><![CDATA[Vim TagBar with Objective-C]]></title>

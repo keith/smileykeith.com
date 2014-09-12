@@ -41,149 +41,6 @@
 <article>
   <header class="seven columns">
     
-      <h2><a href="/2013/02/01/automated-google-reader-backups/">Automated Google Reader Backups</a></h2>
-    
-    <p>
-      <time datetime="2013-02-01 12:30:00 -0800" pubdate="pubdate">
-        01 Feb 2013
-      </time>
-      <a class="permalink" title="Permalink" href="/2013/02/01/automated-google-reader-backups/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>I spend a lot of time in my RSS <a href="http://reederapp.com/">Reeder</a> (see what I did there?). I still find Google Reader to be the best and easiest way to manage my subscriptions, although I've been wanting to switch to <a href="http://feedafever.com/">Fever</a> for a while.</p>
-
-<p>One thing I wanted to do when I launched my new site (the one you're reading) was to have a downloadable up to date export of my Google Reader OPML file (which of course I never did). I looked around for good ways to automate this and I found a simple Python script to do it with (sorry I couldn't find it again for this post). I decided to rewrite it in Ruby and set it up on my server as an automated cron job.</p>
-
-<p>To run the script I came up with use something like:</p>
-
-<div class="highlight"><pre><code class="bash">ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword
-</code></pre></div>
-
-
-<p>To add it to your crontab (to run every Sunday at 1:01am) use something like:</p>
-
-<div class="highlight"><pre><code class="bash">1 1 * * 7 ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword
-</code></pre></div>
-
-
-
-
-<div class="highlight"><pre><code class="ruby"><span class="c1">#!/usr/bin/env ruby</span>
-
-<span class="c1">#</span>
-<span class="c1"># =&gt; This script will authorize your Google credentials and download your Google Reader subscriptions</span>
-<span class="c1"># =&gt; Usage: ./googleReaderOPML.rb GOOGLEUSERNAME PASSWORD</span>
-<span class="c1">#</span>
-
-<span class="c1"># The required networking shenanigans</span>
-<span class="nb">require</span> <span class="s1">&#39;uri&#39;</span>
-<span class="nb">require</span> <span class="s1">&#39;net/http&#39;</span>
-<span class="nb">require</span> <span class="s1">&#39;open-uri&#39;</span>
-
-<span class="nb">require</span> <span class="s1">&#39;rubygems&#39;</span>
-<span class="c1"># This requires the &#39;colorize&#39; gem. Install with &#39;[sudo] gem install colorize&#39;</span>
-<span class="nb">require</span> <span class="s1">&#39;colorize&#39;</span>
-
-
-<span class="c1"># The base Google URLs for callback, authentication, and subscription export</span>
-<span class="vg">$GOOGLE_URL</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com&quot;</span>
-<span class="vg">$LOGIN_URL</span> <span class="o">=</span> <span class="s2">&quot;https://www.google.com/accounts/ClientLogin&quot;</span>
-<span class="vg">$READER_URL</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/reader/subscriptions/export&quot;</span>
-
-<span class="c1"># The user agent string, for some reason this is required, feel free to change it</span>
-<span class="vg">$SOURCE</span> <span class="o">=</span> <span class="s2">&quot;keith.so&quot;</span>
-
-<span class="c1"># The default output filename, it is automatically overwritten if one already exists</span>
-<span class="vg">$FILE_NAME</span> <span class="o">=</span> <span class="s2">&quot;googlereadersubscriptions.opml&quot;</span>
-
-
-<span class="c1"># Make sure there is the correct number of arguments</span>
-<span class="k">if</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">count</span> <span class="o">!=</span> <span class="mi">2</span>
-    <span class="c1"># Print the instruction</span>
-    <span class="nb">puts</span> <span class="s2">&quot;Usage: ./</span><span class="si">#{</span> <span class="no">File</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">)</span> <span class="si">}</span><span class="s2"> USERNAME PASSWORD&quot;</span><span class="o">.</span><span class="n">red</span>
-    <span class="nb">exit</span>
-<span class="k">end</span>
-
-<span class="c1"># Build the request URL</span>
-<span class="n">uri</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="vg">$LOGIN_URL</span><span class="p">)</span>
-
-<span class="c1"># Setup the Parameters</span>
-<span class="n">params</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">Email</span><span class="p">:</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">first</span><span class="p">,</span> <span class="ss">Passwd</span><span class="p">:</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">last</span><span class="p">,</span> <span class="ss">service</span><span class="p">:</span> <span class="s2">&quot;reader&quot;</span><span class="p">,</span> <span class="ss">source</span><span class="p">:</span> <span class="vg">$SOURCE</span><span class="p">,</span> <span class="ss">continue</span><span class="p">:</span> <span class="vg">$GOOGLE_URL</span> <span class="p">}</span>
-
-<span class="c1"># Add the user-agent string, my website (feel free to replace it) to the headers</span>
-<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;User-agent&quot;</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span> <span class="p">}</span>
-
-<span class="c1"># Encode the parameters into the url</span>
-<span class="n">uri</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">encode_www_form</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-
-<span class="c1"># Create a new NET:HTTP object with the request URL</span>
-<span class="n">http</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">uri</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">uri</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
-
-<span class="c1"># Require HTTPS without this net/http will not be happy with you</span>
-<span class="n">http</span><span class="o">.</span><span class="n">use_ssl</span> <span class="o">=</span> <span class="kp">true</span>
-
-<span class="c1"># Execute the request</span>
-<span class="n">request</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">::</span><span class="no">Get</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">uri</span><span class="o">.</span><span class="n">request_uri</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
-
-<span class="c1"># Get the data from the request</span>
-<span class="n">response</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-
-<span class="c1"># Check for valid response code, should ONLY be 200</span>
-<span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">code</span> <span class="o">!=</span> <span class="s1">&#39;200&#39;</span>
-    <span class="nb">puts</span> <span class="s2">&quot;Google returned </span><span class="si">#{</span> <span class="n">response</span><span class="o">.</span><span class="n">code</span> <span class="si">}</span><span class="s2">, check your username and password&quot;</span><span class="o">.</span><span class="n">red</span>
-    <span class="nb">exit</span>
-<span class="k">end</span>
-
-<span class="c1"># split each token into a different item then load them each into a hash with the key as the token key</span>
-<span class="n">auth_hash</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">.</span><span class="n">new</span>
-<span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sr">/\n/</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">token</span><span class="o">|</span>
-    <span class="n">split_array</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
-    <span class="n">auth_hash</span><span class="o">[</span><span class="n">split_array</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">downcase</span><span class="o">]</span> <span class="o">=</span> <span class="n">split_array</span><span class="o">.</span><span class="n">last</span>
-<span class="k">end</span>
-
-<span class="c1"># Create a header hash for the request of the XML file</span>
-<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;user-agent&quot;</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span><span class="p">,</span> <span class="s2">&quot;cookie&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;Name=SID;SID=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="o">[</span><span class="s1">&#39;sid&#39;</span><span class="o">]</span> <span class="si">}</span><span class="s2">;Domain=.google.com;Path=/;Expires=160000000000&quot;</span><span class="p">,</span> <span class="s2">&quot;authorization&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;GoogleLogin auth=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="o">[</span><span class="s1">&#39;auth&#39;</span><span class="o">]</span> <span class="si">}</span><span class="s2">&quot;</span> <span class="p">}</span>
-
-<span class="c1"># Open the URL for the Google Reader export with the setup headers</span>
-<span class="n">request</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="vg">$READER_URL</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
-
-<span class="c1"># Open the received XML feeds file</span>
-<span class="n">google_reader_file</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
-
-<span class="c1"># Read the entire feeds file into &#39;subscriptions&#39;</span>
-<span class="n">subscriptions</span> <span class="o">=</span> <span class="n">google_reader_file</span><span class="o">.</span><span class="n">read</span>
-
-<span class="c1"># Close the downloaded file</span>
-<span class="n">google_reader_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-<span class="c1"># Open a new file with the global filename to write to, overwrite it if it exists</span>
-<span class="n">subscriptions_file</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$FILE_NAME</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
-
-<span class="c1"># Verify the file was created</span>
-<span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="n">subscriptions_file</span><span class="p">)</span>
-    <span class="c1"># Write the subscriptions to the file and close it</span>
-    <span class="n">subscriptions_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">)</span>
-    <span class="n">subscriptions_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-    <span class="c1"># Display a success message</span>
-    <span class="nb">puts</span> <span class="s2">&quot;Wrote Google Reader subscriptions to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">green</span>
-<span class="k">else</span>
-    <span class="c1"># If the file wasn&#39;t created print an error</span>
-    <span class="nb">puts</span> <span class="s2">&quot;Couldn&#39;t write to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2"> (the process running this script may not have sufficient privileges&quot;</span><span class="o">.</span><span class="n">red</span>
-<span class="k">end</span>
-</code></pre></div>
-
-
-
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
       <h2><a href="/2013/02/01/boredom/">Boredom</a></h2>
     
     <p>
@@ -370,6 +227,103 @@
 
 
 <p>I included the path to the Capistrano executable since cron (on OS X) executes tasks with <code>sh</code>, which isn't setup with my <code>$PATH</code>.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
+      <h2><a href="/2013/01/04/raking-podspecs/">Raking Podspecs</a></h2>
+    
+    <p>
+      <time datetime="2013-01-04 11:09:00 -0800" pubdate="pubdate">
+        04 Jan 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/01/04/raking-podspecs/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>I spend a decent amount of time these days helping maintain the <a href="http://cocoapods.org/">CocoaPods</a> <a href="http://github.com/cocoapods/specs">specs repo</a> by managing pull requests and issues. CococaPods is an awesome dependency manager similar to <a href="http://rubygems.org/">Rubygems</a> for Objective-C projects. Unfortunately a lot of submitted podspecs haven't been correctly formatted or they're missing required information. CocoaPods has an awesome build in command <code>pod spec lint</code> that allows you to make sure the spec is valid and complete. Understandably people who are new to CocoaPods trying to submit their libraries are unaware of this awesome tool. Therefore when I look through the pull requests, I like to lint them myself (CocoaPods does <a href="https://travis-ci.org/CocoaPods/Specs">utilize Travis</a> but unfortunately it can't do everything).</p>
+
+<p>Since CocoaPods supports multiple versions of Ruby (1.8.7 and 1.9.3) to be complete ideally you'd lint them on both versions. Tools like <a href="https://rvm.io/">RVM</a> and <a href="https://github.com/sstephenson/rbenv">rbenv</a>(my tool of choice) make it easy to quickly switch between different versions of Ruby using <code>.rvmrc</code> and <code>.rbenv-version</code> respectively. As you can probably assume I wanted to automate this. So I wrote a quick <a href="http://rake.rubyforge.org/">Rakefile</a> to do this for me.</p>
+
+<div class="highlight"><pre><code class="ruby"><span class="c1">#!/usr/bin/env rake</span>
+
+<span class="c1"># NOTE: Must be using rbenv 4.0 to use `system` and `.ruby-version`</span>
+<span class="c1">## Set your preferred ruby versions</span>
+<span class="vg">$V18</span> <span class="o">=</span> <span class="s1">&#39;system&#39;</span>
+<span class="vg">$V19</span> <span class="o">=</span> <span class="s1">&#39;1.9.3-p385&#39;</span>
+<span class="vg">$RBENV</span> <span class="o">=</span> <span class="s1">&#39;.ruby-version&#39;</span>
+
+<span class="c1"># The gem to use</span>
+<span class="vg">$GEM</span> <span class="o">=</span> <span class="s1">&#39;cocoapods&#39;</span>
+
+<span class="n">task</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="ss">:lint</span>
+<span class="n">task</span> <span class="ss">:c</span>       <span class="o">=&gt;</span> <span class="ss">:clean</span>
+
+<span class="n">desc</span> <span class="s2">&quot;Lint podspecs on multiple versions of ruby with rbenv&quot;</span>
+<span class="n">task</span> <span class="ss">:lint</span> <span class="k">do</span>
+  <span class="k">if</span> <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span> <span class="o">&lt;</span> <span class="mi">1</span>
+    <span class="nb">puts</span> <span class="s2">&quot;No podspecs in </span><span class="si">#{</span> <span class="no">Dir</span><span class="o">.</span><span class="n">pwd</span> <span class="si">}</span><span class="s2">&quot;</span>
+    <span class="nb">exit</span>
+  <span class="k">end</span>
+
+  <span class="n">existed</span> <span class="o">=</span> <span class="n">versionFileExists?</span>
+  <span class="k">if</span> <span class="n">existed</span>
+    <span class="n">old_version</span> <span class="o">=</span> <span class="n">currentVersion</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Loop through all podspecs</span>
+  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span>
+    <span class="c1"># Loop through ruby versions</span>
+    <span class="mi">2</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+      <span class="n">version</span> <span class="o">=</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">?</span> <span class="vg">$V18</span> <span class="p">:</span> <span class="vg">$V19</span>
+      <span class="n">writeVersion</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+
+      <span class="nb">puts</span> <span class="s2">&quot;Linting </span><span class="si">#{</span> <span class="n">file</span> <span class="si">}</span><span class="s2"> on Ruby version </span><span class="si">#{</span> <span class="n">currentVersion</span> <span class="si">}</span><span class="s2">&quot;</span>
+      <span class="nb">puts</span> <span class="n">lint</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="c1"># If the dotfile already existed rewrite the original code</span>
+  <span class="k">if</span> <span class="n">existed</span>
+    <span class="n">writeVersion</span><span class="p">(</span><span class="n">old_version</span><span class="p">)</span>
+  <span class="k">else</span>
+    <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span> <span class="k">if</span> <span class="n">versionFileExists?</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">desc</span> <span class="s2">&quot;Delete all podspec files&quot;</span>
+<span class="n">task</span> <span class="ss">:clean</span> <span class="k">do</span>
+  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">}</span>
+  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Check to see if the current dotfile exists</span>
+<span class="k">def</span> <span class="nf">versionFileExists?</span>
+  <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c1"># Retrieve the current version from the rbenv dotfile</span>
+<span class="k">def</span> <span class="nf">currentVersion</span>
+  <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">io</span><span class="o">|</span> <span class="n">io</span><span class="o">.</span><span class="n">read</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Write out a version to .rbenv-version</span>
+<span class="k">def</span> <span class="nf">writeVersion</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+  <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span> <span class="n">version</span> <span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Run the lint</span>
+<span class="k">def</span> <span class="nf">lint</span><span class="p">(</span><span class="n">podspec</span><span class="p">)</span>
+  <span class="sx">%x[pod spec lint &quot;</span><span class="si">#{</span> <span class="n">podspec</span> <span class="si">}</span><span class="sx">&quot;]</span>
+<span class="k">end</span>
+</code></pre></div>
+
+
+
 
   </div>
 </article>
