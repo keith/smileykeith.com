@@ -15,4 +15,4 @@ Icon
 _site
 .sass-cache
 css/*.css
-
+*.map
