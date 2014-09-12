@@ -6,8 +6,7 @@ pygments: true
 excerpt_separator: "readmore"
 permalink: /:year/:month/:day/:title/
 include: ['.htaccess']
-exclude: ['rakefile.rb', 'Gemfile*', 'build.sh', '*.map']
+exclude: ['rakefile.rb', 'Gemfile*', 'build.sh', '*.map', 'gh-pages']
 markdown: rdiscount
 
 paginate: 5
-
