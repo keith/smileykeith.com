@@ -16,3 +16,4 @@ _site
 .sass-cache
 css/*.css
 *.map
+gh-pages
