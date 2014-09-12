@@ -1,0 +1,1435 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text"><![CDATA[Keith Smiley]]></title>
+  
+  <updated>2014-09-11T22:10:40-07:00</updated>
+  <id>http://smileykeith.com/</id>
+  <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
+
+  
+  <link rel="self" type="application/atom+xml" href="http://smileykeith.com/atom.xml" />
+  
+  <rights>Copyright (c) 2014 Keith Smiley</rights>
+  <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
+
+  
+    <entry>
+      <title type="html"><![CDATA[PGP encryption with Mutt]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2014/02/22/pgp-encryption-with-mutt/" />
+      <id>http://smileykeith.com/2014/02/22/pgp-encryption-with-mutt</id>
+      <updated>2014-02-22T18:25:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>Modern email protocols were <a href="https://en.wikipedia.org/wiki/Email_privacy#Risks_to_user">never
+meant</a> to be
+secure.</p>
+
+<p>While there is some theoretical benefit from interacting with your email
+over HTTPS, if the recipient happens to be have the same email provider
+and the email never leaves the encrypted server, true</p>
+
+<p>Unfortunately just interacting with your email over HTTPS doesn't
+secure your communications as much as you should probably want.</p>
+
+<p>The idea that by interacting with your email over HTTPS your
+communications are more secure is an absolute fallacy.</p>
+
+<p>When it comes to encrypting your email
+<a href="https://en.wikipedia.org/wiki/Pretty_Good_Privacy">PGP</a> seems like the
+only option worth mentioning. The major downside to PGP is the setup and
+the general complexity of how it works. While this makes it a great
+cryptographic solution, it makes it difficult for it to become widely
+used.</p>
+
+<p>While this guide will focus on PGP usage with mutt, there is probably
+some extension for your native email client of choice. If you are not
+familiar with mutt I would recommend <a href="http://stevelosh.com/blog/2012/10/the-homely-mutt/">The Homely
+Mutt</a> to set it up
+on your system. There are other, possibly easier, ways to get everything
+setup but having used Mutt's native IMAP support previously I would
+definitely recommend Steve's method.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[Vim TagBar with Objective-C]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2014/02/14/vim-tagbar-with-objective-c/" />
+      <id>http://smileykeith.com/2014/02/14/vim-tagbar-with-objective-c</id>
+      <updated>2014-02-14T13:53:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>When working with large files in Vim,
+<a href="http://majutsushi.github.io/tagbar/">Tagbar</a> has become an invaluable
+part of my workflow. It provides a succinct list of methods, modules,
+variables and other language specific constructs. When I started trying
+to spend more time in Vim writing Objective-C I was disappointed to see
+that, out of the box, it was not supported.</p>
+
+<p>Hopefully in the future it won't be difficult to set this up in Vim.
+Currently ctags <a href="https://svn.code.sf.net/p/ctags/code/trunk/objc.c">already
+has</a> built in support
+for Objective-C. Unfortunately there hasn't been a release of ctags
+since 2009. As recommended in the <a href="http://bastibe.de/2011-12-04-how-to-make-tagbar-work-with-objective-c.html">canonical how to
+article</a>
+you can attempt to use the trunk version of ctags and just define the
+Tagbar settings. For me, this ended up producing a ton of
+mis-categorized duplicates. I also opened and closed <a href="https://github.com/majutsushi/tagbar/issues/193">an
+issue</a> on the Tagbar
+Github repo hoping that Objective-C support will be added by default in
+the future.</p>
+
+<p>The only other resource I could find about this issue was <a href="https://gist.github.com/yamaya/5598909">this
+gist</a>. It uses regex to define
+Objective-C to ctags and then match it with Tagbar. I improved it a
+little bit and came up with this. Put this file anywhere you want, you
+will define its path in your vimrc.</p>
+
+<pre><code>--langdef=objc
+--langmap=objc:.m..mm..h
+--regex-objc=/\@interface[[:space:]]+([[:alnum:]_]+)/\1/i,interface/
+--regex-objc=/\@implementation[[:space:]]+([[:alnum:]_]+)/\1/I,implementation/
+--regex-objc=/\@protocol[[:space:]]+([[:alnum:]_]+)/\1/P,protocol/
+--regex-objc=/\@property[[:space:]]+\([[:alnum:],[:space:]]+\)[[:space:]]+[[:alnum:]_]+[[:space:]]+\*?([[:alnum:]_]+)/\1/p,property/
+--regex-objc=/([-+])[[:space:]]*\([[:alpha:]_][^)]*\)[[:space:]]*([[:alpha:]_][^:;{]+).*/\1\2/M,method definition/
+--regex-objc=/^[^#@[:space:]][^=]*[[:space:]]([[:alpha:]_][[:alnum:]_]*)[[:space:]]*=/\1/c,constant/
+--regex-objc=/^[[:space:]]*typedef[[:space:]][^;]+[[:space:]]([[:alpha:]_][[:alnum:]]*)[[:space:]]*;/\1/t,typedef/
+--regex-objc=/^[[:space:]]*NS_ENUM\([[:alnum:]]+[[:space:]]*,[[:space:]]([[:alnum:]]+)\)/\1/e,enum/
+--regex-objc=/^#pragma[[:space:]]+mark[[:space:]]+-?[[:space:]]+([[:alnum:][:space:]]+)/\1/g,pragma/
+</code></pre>
+
+<p>Then in your vimrc:</p>
+
+<div class="highlight"><pre><code class="vim"><span class="k">let</span> <span class="k">g</span>:tagbar_type_objc <span class="p">=</span> {
+  \ <span class="s1">&#39;ctagstype&#39;</span>: <span class="s1">&#39;objc&#39;</span><span class="p">,</span>
+  \ <span class="s1">&#39;ctagsargs&#39;</span>: [
+    \ <span class="s1">&#39;-f&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;-&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;--excmd=pattern&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;--extra=&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;--format=2&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;--fields=nksaSmt&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;--options=&#39;</span> . expand<span class="p">(</span><span class="s1">&#39;~/.vim/objctags&#39;</span><span class="p">),</span>
+    \ <span class="s1">&#39;--objc-kinds=-N&#39;</span><span class="p">,</span>
+  \ ]<span class="p">,</span>
+  \ <span class="s1">&#39;sro&#39;</span>: <span class="s1">&#39; &#39;</span><span class="p">,</span>
+  \ <span class="s1">&#39;kinds&#39;</span>: [
+    \ <span class="s1">&#39;c:constant&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;e:enum&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;t:typedef&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;i:interface&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;P:protocol&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;p:property&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;I:implementation&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;M:method&#39;</span><span class="p">,</span>
+    \ <span class="s1">&#39;g:pragma&#39;</span><span class="p">,</span>
+  \ ]<span class="p">,</span>
+\ }
+</code></pre></div>
+
+
+<p>Replace the <code>~/.vim/objctags</code> with the path where you chose to put the
+first file. Please let me know if you see any way that this could be
+improved.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[IPSEC/L2TP VPN on a Raspberry Pi running Arch Linux]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux/" />
+      <id>http://smileykeith.com/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux</id>
+      <updated>2014-01-27T20:49:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>After you buy a Raspberry Pi, or two, you need to figure out what to use them
+for. While you'll get a ton of <em>interesting</em> ideas from Googling "uses for a
+Raspberry Pi," I didn't particularly find them any more than a <a href="http://arstechnica.com/information-technology/2012/12/10-raspberry-pi-creations-that-show-how-amazing-the-tiny-pc-can-be/">thought
+exercise</a>.
+Making a VPN stood out as an actually useful configuration.</p>
+
+<p>Originally when I got my (accidentally chosen) Model A, I spent a little
+while going through <a href="http://willitscript.com/post/40357408648/using-your-pi-as-a-l2tp-vpn-server">this
+guide</a>
+using Raspbian. That seemed to work fine until I recently purchased a
+Model B to replace it and couldn't reproduce the configuration. I
+decided to write the steps that I was finally able to use to get a
+functional VPN running on Arch Linux.</p>
+
+<p>I started out by following <a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_on_a_Raspberry_Pi_with_Arch_Linux.html">this
+guide</a>
+hoping that it would get me a functioning VPN without too much work.  Most of
+this setup will be based on that article with some tweaks for what I had to do
+to make the settings stick.  Unfortunately while it worked after the setup the
+configuration did not persist after restart.  For this configuration, like I
+said earlier, I wanted to use the ARM version of Arch Linux rather than
+Raspbian for the install. You can download the Raspberry Pi compatible Arch
+image from their <a href="http://www.raspberrypi.org/downloads">downloads page</a>. I'm
+not sure I would recommend Arch for people who haven't installed it before or
+at least gotten through their <a href="https://wiki.archlinux.org/index.php/Beginners'_Guide">Beginners'
+Guide</a>. The ARM Image,
+like the normal image, doesn't come with a GUI, perfect for this use of the Pi.</p>
+
+<p>I'm not going to bother with making sure this works before restarting, since
+that doesn't seem like much of an issue with actual usage (although you can
+just run the scripts we create and it should work fine). I wouldn't recommend
+doing much configuration before doing this intial setup. I did this the first
+time and after an hour of configuration my VPN did not work correctly, I ended
+up nuking the work I had done and starting over.</p>
+
+<p>Start by installing the necessary components:</p>
+
+<pre><code>pacman -Sy openswan xl2tpd ppp lsof python2
+</code></pre>
+
+<p>You need to do some configuration of the firewall and redirects:</p>
+
+<div class="highlight"><pre><code class="bash"><span class="nb">echo</span> <span class="s2">&quot;net.ipv4.ip_forward = 1&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.all.accept_redirects = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.all.send_redirects = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.default.rp_filter = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.default.accept_source_route = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.default.send_redirects = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.icmp_ignore_bogus_error_responses = 1&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+</code></pre></div>
+
+
+<p>To make these settings persist we need to create a script that gets launched by
+systemd each time we restart the system. As recommended in the original
+article, and being a <a href="http://brew.sh/">Homebrew</a> user I created the script in
+<code>/usr/local/bin/vpn-boot.sh</code>:</p>
+
+<div class="highlight"><pre><code class="bash"><span class="c">#!/usr/bin/bash</span>
+
+iptables --table nat --append POSTROUTING --jump MASQUERADE
+
+<span class="k">for </span>vpn in /proc/sys/net/ipv4/conf/*<span class="p">;</span> <span class="k">do</span>
+<span class="k">    </span><span class="nb">echo </span>0 &gt; <span class="nv">$vpn</span>/accept_redirects<span class="p">;</span>
+    <span class="nb">echo </span>0 &gt; <span class="nv">$vpn</span>/send_redirects<span class="p">;</span>
+<span class="k">done</span>
+
+sysctl -p
+</code></pre></div>
+
+
+<p>There are a few things that differ here to the original article. First
+the hashbang path was changed since the default $PATH on the ARM version
+of Arch didn't include <code>/bin</code>. I would run <code>which -a bash</code> on your
+install to make sure this works for you. This obviously doesn't have
+to be changed, but I think it's better in the long run. I also added
+<code>sysctl -p</code> since these settings didn't seemed to be applied otherwise.
+Then you must make this script executable with something like:</p>
+
+<div class="highlight"><pre><code class="bash">chmod +x /usr/local/bin/vpn-boot.sh
+</code></pre></div>
+
+
+<p>Since Arch uses systemd to this script has to be launched by creating a
+service to be ran through systemd. You can create this file in
+<code>/etc/systemd/system/vpnboot.service</code></p>
+
+<pre><code>[Unit]
+Description=VPN Settings at boot
+After=netctl@eth0.service
+Before=openswan.service xl2tpd.service
+
+[Service]
+ExecStart=/usr/local/bin/vpn-boot.sh
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>I added a few things here as well. I wanted to make sure that the boot command
+would launch after the network settings had been established and before the
+other VPN software was launched. I'm not sure how many of these changes would
+be required for systemd to do what I wanted it to but the order really seemed
+to matter for here. After you create this service enable it within systemd
+with:</p>
+
+<pre><code>systemctl enable vpnboot.service
+</code></pre>
+
+<p>I also made some changes to <code>/etc/ipsec.conf</code> (note the comments in the
+default file for some more info on these settings):</p>
+
+<pre><code>config setup
+  dumpdir=/var/run/pluto/
+  nat_traversal=yes
+  virtual_private=%v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v4:25.0.0.0/8,%v6:fd00::/8,%v6:fe80::/10
+  oe=off
+  protostack=netkey
+  plutoopts="--interface=eth0"
+
+conn L2TP-PSK-noNAT
+  authby=secret
+  pfs=no
+  auto=add
+  keyingtries=3
+  ikelifetime=8h
+  keylife=1h
+  type=transport
+  # Your server's IP (I used my internal IP, assuming you're using NAT)
+  left=172.16.1.1
+  leftprotoport=17/1701
+  right=%any
+  rightprotoport=17/%any
+  rightsubnetwithin=0.0.0.0/0
+  dpddelay=10
+  dpdtimeout=20
+  dpdaction=clear
+</code></pre>
+
+<p>Then for the <code>/etc/ipsec.secrets</code> (use the same server IP address):</p>
+
+<pre><code>%SameIP%  %any: PSK "super random key"
+</code></pre>
+
+<p>The make systemd start openswan on boot as well:</p>
+
+<pre><code>systemctl enable openswan
+</code></pre>
+
+<p>I also edited the openswan service file in
+<code>/etc/systemd/system/multi-user.target.wants/openswan.service</code></p>
+
+<pre><code>[Unit]
+Description=Openswan daemon
+After=netctl@eth0.service vpnboot.service
+Before=xl2tpd.service
+
+[Service]
+Type=forking
+ExecStart=/usr/lib/systemd/scripts/ipsec --start
+ExecStop=/usr/lib/systemd/scripts/ipsec --stop
+ExecReload=/usr/lib/systemd/scripts/ipsec --restart
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>As you can see I removed the original network dependency and added a new
+dependency of <a href="https://wiki.archlinux.org/index.php/Netctl">netctl's</a>
+default network interface (we haven't enabled this yet).</p>
+
+<p>Next for <code>/etc/xl2tpd/xl2tpd.conf</code>:</p>
+
+<pre><code>[global]
+ipsec saref = yes
+saref refinfo = 30
+
+[lns default]
+ip range = 172.16.1.70-172.16.1.89
+local ip = 172.16.1.1
+require authentication = yes
+ppp debug = yes
+pppoptfile = /etc/ppp/options.xl2tpd
+length bit = yes
+unix authentication = yes
+</code></pre>
+
+<p>Where <code>local ip</code> is the server's ip and the <code>ip range</code> is the range of
+IP addresses you want to use for VPN clients. You need to enable this
+service too with:</p>
+
+<pre><code>systemctl enable xl2tpd
+</code></pre>
+
+<p>I also edited the systemd file for xl2tpd at
+<code>/etc/systemd/system/multi-user.target.wants/xl2tpd.service</code>:</p>
+
+<pre><code>[Unit]
+Description=Level 2 Tunnel Protocol Daemon (L2TP)
+After=syslog.target netctl@eth0.service openswan.service
+Requires=openswan.service
+
+[Service]
+Type=simple
+PIDFile=/run/xl2tpd/xl2tpd.pid
+ExecStart=/usr/bin/xl2tpd -D
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>The other guide also recommends creating the xl2tpd control folder with:</p>
+
+<pre><code>mkdir /var/run/xl2tpd/
+</code></pre>
+
+<p>Now we need to create/edit <code>/etc/ppp/options.xl2tpd</code>:</p>
+
+<pre><code>ipcp-accept-local
+ipcp-accept-remote
+ms-dns 8.8.8.8
+ms-dns 8.8.4.4
+auth
+mtu 1200
+mru 1000
+crtscts
+hide-password
+modem
+name l2tpd
+proxyarp
+lcp-echo-interval 30
+lcp-echo-failure 4
+login
+</code></pre>
+
+<p><code>/etc/pam.d/ppp</code>:</p>
+
+<pre><code>auth    required        pam_nologin.so
+auth    required        pam_unix.so
+account required        pam_unix.so
+session required        pam_unix.so
+</code></pre>
+
+<p>And <code>/etc/ppp/pap-secrets</code>:</p>
+
+<pre><code>*       l2tpd           ""              *
+</code></pre>
+
+<p>If you'd like you can also restrict the users accounts that can access
+the vpn. This way you can separate your login user from your VPN users
+who can have much stronger passwords. You'd do that in your
+<code>/etc/ppp/pap-secrets</code>:</p>
+
+<pre><code>vpnuser   l2tpd         ""              *
+</code></pre>
+
+<p>To enable the startup of the default netctl eth0 interface you need to
+run:</p>
+
+<pre><code>netctl enable eth0
+</code></pre>
+
+<p>You'll probably want to disable any other netctl systemd functions that are
+enabled by default. Check <code>/etc/systemd/system/mutli-user.target.wants</code> to for
+other <code>netctl</code> profiles.</p>
+
+<p>So at this point you should be able to enable VPN clients using the
+super secret keys you enabled before and the username and passwords
+you've created previously. You can create new users for specifically VPN
+usage with something like this:</p>
+
+<pre><code>useradd -s /sbin/nologin vpnuser
+</code></pre>
+
+<p>This disallows users from being able to be used for login which is probably
+more secure for your VPN (although not required). For testing you can use the
+root/root defualt user and a less secure key, although you should <em>definitely</em>
+change these before allowing access to the outside world.</p>
+
+<h3>Troubleshooting</h3>
+
+<p>Undoubtedly you'll have to deal with something that doesn't work exactly
+how my setup works. The most useful things to seeing what was happening
+were these:</p>
+
+<pre><code>netstat -tulpan
+systemctl status openswan
+systemctl status xl2tpd
+journalctl -f
+</code></pre>
+
+<p>You can glance at some of the other guides to see what should be going
+on. You probably shouldn't see any red in the <code>openswan</code> status and you
+should see ports open under <code>pluto</code> with netstat. You can check out the
+<a href="http://linux.die.net/man/5/ipsec.conf">ipsec manpage</a> or the <a href="https://github.com/xelerance/Openswan/wiki/L2tp-ipsec-configuration-using-openswan-and-xl2tpd">openswan
+wiki
+page</a>
+for a little more information on some of the settings. Also I used <a href="http://www.freedesktop.org/software/systemd/man/systemd.service.html">this
+page</a>
+for some more info on how systemd settings work. Please let me know if
+there's anything here that could be done easier/better for this
+configuration.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[iTerm theme based on the time of day]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/09/03/iterm-theme-based-on-the-time-of-day/" />
+      <id>http://smileykeith.com/2013/09/03/iterm-theme-based-on-the-time-of-day</id>
+      <updated>2013-09-03T10:56:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>One of the great things about Vim's textual configuration is it's
+ability to contain logic based on outside factors. For the purpose of
+this post I'm referring to the ability to set your colorscheme based on
+the time of day with something like
+<a href="https://github.com/Keithbsmiley/dotfiles/blob/a34e432b59e26225ebdb05737b30729b7ea670d9/vimrc#L102-L108">this</a>.</p>
+
+<p>Having this functionality in Vim with the
+<a href="http://ethanschoonover.com/solarized">Solarized</a> theme at night really
+made me want this in <a href="http://www.iterm2.com/#/section/home">iTerm</a> as
+well. Unfortunately iTerm's conifguration doesn't allow anything similar
+to this. The closest you get is profiles which you can assign keyboard
+shortcuts to for quickly opening windows with different colorschemes.
+Luckily, thanks to this <a href="https://github.com/gnachman/iTerm2/pull/10">pull
+request</a> two years ago from
+<a href="https://twitter.com/junkiesxl">Piet Jaspers</a>, support was added for
+scripting iTerm's entire colorscheme with AppleScript. Using these
+AppleScript bindings I was able to create a
+<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/scripts/itermcolors.applescript">script</a>
+that changes the entire colorscheme of iTerm based on the time of day
+between Solarized light and dark. As you can see the
+<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/scripts/itermcolors.applescript#L27-L49">bulk</a>
+of this script is just setting different color attributes based on the
+theme you want. While you could do this conversion by hand to 65535
+flavored RGB, I made a
+tiny Objective-C app to automate the process which is <a href="https://github.com/Keithbsmiley/ColorConvert">on
+Github</a>. You can download
+the signed binary
+<a href="https://github.com/Keithbsmiley/ColorConvert/releases/tag/1.0">here</a>.</p>
+
+<p>Using this newly created AppleScript I then made a zsh
+<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/functions/colorize">function</a> so that I could call <code>colorize</code> from anywhere to update the color scheme of the current terminal.
+I also chose to do this at the end of my <code>.zshrc</code> <a href="https://github.com/Keithbsmiley/dotfiles/blob/763e6f3f2bbcd93775c70e0d9ed9878ac99896a3/zshrc#L51">here</a>.
+This way everytime I open a new session my theme is automatically set.</p>
+
+<p>If you have any input on how I could optimize this let me know.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[Global htaccess]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/08/14/global-htaccess/" />
+      <id>http://smileykeith.com/2013/08/14/global-htaccess</id>
+      <updated>2013-08-14T13:12:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>When starting a new web project one of the first things I do is download
+the most up to date <a href="http://html5boilerplate.com/">HTML5 Boilerplate</a>.
+It provides a great starting point for the HTML you need in a project.
+It also comes with an extremely complete <a href="https://github.com/h5bp/html5-boilerplate/blob/master/.htaccess">.htaccess</a>
+file. While this is very nice for a single site they recommend you do
+something different for multiple sites at <a href="https://github.com/h5bp/html5-boilerplate/blob/21c614849afc5b518685b68d81d2b0c8f7971f0a/.htaccess#L4-L6">the very top</a>.</p>
+
+<blockquote><p>(!) Using .htaccess files slows down Apache, therefore, if you have access
+to the main server config file (usually called httpd.conf), you should add
+this logic there: http://httpd.apache.org/docs/current/howto/htaccess.html.</p></blockquote>
+
+<p>This got me to their awesome collection of <a href="https://github.com/h5bp/server-configs">server configs</a>
+which has their, and in many ways the communities, recommended settings
+depending on your webserver. The <a href="https://github.com/h5bp/server-configs-apache">apache configs</a>
+have the same <code>.htaccess</code> file so I decided to dig into how to do this.</p>
+
+<p>They direct you to the <a href="http://httpd.apache.org/docs/current/howto/htaccess.html">apache article</a>
+about using <code>.htaccess</code> files which has a similar comment about their
+use.</p>
+
+<blockquote><p>You should avoid using .htaccess files completely if you have access to httpd main server config file
+Using .htaccess files slows down your Apache http server. Any directive that you can include in a
+.htaccess file is better set in a Directory block, as it will have the same effect with better performance.</p></blockquote>
+
+<p>So I decided to set this up on my <a href="http://www.linode.com/?r=c190426bf1ff0f144b48997675bae8b32d339824">Linode VPS</a> which is running Ubuntu 10.04.
+As stated in the original file comment they recommend using the
+<code>httpd.conf</code> file for your custom configuration like this. But
+<a href="http://stackoverflow.com/a/11687212/902968">apparently</a> that file could be
+overwritten on updates of Apache which would be pretty annoying. Luckily
+the default Apache config file (<code>apache2.conf</code> on 10.04) includes the
+contents of the <code>conf.d</code> folder which is in the same location. By
+creating a <code>foo.conf</code> file in that directory Apache should immediately
+load its contents. As mentioned in the comment from the Apache site the
+custom configuration needs to be wrapped in a <a href="http://httpd.apache.org/docs/current/mod/core.html#directory">Directory</a> block.
+The block expects you to provide a path to the files you want to be
+affected by the contained configuration. Since I wanted this to work for
+all the sites being served by Apache I simply used <code>/srv/www/*/</code> which
+includes my entire sites directory.</p>
+
+<p>Besides the speed increased gained by using a global <code>.htaccess</code> file
+this allows you to have much shorter custom files for site specific
+configuration. For example only required configuration for one of my sites
+was the <code>ErrorDocument</code>s. Now my <code>.htaccess</code> file went from 300+ lines
+to</p>
+
+<div class="highlight"><pre><code class="apache"><span class="nb">ErrorDocument</span> <span class="m">403</span> <span class="sx">/403.php</span>
+<span class="nb">ErrorDocument</span> <span class="m">404</span> <span class="sx">/404.php</span>
+<span class="nb">ErrorDocument</span> <span class="m">500</span> <span class="sx">/500.php</span>
+</code></pre></div>
+
+
+
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[OS X Crash Report Symbolication]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/08/09/os-x-crash-symbolication/" />
+      <id>http://smileykeith.com/2013/08/09/os-x-crash-symbolication</id>
+      <updated>2013-08-09T13:26:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>As you may know I write a small OS X called <a href="http://sailforapp.net/">Sail</a>. Over
+the past few months that it has been available I've received a few crash reports
+about an issue I wasn't able to reproduce. Today I decided I wanted to dive into
+them and see if I could at least figure out the root of the issue and fix it
+with my next release.</p>
+
+<p>This lead me down the rabbit hole of
+<a href="http://lldb.llvm.org/symbolication.html">symbolication</a>, something I personally
+hadn't dealt with myself before (since Crashlytics does it for you). I was
+hoping I would be able to find something around the internet about this,
+unfortunately what I mostly came up with was a lot of iOS related answers that
+didn't seem to work the same way and
+<a href="http://developer.apple.com/tools/xcode/symbolizingcrashdumps.html">two</a>
+<a href="http://developer.apple.com/library/mac/technotes/tn2004/tn2123.html">links</a> to
+Apple documentation that have been removed. Other than the process for
+symbolicating reports for OS X apps seems to be different than iOS apps which
+there is plenty of documentation for (I'm not bitter). Daniel Jalkut has <a href="http://www.red-sweater.com/blog/439/crappy-crash-logs">a
+post</a> about these but his
+exact method didn't seem to work for me.</p>
+
+<p>Here is what did work for me. For my first abridged crash report I had this</p>
+
+<pre><code>Process:         Sail [35072]
+Path:            /Applications/Sail.app/Contents/MacOS/Sail
+Load Address:    0x106823000
+Identifier:      com.keithsmiley.SailOSX
+Version:         4 (1.2.0)
+Code Type:       x86_64 (Native)
+Parent Process:  launchd [207]
+
+Date/Time:       2013-07-19 16:09:24.097 +0200
+OS Version:      Mac OS X 10.8.4 (12E55)
+Report Version:  8
+
+Thread 0:
+13  Accounts                        0x00007fff839fd1b1 -[ACAccountStore accountTypeWithAccountTypeIdentifier:] + 230
+14  Sail                            0x00000001068308f7
+15  Sail                            0x0000000106830798
+16  Sail                            0x0000000106825249
+17  CoreFoundation                  0x00007fff82465eda _CFXNotificationPost + 2554
+18  Foundation                      0x00007fff8611b7b6 -[NSNotificationCenter postNotificationName:object:userInfo:] + 64
+31  AppKit                          0x00007fff812cc1a3 -[NSApplication run] + 517
+32  AppKit                          0x00007fff81270bd6 NSApplicationMain + 869
+33  libdyld.dylib                   0x00007fff869d07e1 start + 0
+
+Binary Images:
+  0x106823000 - 0x106896fff  com.keithsmiley.SailOSX (1.2.0 - 4) &lt;D1F313B6-21F6-341B-8627-5480C5D1DB20&gt; /Applications/Sail.app/Contents/MacOS/Sail
+</code></pre>
+
+<p>Just glancing at this crash report it's not too difficult to understand a bit
+about what was going on. A notification was sent, some methods were called in my
+application and then <code>accountTypeWithAccountTypeIdentifier</code> was called. Based on
+the small number of times I call that method I was quickly able to assume where
+the issue was but I still wanted to see exactly what methods of mine were being
+called first.</p>
+
+<p>This brings me to <code>atos</code> the command line tool Apple provides to symbolicate
+these reports. This is where my experience differs with most of what I found
+online. My usage looked like this:</p>
+
+<pre><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x106823000
+</code></pre>
+
+<p>This uses my dSYM file that was generated with the archive build I submitted to
+the app store along with the knowledge that it was running on an x86_64
+architecture and the most important part, for me, the load address.</p>
+
+<p>To find my dSYM file that was generated when I did my archive build I simply
+noted the version and build number from the crash report, went to the Archives
+tab in the Xcode organizer, found the build with the same number, right clicked
+and clicked "Show in Finder." This takes you directly to the <code>.xcarchive</code> file
+on disk which you can right click and click "Show Package Contents." From there
+I copied my dSYM to the desktop so I didn't overwrite anything unintentionally.</p>
+
+<p>The load address is the starting memory address of your application. The tool
+uses this address as an offset to find the correct methods in your symbols. In
+the above crash report <code>Load Address</code> is a provided field. This was the only
+report I saw that had that, typically I needed to look under the <code>Binary Images</code>
+section for the address range of my application. In this example it was
+<code>0x106823000 - 0x106896fff</code>.</p>
+
+<p>The <code>atos</code> command then provides an interactive prompt where you can paste
+addresses into the stdin and it will tell you the corresponding methods. Mine
+looked like this:</p>
+
+<pre><code>0x00000001068308f7
+-[KSAccountsPreferences dealloc] (in Sail) (KSAccountsPreferences.m:77)
+0x0000000106830798
+-[KSAccountsPreferences viewDidLoad] (in Sail) (KSAccountsPreferences.m:73)
+0x0000000106825249
+-[KSAppDelegate openAboutWindow:] (in Sail) (KSAppDelegate.m:59)
+</code></pre>
+
+<p>Here I can see that the notification that was being posted was probably an
+<code>NSApplicationDidFinishLaunchingNotification</code> starting off some methods in my
+app delegate. I then load the accounts preferences, which would make sense to
+call the <code>ACAccountStore</code> method, but then <code>dealloc</code> is called. Seeing this was
+an immediate red flag since <code>KSAccountsPreferences</code> should be retained since it
+provides information about available accounts to the rest of the application.</p>
+
+<p>I had another crash report from a different issue that was a little bit harder
+to parse without symbolicating the methods.</p>
+
+<pre><code>Process:         Sail [47027]
+Identifier:      com.keithsmiley.SailOSX
+Version:         1.2.0 (4)
+Code Type:       X86-64 (Native)
+Parent Process:  launchd [45696]
+User ID:         502
+
+Application Specific Information:
+*** Terminating app due to uncaught exception 'NSRangeException', reason: '*** -[__NSArrayM objectAtIndex:]: index 0 beyond bounds for empty array'
+abort() called
+terminate called throwing an exception
+
+Application Specific Backtrace 1:
+2   CoreFoundation                      0x000000010c5008ec -[__NSArrayM objectAtIndex:] + 252
+3   Sail                                0x000000010b838eed Sail + 61165
+4   Sail                                0x000000010b838f36 Sail + 61238
+5   Sail                                0x000000010b838b19 Sail + 60185
+6   Sail                                0x000000010b83785d Sail + 55389
+7   libdispatch.dylib                   0x000000010fa07f01 _dispatch_call_block_and_release + 15
+
+Binary Images:
+  0x10b82a000 - 0x10b89dff7 +com.keithsmiley.SailOSX (1.2.0 - 4) &lt;47EC2733-B543-31EA-A6AA-9D998FB65803&gt;
+</code></pre>
+
+<p>Obviously this was caused by an invalid access to an array but that's a little harder to track down. So I again used <code>atos</code> with the dSYM and new memory location.</p>
+
+<pre><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x10b82a000
+</code></pre>
+
+<p>I got this output for my memory addresses</p>
+
+<pre><code>0x000000010b838eed
+-[KSAccountsPreferences selectedADNUser] (in Sail) (KSAccountsPreferences.m:238)
+0x000000010b838f36
+-[KSAccountsPreferences selectTwitterUsername] (in Sail) (KSAccountsPreferences.m:243)
+0x000000010b838b19
+-[KSAccountsPreferences populateTwitterAccounts] (in Sail) (KSAccountsPreferences.m:211)
+0x000000010b83785d
+__36-[KSAccountsPreferences viewDidLoad]_block_invoke (in Sail) (KSAccountsPreferences.m:70)
+</code></pre>
+
+<p>This ended up giving me the exact line where out of bounds issue was happening
+depending on a certain number of accounts. I noticed that this issue had been
+fixed since my last release so I did a <code>diff</code> on the tag I created for that
+specific release with</p>
+
+<pre><code>git difftool HEAD..1.2.0\(3\)
+</code></pre>
+
+<p>Then in <a href="http://www.kaleidoscopeapp.com/">Kaleidoscope</a> I was able to figure out
+what changed had fixed the issue. Just because it's so pretty here is what it
+looked like.</p>
+
+<p><img src="/images/symbolication/diff.png" alt="Diff" /></p>
+
+<p>Symbolicating crash reports is definitely vital to tracking down bugs your users
+are experiencing when you can't reproduce them yourself. Once you figure out how
+it's obviously worth it.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[The 'Best' Text Editor]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/05/22/the-best-text-editor/" />
+      <id>http://smileykeith.com/2013/05/22/the-best-text-editor</id>
+      <updated>2013-05-22T00:59:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>I'm tired of people asking about the 'best' IDE for xyz purpose. The answer to this question is there is no best. The answer is always 'it depends.' Not only does it depend on what you're doing but more importantly it depends on you. It depends on your work flow. It depends tons of other indiscernible factors.</p>
+
+<p>It seems like people think they work in exactly the same way as enough other people. That asking this question will yield a useful result. The truth is that there are far fewer text editors than people who need text editors so it's impossible not to overlap with someone. We misconstrue this overlap in thinking that now this person knows exactly what we want. In reality they just happen to share some arbitrary subset of the way we  work and therefore ended up with the same text editor.</p>
+
+<p>So how can you decide which editor is best for you? Try them. This sounds obvious to you? Good, this article is not for you and you can safely leave now. These days text editors are either free, cheap or have trials. So download them all try them out and see if they make sense to you. Weed out the ones you really hate or the ones that crash and spend a little more time with the remaining editors. Some, like Vim, you may have to spend a little more time with to grasp but this still doesn't seem like a high order.</p>
+
+<p>But please stop asking questions on StackOverflow and similar sites where you expect people to throw their vote into the hat for the 'best' editor and make a decision for yourself.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[Objective-C on Travis-CI]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/04/11/objective-c-on-travis-ci/" />
+      <id>http://smileykeith.com/2013/04/11/objective-c-on-travis-ci</id>
+      <updated>2013-04-11T15:58:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>Recently <a href="https://travis-ci.org/">Travis</a> added support for Objective-C and there for OS X and iOS projects for continuous integration testing. I gather that people have previously done this with self-hosted dedicated <a href="http://jenkins-ci.org/">Jenkins</a> machines but since Apple is so aggressive about dropping support for previous versions of the OS it seems like a pain to have to replace your build server every few years. Enter Travis, a great hosted <a href="http://en.wikipedia.org/wiki/Continuous_integration">continuous integration</a> server that hosts a huge amount of open source projects. I figured with this new support I could host some of my <a href="https://github.com/Keithbsmiley/KSADNTwitterFormatter">smaller</a> libraries just to set how well it worked. The initial setup process was a bit tedious but I eventually got it to work.</p>
+
+<h3>Assumtions:</h3>
+
+<ul>
+<li>You have a test framework already integrated with your project (I like <a href="https://github.com/petejkim/specta">Specta</a>/<a href="https://github.com/petejkim/expecta">Expecta</a>)</li>
+<li>You have your project on Github in a public repository. Travis offers a <a href="http://about.travis-ci.org/docs/user/travis-pro/">pro</a> account if you'd rather</li>
+</ul>
+
+
+<h3>Steps</h3>
+
+<ul>
+<li>Create a <code>.travis.yml</code> file in the root of your repository (leading dot is intentional). For many projects a file may just look like:</li>
+</ul>
+
+
+<div class="highlight"><pre><code class="yaml"><span class="l-Scalar-Plain">language</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">objective-c</span>
+</code></pre></div>
+
+
+<p><del>By default Travis runs <a href="https://gist.github.com/henrikhodne/73151fccea7af3201f63">this script</a> for Objective-C projects</del> I was informed <a href="https://twitter.com/henrikhodne/status/322665896806060032">on Twitter</a> that the current script that runs Objective-C projects is actually located <a href="https://github.com/travis-ci/travis-cookbooks/blob/osx/ci_environment/travis_build_environment/files/default/ci_user/travis-utils/osx-cibuild.sh">here</a>. It was originally created by <a href="https://github.com/jspahrsummers">Justin Spahr-Summers</a> <a href="https://github.com/jspahrsummers/objc-build-scripts">here</a>. This script seems to run my projects without any issue, they just occasionally require more initial setup (we'll get to that).</p>
+
+<ul>
+<li><p>Enable your repository in Travis' settings. From your <a href="https://travis-ci.org/profile">Travis profile page</a> (after signing in with Github) you should see a list of your repositories, you may have to press 'Sync now', where you can switch on the repository you're planning on adding.</p></li>
+<li><p>Configure your project within Xcode. As I assumed above you already have a test target setup. You do have to do a few things in Xcode to make everything work correctly.</p>
+
+<ol>
+<li>Go to 'Manage Schemes' in Xcode. <img src="/images/travis/manageschemes.png" alt="Manage Schemes" /></li>
+<li>Check the 'Shared' box for the scheme that needs to be run. <img src="/images/travis/shareschemes.png" alt="Shared Scheme" /></li>
+<li>Click 'Edit...' in the bottom left and go to your build action. <img src="/images/travis/editscheme.png" alt="Edit Scheme" /></li>
+<li>On the row of your Tests target check the box in the 'Run' column. <img src="/images/travis/runtest.png" alt="Run Test" /></li>
+</ol>
+</li>
+<li><p>At this point for a simple project or a project using <a href="http://cocoapods.org/">CocoaPods</a> you should be good to go. If Travis finds a <code>Podfile</code> in the root of your repository it automatically runs <code>pod install</code> to get your dependencies (from their <a href="http://about.travis-ci.org/docs/user/languages/objective-c/">docs</a>). Otherwise there are a ton of <a href="http://about.travis-ci.org/docs/user/build-configuration/">configuration options</a> for your <code>.travis.yml</code> depending on how your repo is setup.</p></li>
+</ul>
+
+
+<p>For one of my projects I created a <code>setup.sh</code> file at the root of my repo that looks like this:</p>
+
+<div class="highlight"><pre><code class="bash"><span class="c">#!/usr/bin/env bash</span>
+
+git submodule update --init --recursive
+<span class="nb">echo</span> <span class="s2">&quot;Setting up test frameworks...&quot;</span>
+<span class="nb">cd </span>Example/Vendor/Specta<span class="p">;</span> rake &gt; /dev/null
+<span class="nb">cd</span> ../Expecta<span class="p">;</span> rake &gt; /dev/null
+<span class="nb">echo</span> <span class="s2">&quot;Done&quot;</span>
+<span class="nb">cd</span> ../../../
+</code></pre></div>
+
+
+<p>This script which I run using the <code>before_install: ./setup.sh</code> option in my <code>.travis.yml</code> gets all my submodules, sets up Specta and Expecta and then goes back to the root directory for running. If you just have a few simple steps you can also have multiple <code>before_install</code> actions like:</p>
+
+<div class="highlight"><pre><code class="yaml"><span class="l-Scalar-Plain">before_install</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cd Example</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">make</span>
+</code></pre></div>
+
+
+<p>You can read more about other Travis configuration options in their <a href="http://about.travis-ci.org/docs/user/build-configuration/">documentation</a>.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[OS X + ZFS]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/02/21/os-x-plus-zfs/" />
+      <id>http://smileykeith.com/2013/02/21/os-x-plus-zfs</id>
+      <updated>2013-02-21T11:28:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>For a long time people have talked about how horrible <a href="http://en.wikipedia.org/wiki/HFS_Plus">HFS+</a> is. Most notably, in my opinion, <a href="http://en.wikipedia.org/wiki/Linus_Torvalds">Linus Torvalds</a> (the creator of Linux and Git) who <a href="http://www.smh.com.au/news/technology/torvalds-pans-apples-os-x/2008/02/05/1202090393959.html">said</a> "Their file system is complete and utter crap, which is scary." <a href="https://twitter.com/siracusa">John Siracusa</a> also wrote about the problems with HFS+ in his <a href="http://arstechnica.com/apple/2011/07/mac-os-x-10-7/12/#hfs-problems">10.7 review</a> along with talking about it on his podcast, <a href="http://5by5.tv/hypercritical/">Hypercritical</a> in episodes <a href="http://5by5.tv/hypercritical/56">56</a> and <a href="http://5by5.tv/hypercritical/57">57</a>.</p>
+
+<p>The gist of all this really is that Apple needs a new filesystem. It has been a while since Apple had <a href="http://en.wikipedia.org/wiki/ZFS">ZFS</a> support <a href="http://gizmodo.com/5018512/mac-os-x-snow-leopard-for-servers-getting-zfs">on their website</a> for release in Snow Leopard. After which Apple dropped ZFS support because of <a href="http://arstechnica.com/apple/2009/10/apple-abandons-zfs-on-mac-os-x-project-over-licensing-issues/">licensing issues</a>. There had been talks of Apple developing their own file system, although I think that's the wrong way to go. I think Apple needs to approach file systems the way they approached Safari with <a href="http://www.webkit.org/">Webkit</a>. I think they would be best served by picking up a liberally open source file system, such as <a href="http://en.wikipedia.org/wiki/Btrfs">BTRFS</a>, or grabbing up one of the ZFS <a href="http://code.google.com/p/maczfs/">ports</a> and continuing development while leaving it open for anyone to use. One of the great things about this approach is exactly what happened with Webkit and Google Chrome. Google decided to use the Webkit engine to make a product that competes with the main developers of the Webkit project. By doing this with a file system other vendors could use the same implementation and therefore increase development and in turn stability of whichever system was chosen (not to mention compatibility).</p>
+
+<p>One thing is for sure. People who understand how integral a file system is <a href="http://arstechnica.com/apple/2013/02/zfs-loving-mac-users-demand-support-in-os-x-10-9/">want</a> something <a href="https://www.change.org/petitions/apple-os-x-10-9-support-opengl-4-3-and-zfs">modern</a>.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[Terminal Shortcut in OS X]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/02/08/terminal-shortcut-in-os-x/" />
+      <id>http://smileykeith.com/2013/02/08/terminal-shortcut-in-os-x</id>
+      <updated>2013-02-08T09:59:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>One of my favorite defaults in some Linux distros is the ability to use CTRL+ALT+T to open a new terminal window. I wanted to enable this same functionality in OS X using <a href="http://qsapp.com/">Quicksilver</a>. I did this using <a href="http://www.iterm2.com/">iTerm 2</a> but you can do it with the default Terminal if that's what you want.</p>
+
+<ol>
+<li><p>Enable the <code>Terminal</code> and <code>iTerm2</code> Quicksilver plugins.
+<img src="/images/qs-terminal/qs-plugins.png" alt="Quicksilver plugins" /></p></li>
+<li><p>Create a new custom hotkey trigger. Using the <code>Home</code> directory with the action <code>Open Directory in Terminal</code>
+<img src="/images/qs-terminal/qs-triggers.png" alt="Quicksilver trigger" /></p></li>
+<li><p>Set it's hotkey using the drawer to whatever you want.
+<img src="/images/qs-terminal/qs-hotkey.png" alt="Quicksilver hotkey" /></p></li>
+<li><p>Set your default <code>Command Line Interface</code> <code>Trigger</code> to <code>iTerm</code> (if that's what you want)
+<img src="/images/qs-terminal/qs-cli.png" alt="Quicksilver CLI" /></p></li>
+</ol>
+
+
+<p>You're done! Now you can easily press your hotkey and pull up a new iTerm/Terminal window whenever and wherever.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[Automated Google Reader Backups]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/02/01/automated-google-reader-backups/" />
+      <id>http://smileykeith.com/2013/02/01/automated-google-reader-backups</id>
+      <updated>2013-02-01T12:30:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>I spend a lot of time in my RSS <a href="http://reederapp.com/">Reeder</a> (see what I did there?). I still find Google Reader to be the best and easiest way to manage my subscriptions, although I've been wanting to switch to <a href="http://feedafever.com/">Fever</a> for a while.</p>
+
+<p>One thing I wanted to do when I launched my new site (the one you're reading) was to have a downloadable up to date export of my Google Reader OPML file (which of course I never did). I looked around for good ways to automate this and I found a simple Python script to do it with (sorry I couldn't find it again for this post). I decided to rewrite it in Ruby and set it up on my server as an automated cron job.</p>
+
+<p>To run the script I came up with use something like:</p>
+
+<div class="highlight"><pre><code class="bash">ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword
+</code></pre></div>
+
+
+<p>To add it to your crontab (to run every Sunday at 1:01am) use something like:</p>
+
+<div class="highlight"><pre><code class="bash">1 1 * * 7 ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword
+</code></pre></div>
+
+
+
+
+<div class="highlight"><pre><code class="ruby"><span class="c1">#!/usr/bin/env ruby</span>
+
+<span class="c1">#</span>
+<span class="c1"># =&gt; This script will authorize your Google credentials and download your Google Reader subscriptions</span>
+<span class="c1"># =&gt; Usage: ./googleReaderOPML.rb GOOGLEUSERNAME PASSWORD</span>
+<span class="c1">#</span>
+
+<span class="c1"># The required networking shenanigans</span>
+<span class="nb">require</span> <span class="s1">&#39;uri&#39;</span>
+<span class="nb">require</span> <span class="s1">&#39;net/http&#39;</span>
+<span class="nb">require</span> <span class="s1">&#39;open-uri&#39;</span>
+
+<span class="nb">require</span> <span class="s1">&#39;rubygems&#39;</span>
+<span class="c1"># This requires the &#39;colorize&#39; gem. Install with &#39;[sudo] gem install colorize&#39;</span>
+<span class="nb">require</span> <span class="s1">&#39;colorize&#39;</span>
+
+
+<span class="c1"># The base Google URLs for callback, authentication, and subscription export</span>
+<span class="vg">$GOOGLE_URL</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com&quot;</span>
+<span class="vg">$LOGIN_URL</span> <span class="o">=</span> <span class="s2">&quot;https://www.google.com/accounts/ClientLogin&quot;</span>
+<span class="vg">$READER_URL</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/reader/subscriptions/export&quot;</span>
+
+<span class="c1"># The user agent string, for some reason this is required, feel free to change it</span>
+<span class="vg">$SOURCE</span> <span class="o">=</span> <span class="s2">&quot;keith.so&quot;</span>
+
+<span class="c1"># The default output filename, it is automatically overwritten if one already exists</span>
+<span class="vg">$FILE_NAME</span> <span class="o">=</span> <span class="s2">&quot;googlereadersubscriptions.opml&quot;</span>
+
+
+<span class="c1"># Make sure there is the correct number of arguments</span>
+<span class="k">if</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">count</span> <span class="o">!=</span> <span class="mi">2</span>
+    <span class="c1"># Print the instruction</span>
+    <span class="nb">puts</span> <span class="s2">&quot;Usage: ./</span><span class="si">#{</span> <span class="no">File</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">)</span> <span class="si">}</span><span class="s2"> USERNAME PASSWORD&quot;</span><span class="o">.</span><span class="n">red</span>
+    <span class="nb">exit</span>
+<span class="k">end</span>
+
+<span class="c1"># Build the request URL</span>
+<span class="n">uri</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="vg">$LOGIN_URL</span><span class="p">)</span>
+
+<span class="c1"># Setup the Parameters</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">Email</span><span class="p">:</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">first</span><span class="p">,</span> <span class="ss">Passwd</span><span class="p">:</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">last</span><span class="p">,</span> <span class="ss">service</span><span class="p">:</span> <span class="s2">&quot;reader&quot;</span><span class="p">,</span> <span class="ss">source</span><span class="p">:</span> <span class="vg">$SOURCE</span><span class="p">,</span> <span class="ss">continue</span><span class="p">:</span> <span class="vg">$GOOGLE_URL</span> <span class="p">}</span>
+
+<span class="c1"># Add the user-agent string, my website (feel free to replace it) to the headers</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;User-agent&quot;</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span> <span class="p">}</span>
+
+<span class="c1"># Encode the parameters into the url</span>
+<span class="n">uri</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">encode_www_form</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+<span class="c1"># Create a new NET:HTTP object with the request URL</span>
+<span class="n">http</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">uri</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">uri</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+
+<span class="c1"># Require HTTPS without this net/http will not be happy with you</span>
+<span class="n">http</span><span class="o">.</span><span class="n">use_ssl</span> <span class="o">=</span> <span class="kp">true</span>
+
+<span class="c1"># Execute the request</span>
+<span class="n">request</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">::</span><span class="no">Get</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">uri</span><span class="o">.</span><span class="n">request_uri</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+
+<span class="c1"># Get the data from the request</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+<span class="c1"># Check for valid response code, should ONLY be 200</span>
+<span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">code</span> <span class="o">!=</span> <span class="s1">&#39;200&#39;</span>
+    <span class="nb">puts</span> <span class="s2">&quot;Google returned </span><span class="si">#{</span> <span class="n">response</span><span class="o">.</span><span class="n">code</span> <span class="si">}</span><span class="s2">, check your username and password&quot;</span><span class="o">.</span><span class="n">red</span>
+    <span class="nb">exit</span>
+<span class="k">end</span>
+
+<span class="c1"># split each token into a different item then load them each into a hash with the key as the token key</span>
+<span class="n">auth_hash</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">.</span><span class="n">new</span>
+<span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sr">/\n/</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">token</span><span class="o">|</span>
+    <span class="n">split_array</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+    <span class="n">auth_hash</span><span class="o">[</span><span class="n">split_array</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">downcase</span><span class="o">]</span> <span class="o">=</span> <span class="n">split_array</span><span class="o">.</span><span class="n">last</span>
+<span class="k">end</span>
+
+<span class="c1"># Create a header hash for the request of the XML file</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;user-agent&quot;</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span><span class="p">,</span> <span class="s2">&quot;cookie&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;Name=SID;SID=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="o">[</span><span class="s1">&#39;sid&#39;</span><span class="o">]</span> <span class="si">}</span><span class="s2">;Domain=.google.com;Path=/;Expires=160000000000&quot;</span><span class="p">,</span> <span class="s2">&quot;authorization&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;GoogleLogin auth=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="o">[</span><span class="s1">&#39;auth&#39;</span><span class="o">]</span> <span class="si">}</span><span class="s2">&quot;</span> <span class="p">}</span>
+
+<span class="c1"># Open the URL for the Google Reader export with the setup headers</span>
+<span class="n">request</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="vg">$READER_URL</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+
+<span class="c1"># Open the received XML feeds file</span>
+<span class="n">google_reader_file</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="c1"># Read the entire feeds file into &#39;subscriptions&#39;</span>
+<span class="n">subscriptions</span> <span class="o">=</span> <span class="n">google_reader_file</span><span class="o">.</span><span class="n">read</span>
+
+<span class="c1"># Close the downloaded file</span>
+<span class="n">google_reader_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="c1"># Open a new file with the global filename to write to, overwrite it if it exists</span>
+<span class="n">subscriptions_file</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$FILE_NAME</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+<span class="c1"># Verify the file was created</span>
+<span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="n">subscriptions_file</span><span class="p">)</span>
+    <span class="c1"># Write the subscriptions to the file and close it</span>
+    <span class="n">subscriptions_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">)</span>
+    <span class="n">subscriptions_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># Display a success message</span>
+    <span class="nb">puts</span> <span class="s2">&quot;Wrote Google Reader subscriptions to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">green</span>
+<span class="k">else</span>
+    <span class="c1"># If the file wasn&#39;t created print an error</span>
+    <span class="nb">puts</span> <span class="s2">&quot;Couldn&#39;t write to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2"> (the process running this script may not have sufficient privileges&quot;</span><span class="o">.</span><span class="n">red</span>
+<span class="k">end</span>
+</code></pre></div>
+
+
+
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[Boredom]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/02/01/boredom/" />
+      <id>http://smileykeith.com/2013/02/01/boredom</id>
+      <updated>2013-02-01T11:03:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>Working as a developer full-time can be very exciting. Dealing with new interesting problems gets me up in the morning. But I still find that after a few months of a specific project I find myself less and less interested with it. Not only projects but concepts and languages start to become less interesting. First it was websites then Objective-C then Ruby then C and now who knows. This scares me. At this point in my life I hope to work in this field for my 'career' meaning a significant amount of time. Yet I can't even keep myself working on a single project now, much less one that doesn't interest me.</p>
+
+<p>I typically blame this on the difficulty of the project. As a lone developer I find that most projects I work on are pretty small in scope, since I just don't have the time or people-power to work on anything larger. Therefore I look at most of my projects without interest. I'm not sure what it will take to keep myself engaged and interested on my next project.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[Learning C]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/27/learning-c/" />
+      <id>http://smileykeith.com/2013/01/27/learning-c</id>
+      <updated>2013-01-27T22:59:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>I've been using Objective-C and C++ for a while now. While I feel like I know them pretty well I had absolutely no grasp on C itself. Obviously when using those languages you pick up a bit about data types and conditionals but you couldn't take that knowledge and completely write something non-trivial in C. Because of this I figured it might be worth some time so I started looking for viable resources. In that search I found Learn Code the Hard way. They publish physical and online books on different languages and so far I've found it to be a delight. It's not your typical easy walk through and on lessons 17 (of 51) you'll start actually having to think. This for me has been much better so far than typically online learning where the introductory course ends on how to write a for loop.</p>
+
+<p>If you're interested in picking up a C background I would definitely recommend you start here.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[NSTableView vim keys]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/08/nstableview-vim-keys/" />
+      <id>http://smileykeith.com/2013/01/08/nstableview-vim-keys</id>
+      <updated>2013-01-08T16:19:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>I'm currently working on a OS X application that uses a few different NSTableViews to display user data. I was testing them out a bit to make sure multiple deletions worked correctly from my database and I found myself pressing 'j' and 'k' to try and move down and up. I decided it would be pretty cool to implement those two vim shortcuts into my table view just in case anyone else thinks like me.</p>
+
+<p>This functionality already exists in <a href="http://www.potionfactory.com/thehitlist/">The Hit List</a> an awesome GTD app that has a lot of baggage with me, and I'm sure it exists in other applications as well.</p>
+
+<p>In my <code>NSTableView</code> subclass' <code>keyDown:</code> method I tried a few things.</p>
+
+<p>Attempt 1: First I tried to re implement the functionality myself. In retrospect this doesn't make any sense but at first it was pretty simple. It looked something like this.</p>
+
+<div class="highlight"><pre><code class="objc"><span class="n">NSUInteger</span> <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">theEvent</span> <span class="n">modifierFlags</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">NSDeviceIndependentModifierFlagsMask</span><span class="p">;</span>
+<span class="n">NSNumber</span> <span class="o">*</span><span class="n">shiftPressed</span> <span class="o">=</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">NSShiftKeyMask</span><span class="p">);</span>
+ 
+<span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
+    <span class="n">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="n">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
+        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">NO</span><span class="p">];</span>
+    <span class="p">}</span>
+<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
+    <span class="n">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="n">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
+        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">NO</span><span class="p">];</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>The issue with this is the way <code>NSTableView</code> typically expands it's selection. I think of it as a pivot point where you start. Then you go up and down relative to that point. So if you start at index 2 and go down till index 4, you should have 2 rows selected. Then when you go back up you should deselect the rows and indexes 3 and 4 and select the rows and index 1 and 0. At this point I realized it was more difficult than I realized at first and went in search on another solution.</p>
+
+<p>Attempt 2: The next solution I discovered used the <a href="https://developer.apple.com/library/mac/#documentation/Carbon/Reference/QuartzEventServicesRef/Reference/reference.html">Quartz Event Services</a> APIs.</p>
+
+<div class="highlight"><pre><code class="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter &#39;j&#39;</span>
+    <span class="n">CGEventRef</span> <span class="n">e</span> <span class="o">=</span> <span class="n">CGEventCreateKeyboardEvent</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="n">CGKeyCode</span><span class="p">)</span><span class="mi">125</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+    <span class="n">CGEventPost</span><span class="p">(</span><span class="n">kCGSessionEventTap</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+    <span class="n">CFRelease</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
+<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter &#39;k&#39;</span>
+    <span class="n">CGEventRef</span> <span class="n">e</span> <span class="o">=</span> <span class="n">CGEventCreateKeyboardEvent</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="n">CGKeyCode</span><span class="p">)</span><span class="mi">126</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+    <span class="n">CGEventPost</span><span class="p">(</span><span class="n">kCGSessionEventTap</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+    <span class="n">CFRelease</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>This solution worked perfectly, at first. This mainly emulates a key press with a different key code. So as you can see I was catching j and k and spitting them out as down and up. I spent a few minutes testing this before I remembered that I had sandboxing disabled so I could more easily delete my application support folder while messing with my Core Data stack. There went that solution.</p>
+
+<p>Attempt 3: Before I used the weird <code>CGEventRef</code> solution I tried to create my own <code>NSEvent</code> passing it all the same attributes from the original event (all this code is being used in the <code>keyDown:</code> function of my subclass) but I couldn't figure out how to get the correct character string for the up and down arrows. I typically use <a href="http://manytricks.com/keycodes/">Key Codes</a> to get all the possible information you could want about each key you press. But for some keys, including the arrow keys, it returns garbage for the character code. Then I discovered <a href="http://stackoverflow.com/a/4434934/902968">this answer</a> on StackOverflow where there is a brief mention of <code>NSUpArrowFunctionKey</code>. With that I came up with this.</p>
+
+<div class="highlight"><pre><code class="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
+    <span class="kt">unichar</span> <span class="n">down</span> <span class="o">=</span> <span class="n">NSDownArrowFunctionKey</span><span class="p">;</span>
+    <span class="n">NSString</span> <span class="o">*</span><span class="n">downString</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span> <span class="n">stringWithCharacters</span><span class="o">:&amp;</span><span class="n">down</span> <span class="n">length</span><span class="o">:</span><span class="mi">1</span><span class="p">];</span>
+    <span class="n">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="n">NSEvent</span> <span class="n">keyEventWithType</span><span class="o">:</span><span class="n">NSKeyDown</span>
+                                        <span class="nl">location:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
+                                   <span class="nl">modifierFlags:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
+                                       <span class="nl">timestamp:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
+                                    <span class="nl">windowNumber:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
+                                         <span class="nl">context:</span><span class="nb">nil</span>
+                                      <span class="nl">characters:</span><span class="n">downString</span>
+                     <span class="nl">charactersIgnoringModifiers:</span><span class="n">downString</span>
+                                       <span class="nl">isARepeat:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
+                                         <span class="nl">keyCode:</span><span class="n">down</span><span class="p">];</span>
+    
+    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">newEvent</span><span class="p">];</span>
+<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
+    <span class="kt">unichar</span> <span class="n">up</span> <span class="o">=</span> <span class="n">NSUpArrowFunctionKey</span><span class="p">;</span>
+    <span class="n">NSString</span> <span class="o">*</span><span class="n">upString</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span> <span class="n">stringWithCharacters</span><span class="o">:&amp;</span><span class="n">up</span> <span class="n">length</span><span class="o">:</span><span class="mi">1</span><span class="p">];</span>
+    <span class="n">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="n">NSEvent</span> <span class="n">keyEventWithType</span><span class="o">:</span><span class="n">NSKeyDown</span>
+                                        <span class="nl">location:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
+                                   <span class="nl">modifierFlags:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
+                                       <span class="nl">timestamp:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
+                                    <span class="nl">windowNumber:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
+                                         <span class="nl">context:</span><span class="nb">nil</span>
+                                      <span class="nl">characters:</span><span class="n">upString</span>
+                     <span class="nl">charactersIgnoringModifiers:</span><span class="n">upString</span>
+                                       <span class="nl">isARepeat:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
+                                         <span class="nl">keyCode:</span><span class="n">up</span><span class="p">];</span>
+    
+    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">newEvent</span><span class="p">];</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">theEvent</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>Not the prettiest solution I but one that seems to work perfectly, even sandboxed, to provide the expected behavior in an <code>NSTableView</code> subclass.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[Backing up with Capistrano]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/05/backing-up-with-capistrano/" />
+      <id>http://smileykeith.com/2013/01/05/backing-up-with-capistrano</id>
+      <updated>2013-01-05T12:12:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>We all know not backing up has <a href="http://www.wired.com/gadgetlab/2012/08/apple-amazon-mat-honan-hacking/">consequences</a>. While losing sentimental files would definitely ruin your day, losing your web server's data could be even worse. I've mentioned <a href="http://smileykeith.com/2013/01/02/linode-setup/">before</a> that I use <a href="http://www.linode.com/?r=c190426bf1ff0f144b48997675bae8b32d339824">Linode</a> for my server hosting, and while they do offer an <a href="http://library.linode.com/backup-service">automated backup service</a> I decided I'd rather setup my own solution to back up periodically to my local machine.</p>
+
+<p>Many people use <a href="http://en.wikipedia.org/wiki/Rsync">rsync</a> to do their server backups. In fact Linode even has a <a href="http://library.linode.com/linux-tools/utilities/rsync#sph_use-rsync-to-back-up-production-environments">guide</a> on how to set it up (there's a better one <a href="http://feross.org/how-to-setup-your-linode/">here</a>). I decided that instead of a 1 for 1 directory backup, I would prefer to have a <a href="http://en.wikipedia.org/wiki/Tar_(file_format">tarball</a>) of the contents. While I could've easily done this with a few bash commands from the server that's not particular ideal for my setup. My local machines don't run 24/7 so if I set it up on the server to automate the backup every week, it may try to initiate the backup when my machine was off (I could try to guess when it's on every week but that's not ideal either).</p>
+
+<p>The obvious solution to this is run it from my local machine instead every week. That way once a week when it's powered up it would log in to the server, create the tarball and pull it down. Insert <a href="https://github.com/capistrano/capistrano">Capistrano</a> (<code>[sudo] gem install capistrano</code>) a <a href="http://rubygems.org/">RubyGem</a> for 'Remote multi-server automation.' So I wrote a very basic <code>Capfile</code> to automate this for me (replace the path to your <code>www</code> folder accordingly).</p>
+
+<div class="highlight"><pre><code class="ruby"><span class="nb">load</span> <span class="s1">&#39;deploy&#39;</span>
+
+<span class="vg">$SERVER_USER</span> <span class="o">=</span> <span class="s2">&quot;username&quot;</span>
+<span class="vg">$SERVER_IP</span>   <span class="o">=</span> <span class="s2">&quot;1.1.1.1&quot;</span>
+
+<span class="n">desc</span> <span class="s2">&quot;Backs up server www files&quot;</span>
+<span class="n">task</span> <span class="ss">:backup</span><span class="p">,</span> <span class="ss">:hosts</span> <span class="o">=&gt;</span> <span class="vg">$SERVER_IP</span> <span class="k">do</span>
+  <span class="n">run</span> <span class="s2">&quot;cd /srv; tar -pvczf ~/backup.tar.gz www/&quot;</span>
+  <span class="n">run_locally</span> <span class="s2">&quot;scp </span><span class="si">#{</span> <span class="vg">$SERVER_USER</span> <span class="si">}</span><span class="s2">@</span><span class="si">#{</span> <span class="vg">$SERVER_IP</span> <span class="si">}</span><span class="s2">:~/backup.tar.gz ~/Dropbox/Backups/Server&quot;</span>
+<span class="k">end</span>
+</code></pre></div>
+
+
+<p>Then I added this to my crontab on my local machine by running <code>crontab -e</code> and adding the line:</p>
+
+<div class="highlight"><pre><code class="bash">@weekly /Users/ksmiley/.rbenv/shims/cap -f ~/path/to/Capfile backup
+</code></pre></div>
+
+
+<p>I included the path to the Capistrano executable since cron (on OS X) executes tasks with <code>sh</code>, which isn't setup with my <code>$PATH</code>.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[Raking Podspecs]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/04/raking-podspecs/" />
+      <id>http://smileykeith.com/2013/01/04/raking-podspecs</id>
+      <updated>2013-01-04T11:09:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>I spend a decent amount of time these days helping maintain the <a href="http://cocoapods.org/">CocoaPods</a> <a href="http://github.com/cocoapods/specs">specs repo</a> by managing pull requests and issues. CococaPods is an awesome dependency manager similar to <a href="http://rubygems.org/">Rubygems</a> for Objective-C projects. Unfortunately a lot of submitted podspecs haven't been correctly formatted or they're missing required information. CocoaPods has an awesome build in command <code>pod spec lint</code> that allows you to make sure the spec is valid and complete. Understandably people who are new to CocoaPods trying to submit their libraries are unaware of this awesome tool. Therefore when I look through the pull requests, I like to lint them myself (CocoaPods does <a href="https://travis-ci.org/CocoaPods/Specs">utilize Travis</a> but unfortunately it can't do everything).</p>
+
+<p>Since CocoaPods supports multiple versions of Ruby (1.8.7 and 1.9.3) to be complete ideally you'd lint them on both versions. Tools like <a href="https://rvm.io/">RVM</a> and <a href="https://github.com/sstephenson/rbenv">rbenv</a>(my tool of choice) make it easy to quickly switch between different versions of Ruby using <code>.rvmrc</code> and <code>.rbenv-version</code> respectively. As you can probably assume I wanted to automate this. So I wrote a quick <a href="http://rake.rubyforge.org/">Rakefile</a> to do this for me.</p>
+
+<div class="highlight"><pre><code class="ruby"><span class="c1">#!/usr/bin/env rake</span>
+
+<span class="c1"># NOTE: Must be using rbenv 4.0 to use `system` and `.ruby-version`</span>
+<span class="c1">## Set your preferred ruby versions</span>
+<span class="vg">$V18</span> <span class="o">=</span> <span class="s1">&#39;system&#39;</span>
+<span class="vg">$V19</span> <span class="o">=</span> <span class="s1">&#39;1.9.3-p385&#39;</span>
+<span class="vg">$RBENV</span> <span class="o">=</span> <span class="s1">&#39;.ruby-version&#39;</span>
+
+<span class="c1"># The gem to use</span>
+<span class="vg">$GEM</span> <span class="o">=</span> <span class="s1">&#39;cocoapods&#39;</span>
+
+<span class="n">task</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="ss">:lint</span>
+<span class="n">task</span> <span class="ss">:c</span>       <span class="o">=&gt;</span> <span class="ss">:clean</span>
+
+<span class="n">desc</span> <span class="s2">&quot;Lint podspecs on multiple versions of ruby with rbenv&quot;</span>
+<span class="n">task</span> <span class="ss">:lint</span> <span class="k">do</span>
+  <span class="k">if</span> <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span> <span class="o">&lt;</span> <span class="mi">1</span>
+    <span class="nb">puts</span> <span class="s2">&quot;No podspecs in </span><span class="si">#{</span> <span class="no">Dir</span><span class="o">.</span><span class="n">pwd</span> <span class="si">}</span><span class="s2">&quot;</span>
+    <span class="nb">exit</span>
+  <span class="k">end</span>
+
+  <span class="n">existed</span> <span class="o">=</span> <span class="n">versionFileExists?</span>
+  <span class="k">if</span> <span class="n">existed</span>
+    <span class="n">old_version</span> <span class="o">=</span> <span class="n">currentVersion</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Loop through all podspecs</span>
+  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span>
+    <span class="c1"># Loop through ruby versions</span>
+    <span class="mi">2</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+      <span class="n">version</span> <span class="o">=</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">?</span> <span class="vg">$V18</span> <span class="p">:</span> <span class="vg">$V19</span>
+      <span class="n">writeVersion</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+
+      <span class="nb">puts</span> <span class="s2">&quot;Linting </span><span class="si">#{</span> <span class="n">file</span> <span class="si">}</span><span class="s2"> on Ruby version </span><span class="si">#{</span> <span class="n">currentVersion</span> <span class="si">}</span><span class="s2">&quot;</span>
+      <span class="nb">puts</span> <span class="n">lint</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="c1"># If the dotfile already existed rewrite the original code</span>
+  <span class="k">if</span> <span class="n">existed</span>
+    <span class="n">writeVersion</span><span class="p">(</span><span class="n">old_version</span><span class="p">)</span>
+  <span class="k">else</span>
+    <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span> <span class="k">if</span> <span class="n">versionFileExists?</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">desc</span> <span class="s2">&quot;Delete all podspec files&quot;</span>
+<span class="n">task</span> <span class="ss">:clean</span> <span class="k">do</span>
+  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">}</span>
+  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Check to see if the current dotfile exists</span>
+<span class="k">def</span> <span class="nf">versionFileExists?</span>
+  <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c1"># Retrieve the current version from the rbenv dotfile</span>
+<span class="k">def</span> <span class="nf">currentVersion</span>
+  <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">io</span><span class="o">|</span> <span class="n">io</span><span class="o">.</span><span class="n">read</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Write out a version to .rbenv-version</span>
+<span class="k">def</span> <span class="nf">writeVersion</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+  <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span> <span class="n">version</span> <span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Run the lint</span>
+<span class="k">def</span> <span class="nf">lint</span><span class="p">(</span><span class="n">podspec</span><span class="p">)</span>
+  <span class="sx">%x[pod spec lint &quot;</span><span class="si">#{</span> <span class="n">podspec</span> <span class="si">}</span><span class="sx">&quot;]</span>
+<span class="k">end</span>
+</code></pre></div>
+
+
+
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[Spawning iTerm Windows]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/03/spawn-iterm/" />
+      <id>http://smileykeith.com/2013/01/03/spawn-iterm</id>
+      <updated>2013-01-03T12:34:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>I've recently been searching around for a good way to 'spawn' an <a href="http://www.iterm2.com/">iTerm</a> window (no I don't use tabs in iTerm), at the <code>pwd</code> in my current iTerm window. I couldn't find any good way to do it so I jumped in to AppleScript Editor and made something happen.</p>
+
+<div class="highlight"><pre><code class="applescript"><span class="k">on</span> <span class="nb">run</span> <span class="nv">argv</span>
+    <span class="k">tell</span> <span class="nb">application</span> <span class="s2">&quot;iTerm&quot;</span>
+        <span class="k">set</span> <span class="nv">t</span> <span class="k">to</span> <span class="nb">make</span> <span class="nb">new</span> <span class="nv">terminal</span>
+        <span class="k">tell</span> <span class="nv">t</span>
+            <span class="nb">activate</span> <span class="nv">current</span> <span class="nv">session</span>
+            <span class="nb">launch</span> <span class="nv">session</span> <span class="s2">&quot;Default Session&quot;</span>
+            <span class="k">tell</span> <span class="nb">the</span> <span class="nb">last</span> <span class="nv">session</span>
+                <span class="nb">write</span> <span class="nb">text</span> <span class="s2">&quot;cd \&quot;&quot;</span> <span class="o">&amp;</span> <span class="nb">item</span> <span class="mi">1</span> <span class="k">of</span> <span class="nv">argv</span> <span class="o">&amp;</span> <span class="s2">&quot;\&quot;; clear; pwd&quot;</span>
+            <span class="k">end</span> <span class="k">tell</span>
+        <span class="k">end</span> <span class="k">tell</span>
+    <span class="k">end</span> <span class="k">tell</span>
+<span class="k">end</span> <span class="nb">run</span>
+</code></pre></div>
+
+
+<p>I then added it to my <a href="http://www.zsh.org/">zsh</a> aliases with:</p>
+
+<p><code>function spawn { osascript ~/Dropbox/Code/Applescript/Spawn/SpawniTerm.applescript $PWD }</code></p>
+
+<p>Now I can call <code>spawn</code> from any iTerm or Terminal window to open a new iTerm session wherever I called it from.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[NSWindow Global Hotkey]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/03/nswindow-global-hotkey/" />
+      <id>http://smileykeith.com/2013/01/03/nswindow-global-hotkey</id>
+      <updated>2013-01-03T10:44:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>For quite a while I was having trouble dealing with a global show/hide hotkey for windows in Objective-C. Global hotkeys are already <a href="http://stackoverflow.com/questions/4807319/register-hotkey">hard</a> <a href="https://github.com/Keithbsmiley/PTHotKeyTest">enough</a>. Although <a href="https://github.com/shpakovski/MASShortcut">MASShortcut</a> has solved that. Yes I know of <a href="http://wafflesoftware.net/shortcut/">ShortcutRecorder</a> but it's very dated (MASShortcut even uses blocks!).</p>
+
+<p>I found that once I had the shortcut working I was having a hard time dealing with opening and closing, showing and hiding the application. What seemed to happen was when the method was called and <code>[[NSRunningApplication currentApplication] isActive]</code> was evaluated in an <code>if</code> statement along with an <code>else</code> clause, if the application was hidden using <code>[[NSApplication sharedApplication] hide:self];</code> it was reevaluated and it hit the <code>else</code> case. This also happened with an <code>if</code> statement checking if the window was already visible with <code>[myWindow isVisible]</code> even with <code>return;</code> statements inserted in appropriate places.</p>
+
+<p>My solution was adding <code>NSNumber</code>s acting as booleans to keep track of the value allowing me to avoid <code>else</code> statements altogether and use <code>else if</code>s instead.</p>
+
+<div class="highlight"><pre><code class="objc"><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">showHideMainWindow</span> <span class="p">{</span>
+    <span class="n">NSNumber</span> <span class="o">*</span><span class="n">wasActive</span> <span class="o">=</span> <span class="p">@</span><span class="nb">NO</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">([[</span><span class="n">NSRunningApplication</span> <span class="n">currentApplication</span><span class="p">]</span> <span class="n">isActive</span><span class="p">])</span> <span class="p">{</span>
+        <span class="n">wasActive</span> <span class="o">=</span> <span class="p">@</span><span class="nb">YES</span><span class="p">;</span>
+        <span class="n">NSNumber</span> <span class="o">*</span><span class="n">wasOpen</span> <span class="o">=</span> <span class="p">@</span><span class="nb">NO</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">([</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">isVisible</span><span class="p">])</span> <span class="p">{</span>
+            <span class="n">wasOpen</span> <span class="o">=</span> <span class="p">@</span><span class="nb">YES</span><span class="p">;</span>
+            <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">close</span><span class="p">];</span>
+            <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="n">hide</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">[</span><span class="n">wasOpen</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
+            <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">makeKeyAndOrderFront</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">[</span><span class="n">wasActive</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
+        <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="n">activateIgnoringOtherApps</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
+        <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">makeKeyAndOrderFront</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[Linode Setup]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/02/linode-setup/" />
+      <id>http://smileykeith.com/2013/01/02/linode-setup</id>
+      <updated>2013-01-02T15:19:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>I've been using <a href="http://www.linode.com/?r=c190426bf1ff0f144b48997675bae8b32d339824">Linode</a> for about the past 4 months. I was previously using <a href="http://www.hostmonster.com/">HostMonster</a> for all of my hosting, while I would recommend them 80% of the time, Linode and the nature of a VPS allows many things you cannot do with shared hosting.</p>
+
+<p>I was looking around for some recommendations on how to deal with user accounts and permissions and ran across this great article that has almost every piece of information you need to get your server from nothing to deployed.</p>
+
+<p>Linode allows you complete control over your VPS which, for beginners (like me when I started with Linode), difficult to get started with. Just follow this guide and you'll be good to go.</p>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
+      <title type="html"><![CDATA[The fear of shipping]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2012/12/12/the-fear-of-shipping/" />
+      <id>http://smileykeith.com/2012/12/12/the-fear-of-shipping</id>
+      <updated>2012-12-12T17:42:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>Something I've become very aware of lately is how difficult it is for me to ship. I have at least a dozen unfinished projects that I could probably ship, yet I find any excuse to hold them back.</p>
+
+<p>I could say forget it and ship it. Then depending on the amount of feedback I received, decide whether or not it was worth putting more time into. I often fall victim to "just one more feature here" or "oh it would be great if I added this first." When I should have just shipped.</p>
+
+<p>After nearly convincing myself to do this, what is holding me back? The fear of ruining my first impressions. Up to this point my programming career, especially in public, has been pretty sparse. I've made a few websites, and I shipped an internal enterprise iOS app, but that doesn't count for much. So as far as most people know I sit at home on my thumbs 24/7 occasionally tweeting about Objective-C frameworks. I want to be perceived well in the community, I respect a lot of indie iOS and OS X developers and the last thing I want is attention for an unfinished or unpolished product. I am starting to realize that this is unrealistic. I would love my first major application to be perfect but that's just not feasible. I hope to get there in the future, but I am very close to accepting that getting there requires stepping stones. For me, those stepping stones might be some useless OS X utilities that I've made for myself and now want to share with the world. No matter how unpolished.</p>
+]]>
+      </content>
+    </entry>
+  
+</feed>

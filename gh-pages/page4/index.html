@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+  
+    <title>Keith Smiley</title>
+  
+
+    <meta name="author" content="Keith Smiley">
+    <link rel="author" href="https://plus.google.com/114321628813035573740/">
+    <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/atom.xml">
+
+    <link rel="icon" href="/images/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon">
+
+    <!-- Thank you http://mathiasbynens.be/notes/touch-icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/touchicons/apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/touchicons/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/touchicons/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/images/touchicons/apple-touch-icon-precomposed.png">
+
+    <!--[if lt IE 9]>
+      <script type="text/javascript" language="Javascript" src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
+  </head>
+  <body>
+    <section class="container">
+      <div id="masthead">
+        <h1>
+          <a href="/">Keith Smiley</a>
+          - <a href="http://keith.so" title="Who is this guy?">Who?</a>
+        </h1>
+      </div>
+
+      <section class="content">
+        
+<article>
+  <header class="seven columns">
+    
+      <h2><a href="/2013/01/04/raking-podspecs/">Raking Podspecs</a></h2>
+    
+    <p>
+      <time datetime="2013-01-04 11:09:00 -0800" pubdate="pubdate">
+        04 Jan 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/01/04/raking-podspecs/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>I spend a decent amount of time these days helping maintain the <a href="http://cocoapods.org/">CocoaPods</a> <a href="http://github.com/cocoapods/specs">specs repo</a> by managing pull requests and issues. CococaPods is an awesome dependency manager similar to <a href="http://rubygems.org/">Rubygems</a> for Objective-C projects. Unfortunately a lot of submitted podspecs haven't been correctly formatted or they're missing required information. CocoaPods has an awesome build in command <code>pod spec lint</code> that allows you to make sure the spec is valid and complete. Understandably people who are new to CocoaPods trying to submit their libraries are unaware of this awesome tool. Therefore when I look through the pull requests, I like to lint them myself (CocoaPods does <a href="https://travis-ci.org/CocoaPods/Specs">utilize Travis</a> but unfortunately it can't do everything).</p>
+
+<p>Since CocoaPods supports multiple versions of Ruby (1.8.7 and 1.9.3) to be complete ideally you'd lint them on both versions. Tools like <a href="https://rvm.io/">RVM</a> and <a href="https://github.com/sstephenson/rbenv">rbenv</a>(my tool of choice) make it easy to quickly switch between different versions of Ruby using <code>.rvmrc</code> and <code>.rbenv-version</code> respectively. As you can probably assume I wanted to automate this. So I wrote a quick <a href="http://rake.rubyforge.org/">Rakefile</a> to do this for me.</p>
+
+<div class="highlight"><pre><code class="ruby"><span class="c1">#!/usr/bin/env rake</span>
+
+<span class="c1"># NOTE: Must be using rbenv 4.0 to use `system` and `.ruby-version`</span>
+<span class="c1">## Set your preferred ruby versions</span>
+<span class="vg">$V18</span> <span class="o">=</span> <span class="s1">&#39;system&#39;</span>
+<span class="vg">$V19</span> <span class="o">=</span> <span class="s1">&#39;1.9.3-p385&#39;</span>
+<span class="vg">$RBENV</span> <span class="o">=</span> <span class="s1">&#39;.ruby-version&#39;</span>
+
+<span class="c1"># The gem to use</span>
+<span class="vg">$GEM</span> <span class="o">=</span> <span class="s1">&#39;cocoapods&#39;</span>
+
+<span class="n">task</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="ss">:lint</span>
+<span class="n">task</span> <span class="ss">:c</span>       <span class="o">=&gt;</span> <span class="ss">:clean</span>
+
+<span class="n">desc</span> <span class="s2">&quot;Lint podspecs on multiple versions of ruby with rbenv&quot;</span>
+<span class="n">task</span> <span class="ss">:lint</span> <span class="k">do</span>
+  <span class="k">if</span> <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span> <span class="o">&lt;</span> <span class="mi">1</span>
+    <span class="nb">puts</span> <span class="s2">&quot;No podspecs in </span><span class="si">#{</span> <span class="no">Dir</span><span class="o">.</span><span class="n">pwd</span> <span class="si">}</span><span class="s2">&quot;</span>
+    <span class="nb">exit</span>
+  <span class="k">end</span>
+
+  <span class="n">existed</span> <span class="o">=</span> <span class="n">versionFileExists?</span>
+  <span class="k">if</span> <span class="n">existed</span>
+    <span class="n">old_version</span> <span class="o">=</span> <span class="n">currentVersion</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Loop through all podspecs</span>
+  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span>
+    <span class="c1"># Loop through ruby versions</span>
+    <span class="mi">2</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+      <span class="n">version</span> <span class="o">=</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">?</span> <span class="vg">$V18</span> <span class="p">:</span> <span class="vg">$V19</span>
+      <span class="n">writeVersion</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+
+      <span class="nb">puts</span> <span class="s2">&quot;Linting </span><span class="si">#{</span> <span class="n">file</span> <span class="si">}</span><span class="s2"> on Ruby version </span><span class="si">#{</span> <span class="n">currentVersion</span> <span class="si">}</span><span class="s2">&quot;</span>
+      <span class="nb">puts</span> <span class="n">lint</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="c1"># If the dotfile already existed rewrite the original code</span>
+  <span class="k">if</span> <span class="n">existed</span>
+    <span class="n">writeVersion</span><span class="p">(</span><span class="n">old_version</span><span class="p">)</span>
+  <span class="k">else</span>
+    <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span> <span class="k">if</span> <span class="n">versionFileExists?</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">desc</span> <span class="s2">&quot;Delete all podspec files&quot;</span>
+<span class="n">task</span> <span class="ss">:clean</span> <span class="k">do</span>
+  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">}</span>
+  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Check to see if the current dotfile exists</span>
+<span class="k">def</span> <span class="nf">versionFileExists?</span>
+  <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c1"># Retrieve the current version from the rbenv dotfile</span>
+<span class="k">def</span> <span class="nf">currentVersion</span>
+  <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">io</span><span class="o">|</span> <span class="n">io</span><span class="o">.</span><span class="n">read</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Write out a version to .rbenv-version</span>
+<span class="k">def</span> <span class="nf">writeVersion</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+  <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span> <span class="n">version</span> <span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Run the lint</span>
+<span class="k">def</span> <span class="nf">lint</span><span class="p">(</span><span class="n">podspec</span><span class="p">)</span>
+  <span class="sx">%x[pod spec lint &quot;</span><span class="si">#{</span> <span class="n">podspec</span> <span class="si">}</span><span class="sx">&quot;]</span>
+<span class="k">end</span>
+</code></pre></div>
+
+
+
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
+      <h2><a href="/2013/01/03/spawn-iterm/">Spawning iTerm Windows</a></h2>
+    
+    <p>
+      <time datetime="2013-01-03 12:34:00 -0800" pubdate="pubdate">
+        03 Jan 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/01/03/spawn-iterm/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>I've recently been searching around for a good way to 'spawn' an <a href="http://www.iterm2.com/">iTerm</a> window (no I don't use tabs in iTerm), at the <code>pwd</code> in my current iTerm window. I couldn't find any good way to do it so I jumped in to AppleScript Editor and made something happen.</p>
+
+<div class="highlight"><pre><code class="applescript"><span class="k">on</span> <span class="nb">run</span> <span class="nv">argv</span>
+    <span class="k">tell</span> <span class="nb">application</span> <span class="s2">&quot;iTerm&quot;</span>
+        <span class="k">set</span> <span class="nv">t</span> <span class="k">to</span> <span class="nb">make</span> <span class="nb">new</span> <span class="nv">terminal</span>
+        <span class="k">tell</span> <span class="nv">t</span>
+            <span class="nb">activate</span> <span class="nv">current</span> <span class="nv">session</span>
+            <span class="nb">launch</span> <span class="nv">session</span> <span class="s2">&quot;Default Session&quot;</span>
+            <span class="k">tell</span> <span class="nb">the</span> <span class="nb">last</span> <span class="nv">session</span>
+                <span class="nb">write</span> <span class="nb">text</span> <span class="s2">&quot;cd \&quot;&quot;</span> <span class="o">&amp;</span> <span class="nb">item</span> <span class="mi">1</span> <span class="k">of</span> <span class="nv">argv</span> <span class="o">&amp;</span> <span class="s2">&quot;\&quot;; clear; pwd&quot;</span>
+            <span class="k">end</span> <span class="k">tell</span>
+        <span class="k">end</span> <span class="k">tell</span>
+    <span class="k">end</span> <span class="k">tell</span>
+<span class="k">end</span> <span class="nb">run</span>
+</code></pre></div>
+
+
+<p>I then added it to my <a href="http://www.zsh.org/">zsh</a> aliases with:</p>
+
+<p><code>function spawn { osascript ~/Dropbox/Code/Applescript/Spawn/SpawniTerm.applescript $PWD }</code></p>
+
+<p>Now I can call <code>spawn</code> from any iTerm or Terminal window to open a new iTerm session wherever I called it from.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
+      <h2><a href="/2013/01/03/nswindow-global-hotkey/">NSWindow Global Hotkey</a></h2>
+    
+    <p>
+      <time datetime="2013-01-03 10:44:00 -0800" pubdate="pubdate">
+        03 Jan 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/01/03/nswindow-global-hotkey/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>For quite a while I was having trouble dealing with a global show/hide hotkey for windows in Objective-C. Global hotkeys are already <a href="http://stackoverflow.com/questions/4807319/register-hotkey">hard</a> <a href="https://github.com/Keithbsmiley/PTHotKeyTest">enough</a>. Although <a href="https://github.com/shpakovski/MASShortcut">MASShortcut</a> has solved that. Yes I know of <a href="http://wafflesoftware.net/shortcut/">ShortcutRecorder</a> but it's very dated (MASShortcut even uses blocks!).</p>
+
+<p>I found that once I had the shortcut working I was having a hard time dealing with opening and closing, showing and hiding the application. What seemed to happen was when the method was called and <code>[[NSRunningApplication currentApplication] isActive]</code> was evaluated in an <code>if</code> statement along with an <code>else</code> clause, if the application was hidden using <code>[[NSApplication sharedApplication] hide:self];</code> it was reevaluated and it hit the <code>else</code> case. This also happened with an <code>if</code> statement checking if the window was already visible with <code>[myWindow isVisible]</code> even with <code>return;</code> statements inserted in appropriate places.</p>
+
+<p>My solution was adding <code>NSNumber</code>s acting as booleans to keep track of the value allowing me to avoid <code>else</code> statements altogether and use <code>else if</code>s instead.</p>
+
+<div class="highlight"><pre><code class="objc"><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">showHideMainWindow</span> <span class="p">{</span>
+    <span class="n">NSNumber</span> <span class="o">*</span><span class="n">wasActive</span> <span class="o">=</span> <span class="p">@</span><span class="nb">NO</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">([[</span><span class="n">NSRunningApplication</span> <span class="n">currentApplication</span><span class="p">]</span> <span class="n">isActive</span><span class="p">])</span> <span class="p">{</span>
+        <span class="n">wasActive</span> <span class="o">=</span> <span class="p">@</span><span class="nb">YES</span><span class="p">;</span>
+        <span class="n">NSNumber</span> <span class="o">*</span><span class="n">wasOpen</span> <span class="o">=</span> <span class="p">@</span><span class="nb">NO</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">([</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">isVisible</span><span class="p">])</span> <span class="p">{</span>
+            <span class="n">wasOpen</span> <span class="o">=</span> <span class="p">@</span><span class="nb">YES</span><span class="p">;</span>
+            <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">close</span><span class="p">];</span>
+            <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="n">hide</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">[</span><span class="n">wasOpen</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
+            <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">makeKeyAndOrderFront</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">[</span><span class="n">wasActive</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
+        <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="n">activateIgnoringOtherApps</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
+        <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">makeKeyAndOrderFront</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
+      <h2 class="link">
+        <a href="http://feross.org/how-to-setup-your-linode/">Linode Setup</a>
+        <span class="linkarrow">&rarr;</span>
+      </h2>
+    
+    <p>
+      <time datetime="2013-01-02 15:19:00 -0800" pubdate="pubdate">
+        02 Jan 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/01/02/linode-setup/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>I've been using <a href="http://www.linode.com/?r=c190426bf1ff0f144b48997675bae8b32d339824">Linode</a> for about the past 4 months. I was previously using <a href="http://www.hostmonster.com/">HostMonster</a> for all of my hosting, while I would recommend them 80% of the time, Linode and the nature of a VPS allows many things you cannot do with shared hosting.</p>
+
+<p>I was looking around for some recommendations on how to deal with user accounts and permissions and ran across this great article that has almost every piece of information you need to get your server from nothing to deployed.</p>
+
+<p>Linode allows you complete control over your VPS which, for beginners (like me when I started with Linode), difficult to get started with. Just follow this guide and you'll be good to go.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
+      <h2><a href="/2012/12/12/the-fear-of-shipping/">The fear of shipping</a></h2>
+    
+    <p>
+      <time datetime="2012-12-12 17:42:00 -0800" pubdate="pubdate">
+        12 Dec 2012
+      </time>
+      <a class="permalink" title="Permalink" href="/2012/12/12/the-fear-of-shipping/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>Something I've become very aware of lately is how difficult it is for me to ship. I have at least a dozen unfinished projects that I could probably ship, yet I find any excuse to hold them back.</p>
+
+<p>I could say forget it and ship it. Then depending on the amount of feedback I received, decide whether or not it was worth putting more time into. I often fall victim to "just one more feature here" or "oh it would be great if I added this first." When I should have just shipped.</p>
+
+<p>After nearly convincing myself to do this, what is holding me back? The fear of ruining my first impressions. Up to this point my programming career, especially in public, has been pretty sparse. I've made a few websites, and I shipped an internal enterprise iOS app, but that doesn't count for much. So as far as most people know I sit at home on my thumbs 24/7 occasionally tweeting about Objective-C frameworks. I want to be perceived well in the community, I respect a lot of indie iOS and OS X developers and the last thing I want is attention for an unfinished or unpolished product. I am starting to realize that this is unrealistic. I would love my first major application to be perfect but that's just not feasible. I hope to get there in the future, but I am very close to accepting that getting there requires stepping stones. For me, those stepping stones might be some useless OS X utilities that I've made for myself and now want to share with the world. No matter how unpolished.</p>
+
+  </div>
+</article>
+
+
+<!-- Pagination links -->
+<div class="pagination ten columns">
+  
+    <div class="older">&nbsp;</div>
+  
+
+  <div class="pagearchive">
+    <a href="/archives/">Blog Archive</a>
+  </div>
+
+  
+    
+      <div class="newer">
+        <a href="/page3">Newer</a>
+        <span class="pagearrow">&rarr;</span>
+      </div>
+    
+  
+</div>
+
+      </section>
+    </section>
+
+    <script>
+        var _gaq=[['_setAccount','UA-10630305-13'],['_trackPageview']];
+        (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+        g.src='//www.google-analytics.com/ga.js';
+        s.parentNode.insertBefore(g,s)}(document,'script'));
+    </script>
+  </body>
+</html>
