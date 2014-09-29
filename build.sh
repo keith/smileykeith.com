@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+set -e
+
 git_dir="gh-pages"
 
+bundle check && bundle install
 rake
 
 git clone --branch gh-pages https://github.com/Keithbsmiley/smileykeith.com.git $git_dir
