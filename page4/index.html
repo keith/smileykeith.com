@@ -41,6 +41,30 @@
 <article>
   <header class="seven columns">
     
+      <h2 class="link">
+        <a href="http://c.learncodethehardway.org/book/">Learning C</a>
+        <span class="linkarrow">&rarr;</span>
+      </h2>
+    
+    <p>
+      <time datetime="2013-01-27 22:59:00 -0800" pubdate="pubdate">
+        27 Jan 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/01/27/learning-c/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>I've been using Objective-C and C++ for a while now. While I feel like I know them pretty well I had absolutely no grasp on C itself. Obviously when using those languages you pick up a bit about data types and conditionals but you couldn't take that knowledge and completely write something non-trivial in C. Because of this I figured it might be worth some time so I started looking for viable resources. In that search I found Learn Code the Hard way. They publish physical and online books on different languages and so far I've found it to be a delight. It's not your typical easy walk through and on lessons 17 (of 51) you'll start actually having to think. This for me has been much better so far than typically online learning where the introductory course ends on how to write a for loop.</p>
+
+<p>If you're interested in picking up a C background I would definitely recommend you start here.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
       <h2><a href="/2013/01/08/nstableview-vim-keys/">NSTableView vim keys</a></h2>
     
     <p>
@@ -319,51 +343,6 @@
 <p><code>function spawn { osascript ~/Dropbox/Code/Applescript/Spawn/SpawniTerm.applescript $PWD }</code></p>
 
 <p>Now I can call <code>spawn</code> from any iTerm or Terminal window to open a new iTerm session wherever I called it from.</p>
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2013/01/03/nswindow-global-hotkey/">NSWindow Global Hotkey</a></h2>
-    
-    <p>
-      <time datetime="2013-01-03 10:44:00 -0800" pubdate="pubdate">
-        03 Jan 2013
-      </time>
-      <a class="permalink" title="Permalink" href="/2013/01/03/nswindow-global-hotkey/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>For quite a while I was having trouble dealing with a global show/hide hotkey for windows in Objective-C. Global hotkeys are already <a href="http://stackoverflow.com/questions/4807319/register-hotkey">hard</a> <a href="https://github.com/Keithbsmiley/PTHotKeyTest">enough</a>. Although <a href="https://github.com/shpakovski/MASShortcut">MASShortcut</a> has solved that. Yes I know of <a href="http://wafflesoftware.net/shortcut/">ShortcutRecorder</a> but it's very dated (MASShortcut even uses blocks!).</p>
-
-<p>I found that once I had the shortcut working I was having a hard time dealing with opening and closing, showing and hiding the application. What seemed to happen was when the method was called and <code>[[NSRunningApplication currentApplication] isActive]</code> was evaluated in an <code>if</code> statement along with an <code>else</code> clause, if the application was hidden using <code>[[NSApplication sharedApplication] hide:self];</code> it was reevaluated and it hit the <code>else</code> case. This also happened with an <code>if</code> statement checking if the window was already visible with <code>[myWindow isVisible]</code> even with <code>return;</code> statements inserted in appropriate places.</p>
-
-<p>My solution was adding <code>NSNumber</code>s acting as booleans to keep track of the value allowing me to avoid <code>else</code> statements altogether and use <code>else if</code>s instead.</p>
-
-<div class="highlight"><pre><code class="objc"><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">showHideMainWindow</span> <span class="p">{</span>
-    <span class="n">NSNumber</span> <span class="o">*</span><span class="n">wasActive</span> <span class="o">=</span> <span class="p">@</span><span class="nb">NO</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">([[</span><span class="n">NSRunningApplication</span> <span class="n">currentApplication</span><span class="p">]</span> <span class="n">isActive</span><span class="p">])</span> <span class="p">{</span>
-        <span class="n">wasActive</span> <span class="o">=</span> <span class="p">@</span><span class="nb">YES</span><span class="p">;</span>
-        <span class="n">NSNumber</span> <span class="o">*</span><span class="n">wasOpen</span> <span class="o">=</span> <span class="p">@</span><span class="nb">NO</span><span class="p">;</span>
-        <span class="k">if</span> <span class="p">([</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">isVisible</span><span class="p">])</span> <span class="p">{</span>
-            <span class="n">wasOpen</span> <span class="o">=</span> <span class="p">@</span><span class="nb">YES</span><span class="p">;</span>
-            <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">close</span><span class="p">];</span>
-            <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="n">hide</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
-        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">[</span><span class="n">wasOpen</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-            <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">makeKeyAndOrderFront</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
-        <span class="p">}</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">[</span><span class="n">wasActive</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-        <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="n">activateIgnoringOtherApps</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
-        <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">makeKeyAndOrderFront</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-
 
   </div>
 </article>

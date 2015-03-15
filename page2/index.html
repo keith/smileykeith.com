@@ -41,6 +41,327 @@
 <article>
   <header class="seven columns">
     
+      <h2><a href="/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux/">IPSEC/L2TP VPN on a Raspberry Pi running Arch Linux</a></h2>
+    
+    <p>
+      <time datetime="2014-01-27 20:49:00 -0800" pubdate="pubdate">
+        27 Jan 2014
+      </time>
+      <a class="permalink" title="Permalink" href="/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>After you buy a Raspberry Pi, or two, you need to figure out what to use them
+for. While you'll get a ton of <em>interesting</em> ideas from Googling "uses for a
+Raspberry Pi," I didn't particularly find them any more than a <a href="http://arstechnica.com/information-technology/2012/12/10-raspberry-pi-creations-that-show-how-amazing-the-tiny-pc-can-be/">thought
+exercise</a>.
+Making a VPN stood out as an actually useful configuration.</p>
+
+<p>Originally when I got my (accidentally chosen) Model A, I spent a little
+while going through <a href="http://willitscript.com/post/40357408648/using-your-pi-as-a-l2tp-vpn-server">this
+guide</a>
+using Raspbian. That seemed to work fine until I recently purchased a
+Model B to replace it and couldn't reproduce the configuration. I
+decided to write the steps that I was finally able to use to get a
+functional VPN running on Arch Linux.</p>
+
+<p>I started out by following <a href="https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_on_a_Raspberry_Pi_with_Arch_Linux.html">this
+guide</a>
+hoping that it would get me a functioning VPN without too much work.  Most of
+this setup will be based on that article with some tweaks for what I had to do
+to make the settings stick.  Unfortunately while it worked after the setup the
+configuration did not persist after restart.  For this configuration, like I
+said earlier, I wanted to use the ARM version of Arch Linux rather than
+Raspbian for the install. You can download the Raspberry Pi compatible Arch
+image from their <a href="http://www.raspberrypi.org/downloads">downloads page</a>. I'm
+not sure I would recommend Arch for people who haven't installed it before or
+at least gotten through their <a href="https://wiki.archlinux.org/index.php/Beginners'_Guide">Beginners'
+Guide</a>. The ARM Image,
+like the normal image, doesn't come with a GUI, perfect for this use of the Pi.</p>
+
+<p>I'm not going to bother with making sure this works before restarting, since
+that doesn't seem like much of an issue with actual usage (although you can
+just run the scripts we create and it should work fine). I wouldn't recommend
+doing much configuration before doing this intial setup. I did this the first
+time and after an hour of configuration my VPN did not work correctly, I ended
+up nuking the work I had done and starting over.</p>
+
+<p>Start by installing the necessary components:</p>
+
+<pre><code>pacman -Sy openswan xl2tpd ppp lsof python2
+</code></pre>
+
+<p>You need to do some configuration of the firewall and redirects:</p>
+
+<div class="highlight"><pre><code class="bash"><span class="nb">echo</span> <span class="s2">&quot;net.ipv4.ip_forward = 1&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.all.accept_redirects = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.all.send_redirects = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.default.rp_filter = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.default.accept_source_route = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.default.send_redirects = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.icmp_ignore_bogus_error_responses = 1&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+</code></pre></div>
+
+
+<p>To make these settings persist we need to create a script that gets launched by
+systemd each time we restart the system. As recommended in the original
+article, and being a <a href="http://brew.sh/">Homebrew</a> user I created the script in
+<code>/usr/local/bin/vpn-boot.sh</code>:</p>
+
+<div class="highlight"><pre><code class="bash"><span class="c">#!/usr/bin/bash</span>
+
+iptables --table nat --append POSTROUTING --jump MASQUERADE
+
+<span class="k">for </span>vpn in /proc/sys/net/ipv4/conf/*<span class="p">;</span> <span class="k">do</span>
+<span class="k">    </span><span class="nb">echo </span>0 &gt; <span class="nv">$vpn</span>/accept_redirects<span class="p">;</span>
+    <span class="nb">echo </span>0 &gt; <span class="nv">$vpn</span>/send_redirects<span class="p">;</span>
+<span class="k">done</span>
+
+sysctl -p
+</code></pre></div>
+
+
+<p>There are a few things that differ here to the original article. First
+the hashbang path was changed since the default $PATH on the ARM version
+of Arch didn't include <code>/bin</code>. I would run <code>which -a bash</code> on your
+install to make sure this works for you. This obviously doesn't have
+to be changed, but I think it's better in the long run. I also added
+<code>sysctl -p</code> since these settings didn't seemed to be applied otherwise.
+Then you must make this script executable with something like:</p>
+
+<div class="highlight"><pre><code class="bash">chmod +x /usr/local/bin/vpn-boot.sh
+</code></pre></div>
+
+
+<p>Since Arch uses systemd to this script has to be launched by creating a
+service to be ran through systemd. You can create this file in
+<code>/etc/systemd/system/vpnboot.service</code></p>
+
+<pre><code>[Unit]
+Description=VPN Settings at boot
+After=netctl@eth0.service
+Before=openswan.service xl2tpd.service
+
+[Service]
+ExecStart=/usr/local/bin/vpn-boot.sh
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>I added a few things here as well. I wanted to make sure that the boot command
+would launch after the network settings had been established and before the
+other VPN software was launched. I'm not sure how many of these changes would
+be required for systemd to do what I wanted it to but the order really seemed
+to matter for here. After you create this service enable it within systemd
+with:</p>
+
+<pre><code>systemctl enable vpnboot.service
+</code></pre>
+
+<p>I also made some changes to <code>/etc/ipsec.conf</code> (note the comments in the
+default file for some more info on these settings):</p>
+
+<pre><code>config setup
+  dumpdir=/var/run/pluto/
+  nat_traversal=yes
+  virtual_private=%v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v4:25.0.0.0/8,%v6:fd00::/8,%v6:fe80::/10
+  oe=off
+  protostack=netkey
+  plutoopts="--interface=eth0"
+
+conn L2TP-PSK-noNAT
+  authby=secret
+  pfs=no
+  auto=add
+  keyingtries=3
+  ikelifetime=8h
+  keylife=1h
+  type=transport
+  # Your server's IP (I used my internal IP, assuming you're using NAT)
+  left=172.16.1.1
+  leftprotoport=17/1701
+  right=%any
+  rightprotoport=17/%any
+  rightsubnetwithin=0.0.0.0/0
+  dpddelay=10
+  dpdtimeout=20
+  dpdaction=clear
+</code></pre>
+
+<p>Then for the <code>/etc/ipsec.secrets</code> (use the same server IP address):</p>
+
+<pre><code>%SameIP%  %any: PSK "super random key"
+</code></pre>
+
+<p>The make systemd start openswan on boot as well:</p>
+
+<pre><code>systemctl enable openswan
+</code></pre>
+
+<p>I also edited the openswan service file in
+<code>/etc/systemd/system/multi-user.target.wants/openswan.service</code></p>
+
+<pre><code>[Unit]
+Description=Openswan daemon
+After=netctl@eth0.service vpnboot.service
+Before=xl2tpd.service
+
+[Service]
+Type=forking
+ExecStart=/usr/lib/systemd/scripts/ipsec --start
+ExecStop=/usr/lib/systemd/scripts/ipsec --stop
+ExecReload=/usr/lib/systemd/scripts/ipsec --restart
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>As you can see I removed the original network dependency and added a new
+dependency of <a href="https://wiki.archlinux.org/index.php/Netctl">netctl's</a>
+default network interface (we haven't enabled this yet).</p>
+
+<p>Next for <code>/etc/xl2tpd/xl2tpd.conf</code>:</p>
+
+<pre><code>[global]
+ipsec saref = yes
+saref refinfo = 30
+
+[lns default]
+ip range = 172.16.1.70-172.16.1.89
+local ip = 172.16.1.1
+require authentication = yes
+ppp debug = yes
+pppoptfile = /etc/ppp/options.xl2tpd
+length bit = yes
+unix authentication = yes
+</code></pre>
+
+<p>Where <code>local ip</code> is the server's ip and the <code>ip range</code> is the range of
+IP addresses you want to use for VPN clients. You need to enable this
+service too with:</p>
+
+<pre><code>systemctl enable xl2tpd
+</code></pre>
+
+<p>I also edited the systemd file for xl2tpd at
+<code>/etc/systemd/system/multi-user.target.wants/xl2tpd.service</code>:</p>
+
+<pre><code>[Unit]
+Description=Level 2 Tunnel Protocol Daemon (L2TP)
+After=syslog.target netctl@eth0.service openswan.service
+Requires=openswan.service
+
+[Service]
+Type=simple
+PIDFile=/run/xl2tpd/xl2tpd.pid
+ExecStart=/usr/bin/xl2tpd -D
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>The other guide also recommends creating the xl2tpd control folder with:</p>
+
+<pre><code>mkdir /var/run/xl2tpd/
+</code></pre>
+
+<p>Now we need to create/edit <code>/etc/ppp/options.xl2tpd</code>:</p>
+
+<pre><code>ipcp-accept-local
+ipcp-accept-remote
+ms-dns 8.8.8.8
+ms-dns 8.8.4.4
+auth
+mtu 1200
+mru 1000
+crtscts
+hide-password
+modem
+name l2tpd
+proxyarp
+lcp-echo-interval 30
+lcp-echo-failure 4
+login
+</code></pre>
+
+<p><code>/etc/pam.d/ppp</code>:</p>
+
+<pre><code>auth    required        pam_nologin.so
+auth    required        pam_unix.so
+account required        pam_unix.so
+session required        pam_unix.so
+</code></pre>
+
+<p>And <code>/etc/ppp/pap-secrets</code>:</p>
+
+<pre><code>*       l2tpd           ""              *
+</code></pre>
+
+<p>If you'd like you can also restrict the users accounts that can access
+the vpn. This way you can separate your login user from your VPN users
+who can have much stronger passwords. You'd do that in your
+<code>/etc/ppp/pap-secrets</code>:</p>
+
+<pre><code>vpnuser   l2tpd         ""              *
+</code></pre>
+
+<p>To enable the startup of the default netctl eth0 interface you need to
+run:</p>
+
+<pre><code>netctl enable eth0
+</code></pre>
+
+<p>You'll probably want to disable any other netctl systemd functions that are
+enabled by default. Check <code>/etc/systemd/system/mutli-user.target.wants</code> to for
+other <code>netctl</code> profiles.</p>
+
+<p>So at this point you should be able to enable VPN clients using the
+super secret keys you enabled before and the username and passwords
+you've created previously. You can create new users for specifically VPN
+usage with something like this:</p>
+
+<pre><code>useradd -s /sbin/nologin vpnuser
+</code></pre>
+
+<p>This disallows users from being able to be used for login which is probably
+more secure for your VPN (although not required). For testing you can use the
+root/root defualt user and a less secure key, although you should <em>definitely</em>
+change these before allowing access to the outside world.</p>
+
+<h3>Troubleshooting</h3>
+
+<p>Undoubtedly you'll have to deal with something that doesn't work exactly
+how my setup works. The most useful things to seeing what was happening
+were these:</p>
+
+<pre><code>netstat -tulpan
+systemctl status openswan
+systemctl status xl2tpd
+journalctl -f
+</code></pre>
+
+<p>You can glance at some of the other guides to see what should be going
+on. You probably shouldn't see any red in the <code>openswan</code> status and you
+should see ports open under <code>pluto</code> with netstat. You can check out the
+<a href="http://linux.die.net/man/5/ipsec.conf">ipsec manpage</a> or the <a href="https://github.com/xelerance/Openswan/wiki/L2tp-ipsec-configuration-using-openswan-and-xl2tpd">openswan
+wiki
+page</a>
+for a little more information on some of the settings. Also I used <a href="http://www.freedesktop.org/software/systemd/man/systemd.service.html">this
+page</a>
+for some more info on how systemd settings work. Please let me know if
+there's anything here that could be done easier/better for this
+configuration.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
       <h2><a href="/2013/09/03/iterm-theme-based-on-the-time-of-day/">iTerm theme based on the time of day</a></h2>
     
     <p>
@@ -361,84 +682,6 @@ it's obviously worth it.</p>
 <p>So how can you decide which editor is best for you? Try them. This sounds obvious to you? Good, this article is not for you and you can safely leave now. These days text editors are either free, cheap or have trials. So download them all try them out and see if they make sense to you. Weed out the ones you really hate or the ones that crash and spend a little more time with the remaining editors. Some, like Vim, you may have to spend a little more time with to grasp but this still doesn't seem like a high order.</p>
 
 <p>But please stop asking questions on StackOverflow and similar sites where you expect people to throw their vote into the hat for the 'best' editor and make a decision for yourself.</p>
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2013/04/11/objective-c-on-travis-ci/">Objective-C on Travis-CI</a></h2>
-    
-    <p>
-      <time datetime="2013-04-11 15:58:00 -0700" pubdate="pubdate">
-        11 Apr 2013
-      </time>
-      <a class="permalink" title="Permalink" href="/2013/04/11/objective-c-on-travis-ci/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>Recently <a href="https://travis-ci.org/">Travis</a> added support for Objective-C and there for OS X and iOS projects for continuous integration testing. I gather that people have previously done this with self-hosted dedicated <a href="http://jenkins-ci.org/">Jenkins</a> machines but since Apple is so aggressive about dropping support for previous versions of the OS it seems like a pain to have to replace your build server every few years. Enter Travis, a great hosted <a href="http://en.wikipedia.org/wiki/Continuous_integration">continuous integration</a> server that hosts a huge amount of open source projects. I figured with this new support I could host some of my <a href="https://github.com/Keithbsmiley/KSADNTwitterFormatter">smaller</a> libraries just to set how well it worked. The initial setup process was a bit tedious but I eventually got it to work.</p>
-
-<h3>Assumtions:</h3>
-
-<ul>
-<li>You have a test framework already integrated with your project (I like <a href="https://github.com/petejkim/specta">Specta</a>/<a href="https://github.com/petejkim/expecta">Expecta</a>)</li>
-<li>You have your project on Github in a public repository. Travis offers a <a href="http://about.travis-ci.org/docs/user/travis-pro/">pro</a> account if you'd rather</li>
-</ul>
-
-
-<h3>Steps</h3>
-
-<ul>
-<li>Create a <code>.travis.yml</code> file in the root of your repository (leading dot is intentional). For many projects a file may just look like:</li>
-</ul>
-
-
-<div class="highlight"><pre><code class="yaml"><span class="l-Scalar-Plain">language</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">objective-c</span>
-</code></pre></div>
-
-
-<p><del>By default Travis runs <a href="https://gist.github.com/henrikhodne/73151fccea7af3201f63">this script</a> for Objective-C projects</del> I was informed <a href="https://twitter.com/henrikhodne/status/322665896806060032">on Twitter</a> that the current script that runs Objective-C projects is actually located <a href="https://github.com/travis-ci/travis-cookbooks/blob/osx/ci_environment/travis_build_environment/files/default/ci_user/travis-utils/osx-cibuild.sh">here</a>. It was originally created by <a href="https://github.com/jspahrsummers">Justin Spahr-Summers</a> <a href="https://github.com/jspahrsummers/objc-build-scripts">here</a>. This script seems to run my projects without any issue, they just occasionally require more initial setup (we'll get to that).</p>
-
-<ul>
-<li><p>Enable your repository in Travis' settings. From your <a href="https://travis-ci.org/profile">Travis profile page</a> (after signing in with Github) you should see a list of your repositories, you may have to press 'Sync now', where you can switch on the repository you're planning on adding.</p></li>
-<li><p>Configure your project within Xcode. As I assumed above you already have a test target setup. You do have to do a few things in Xcode to make everything work correctly.</p>
-
-<ol>
-<li>Go to 'Manage Schemes' in Xcode. <img src="/images/travis/manageschemes.png" alt="Manage Schemes" /></li>
-<li>Check the 'Shared' box for the scheme that needs to be run. <img src="/images/travis/shareschemes.png" alt="Shared Scheme" /></li>
-<li>Click 'Edit...' in the bottom left and go to your build action. <img src="/images/travis/editscheme.png" alt="Edit Scheme" /></li>
-<li>On the row of your Tests target check the box in the 'Run' column. <img src="/images/travis/runtest.png" alt="Run Test" /></li>
-</ol>
-</li>
-<li><p>At this point for a simple project or a project using <a href="http://cocoapods.org/">CocoaPods</a> you should be good to go. If Travis finds a <code>Podfile</code> in the root of your repository it automatically runs <code>pod install</code> to get your dependencies (from their <a href="http://about.travis-ci.org/docs/user/languages/objective-c/">docs</a>). Otherwise there are a ton of <a href="http://about.travis-ci.org/docs/user/build-configuration/">configuration options</a> for your <code>.travis.yml</code> depending on how your repo is setup.</p></li>
-</ul>
-
-
-<p>For one of my projects I created a <code>setup.sh</code> file at the root of my repo that looks like this:</p>
-
-<div class="highlight"><pre><code class="bash"><span class="c">#!/usr/bin/env bash</span>
-
-git submodule update --init --recursive
-<span class="nb">echo</span> <span class="s2">&quot;Setting up test frameworks...&quot;</span>
-<span class="nb">cd </span>Example/Vendor/Specta<span class="p">;</span> rake &gt; /dev/null
-<span class="nb">cd</span> ../Expecta<span class="p">;</span> rake &gt; /dev/null
-<span class="nb">echo</span> <span class="s2">&quot;Done&quot;</span>
-<span class="nb">cd</span> ../../../
-</code></pre></div>
-
-
-<p>This script which I run using the <code>before_install: ./setup.sh</code> option in my <code>.travis.yml</code> gets all my submodules, sets up Specta and Expecta and then goes back to the root directory for running. If you just have a few simple steps you can also have multiple <code>before_install</code> actions like:</p>
-
-<div class="highlight"><pre><code class="yaml"><span class="l-Scalar-Plain">before_install</span><span class="p-Indicator">:</span>
-  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cd Example</span>
-  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">make</span>
-</code></pre></div>
-
-
-<p>You can read more about other Travis configuration options in their <a href="http://about.travis-ci.org/docs/user/build-configuration/">documentation</a>.</p>
 
   </div>
 </article>

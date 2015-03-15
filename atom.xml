@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2015-03-14T18:56:43-07:00</updated>
+  <updated>2015-03-14T18:59:52-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -12,6 +12,26 @@
   <rights>Copyright (c) 2015 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
+  
+    <entry>
+      <title type="html"><![CDATA[NSProgress with Asynchronous Tasks]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2015/03/14/nsprogress-with-asynchronous-tasks/" />
+      <id>http://smileykeith.com/2015/03/14/nsprogress-with-asynchronous-tasks</id>
+      <updated>2015-03-14T18:57:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>After having a use for <code>NSProgress</code> I finally got a chance to dive in to
+its API. I found it to be less than understandable. So I wrote about it
+on the thoughtbot blog. You can find my post, <a href="https://robots.thoughtbot.com/asynchronous-nsprogress">NSProgress with
+Asynchronous Tasks,
+here</a>.</p>
+]]>
+      </content>
+    </entry>
   
     <entry>
       <title type="html"><![CDATA[ReactiveCocoa and Core Data]]></title>
