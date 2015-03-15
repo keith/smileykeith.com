@@ -41,6 +41,40 @@
 <article>
   <header class="seven columns">
     
+      <h2><a href="/2015/03/14/clojure/">Clojure</a></h2>
+    
+    <p>
+      <time datetime="2015-03-14 18:27:00 -0700" pubdate="pubdate">
+        14 Mar 2015
+      </time>
+      <a class="permalink" title="Permalink" href="/2015/03/14/clojure/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>I haven't had anything to write in a while. Mainly because, as I've been
+working at <a href="https://thoughtbot.com">thoughtbot</a>, I've been writing
+everything I can on <a href="https://robots.thoughtbot.com">the thoughtbot
+blog</a>. I spent a little while writing
+<a href="http://clojure.org">Clojure</a>, and out of that came a few posts.</p>
+
+<p>Overall I wasn't a big fan of Clojure. I definitely lean more towards
+functional languages <a href="https://www.haskell.org">with types</a> but I wanted
+to link these articles here regardless.</p>
+
+<ul>
+<li><a href="https://robots.thoughtbot.com/getting-started-with-liberator">Getting Started with Liberator</a></li>
+<li><a href="https://robots.thoughtbot.com/using-yesql-in-clojure">Using Yesql in Clojure</a></li>
+<li><a href="https://robots.thoughtbot.com/writing-clojure-in-vim">Writing Clojure in Vim</a></li>
+</ul>
+
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
       <h2><a href="/2014/02/14/vim-tagbar-with-objective-c/">Vim TagBar with Objective-C</a></h2>
     
     <p>
@@ -568,185 +602,6 @@ to</p>
 
 
 
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2013/08/09/os-x-crash-symbolication/">OS X Crash Report Symbolication</a></h2>
-    
-    <p>
-      <time datetime="2013-08-09 13:26:00 -0700" pubdate="pubdate">
-        09 Aug 2013
-      </time>
-      <a class="permalink" title="Permalink" href="/2013/08/09/os-x-crash-symbolication/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>As you may know I write a small OS X called <a href="http://sailforapp.net/">Sail</a>. Over
-the past few months that it has been available I've received a few crash reports
-about an issue I wasn't able to reproduce. Today I decided I wanted to dive into
-them and see if I could at least figure out the root of the issue and fix it
-with my next release.</p>
-
-<p>This lead me down the rabbit hole of
-<a href="http://lldb.llvm.org/symbolication.html">symbolication</a>, something I personally
-hadn't dealt with myself before (since Crashlytics does it for you). I was
-hoping I would be able to find something around the internet about this,
-unfortunately what I mostly came up with was a lot of iOS related answers that
-didn't seem to work the same way and
-<a href="http://developer.apple.com/tools/xcode/symbolizingcrashdumps.html">two</a>
-<a href="http://developer.apple.com/library/mac/technotes/tn2004/tn2123.html">links</a> to
-Apple documentation that have been removed. Other than the process for
-symbolicating reports for OS X apps seems to be different than iOS apps which
-there is plenty of documentation for (I'm not bitter). Daniel Jalkut has <a href="http://www.red-sweater.com/blog/439/crappy-crash-logs">a
-post</a> about these but his
-exact method didn't seem to work for me.</p>
-
-<p>Here is what did work for me. For my first abridged crash report I had this</p>
-
-<pre><code>Process:         Sail [35072]
-Path:            /Applications/Sail.app/Contents/MacOS/Sail
-Load Address:    0x106823000
-Identifier:      com.keithsmiley.SailOSX
-Version:         4 (1.2.0)
-Code Type:       x86_64 (Native)
-Parent Process:  launchd [207]
-
-Date/Time:       2013-07-19 16:09:24.097 +0200
-OS Version:      Mac OS X 10.8.4 (12E55)
-Report Version:  8
-
-Thread 0:
-13  Accounts                        0x00007fff839fd1b1 -[ACAccountStore accountTypeWithAccountTypeIdentifier:] + 230
-14  Sail                            0x00000001068308f7
-15  Sail                            0x0000000106830798
-16  Sail                            0x0000000106825249
-17  CoreFoundation                  0x00007fff82465eda _CFXNotificationPost + 2554
-18  Foundation                      0x00007fff8611b7b6 -[NSNotificationCenter postNotificationName:object:userInfo:] + 64
-31  AppKit                          0x00007fff812cc1a3 -[NSApplication run] + 517
-32  AppKit                          0x00007fff81270bd6 NSApplicationMain + 869
-33  libdyld.dylib                   0x00007fff869d07e1 start + 0
-
-Binary Images:
-  0x106823000 - 0x106896fff  com.keithsmiley.SailOSX (1.2.0 - 4) &lt;D1F313B6-21F6-341B-8627-5480C5D1DB20&gt; /Applications/Sail.app/Contents/MacOS/Sail
-</code></pre>
-
-<p>Just glancing at this crash report it's not too difficult to understand a bit
-about what was going on. A notification was sent, some methods were called in my
-application and then <code>accountTypeWithAccountTypeIdentifier</code> was called. Based on
-the small number of times I call that method I was quickly able to assume where
-the issue was but I still wanted to see exactly what methods of mine were being
-called first.</p>
-
-<p>This brings me to <code>atos</code> the command line tool Apple provides to symbolicate
-these reports. This is where my experience differs with most of what I found
-online. My usage looked like this:</p>
-
-<pre><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x106823000
-</code></pre>
-
-<p>This uses my dSYM file that was generated with the archive build I submitted to
-the app store along with the knowledge that it was running on an x86_64
-architecture and the most important part, for me, the load address.</p>
-
-<p>To find my dSYM file that was generated when I did my archive build I simply
-noted the version and build number from the crash report, went to the Archives
-tab in the Xcode organizer, found the build with the same number, right clicked
-and clicked "Show in Finder." This takes you directly to the <code>.xcarchive</code> file
-on disk which you can right click and click "Show Package Contents." From there
-I copied my dSYM to the desktop so I didn't overwrite anything unintentionally.</p>
-
-<p>The load address is the starting memory address of your application. The tool
-uses this address as an offset to find the correct methods in your symbols. In
-the above crash report <code>Load Address</code> is a provided field. This was the only
-report I saw that had that, typically I needed to look under the <code>Binary Images</code>
-section for the address range of my application. In this example it was
-<code>0x106823000 - 0x106896fff</code>.</p>
-
-<p>The <code>atos</code> command then provides an interactive prompt where you can paste
-addresses into the stdin and it will tell you the corresponding methods. Mine
-looked like this:</p>
-
-<pre><code>0x00000001068308f7
--[KSAccountsPreferences dealloc] (in Sail) (KSAccountsPreferences.m:77)
-0x0000000106830798
--[KSAccountsPreferences viewDidLoad] (in Sail) (KSAccountsPreferences.m:73)
-0x0000000106825249
--[KSAppDelegate openAboutWindow:] (in Sail) (KSAppDelegate.m:59)
-</code></pre>
-
-<p>Here I can see that the notification that was being posted was probably an
-<code>NSApplicationDidFinishLaunchingNotification</code> starting off some methods in my
-app delegate. I then load the accounts preferences, which would make sense to
-call the <code>ACAccountStore</code> method, but then <code>dealloc</code> is called. Seeing this was
-an immediate red flag since <code>KSAccountsPreferences</code> should be retained since it
-provides information about available accounts to the rest of the application.</p>
-
-<p>I had another crash report from a different issue that was a little bit harder
-to parse without symbolicating the methods.</p>
-
-<pre><code>Process:         Sail [47027]
-Identifier:      com.keithsmiley.SailOSX
-Version:         1.2.0 (4)
-Code Type:       X86-64 (Native)
-Parent Process:  launchd [45696]
-User ID:         502
-
-Application Specific Information:
-*** Terminating app due to uncaught exception 'NSRangeException', reason: '*** -[__NSArrayM objectAtIndex:]: index 0 beyond bounds for empty array'
-abort() called
-terminate called throwing an exception
-
-Application Specific Backtrace 1:
-2   CoreFoundation                      0x000000010c5008ec -[__NSArrayM objectAtIndex:] + 252
-3   Sail                                0x000000010b838eed Sail + 61165
-4   Sail                                0x000000010b838f36 Sail + 61238
-5   Sail                                0x000000010b838b19 Sail + 60185
-6   Sail                                0x000000010b83785d Sail + 55389
-7   libdispatch.dylib                   0x000000010fa07f01 _dispatch_call_block_and_release + 15
-
-Binary Images:
-  0x10b82a000 - 0x10b89dff7 +com.keithsmiley.SailOSX (1.2.0 - 4) &lt;47EC2733-B543-31EA-A6AA-9D998FB65803&gt;
-</code></pre>
-
-<p>Obviously this was caused by an invalid access to an array but that's a little harder to track down. So I again used <code>atos</code> with the dSYM and new memory location.</p>
-
-<pre><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x10b82a000
-</code></pre>
-
-<p>I got this output for my memory addresses</p>
-
-<pre><code>0x000000010b838eed
--[KSAccountsPreferences selectedADNUser] (in Sail) (KSAccountsPreferences.m:238)
-0x000000010b838f36
--[KSAccountsPreferences selectTwitterUsername] (in Sail) (KSAccountsPreferences.m:243)
-0x000000010b838b19
--[KSAccountsPreferences populateTwitterAccounts] (in Sail) (KSAccountsPreferences.m:211)
-0x000000010b83785d
-__36-[KSAccountsPreferences viewDidLoad]_block_invoke (in Sail) (KSAccountsPreferences.m:70)
-</code></pre>
-
-<p>This ended up giving me the exact line where out of bounds issue was happening
-depending on a certain number of accounts. I noticed that this issue had been
-fixed since my last release so I did a <code>diff</code> on the tag I created for that
-specific release with</p>
-
-<pre><code>git difftool HEAD..1.2.0\(3\)
-</code></pre>
-
-<p>Then in <a href="http://www.kaleidoscopeapp.com/">Kaleidoscope</a> I was able to figure out
-what changed had fixed the issue. Just because it's so pretty here is what it
-looked like.</p>
-
-<p><img src="/images/symbolication/diff.png" alt="Diff" /></p>
-
-<p>Symbolicating crash reports is definitely vital to tracking down bugs your users
-are experiencing when you can't reproduce them yourself. Once you figure out how
-it's obviously worth it.</p>
 
   </div>
 </article>

@@ -41,6 +41,103 @@
 <article>
   <header class="seven columns">
     
+      <h2><a href="/2013/01/04/raking-podspecs/">Raking Podspecs</a></h2>
+    
+    <p>
+      <time datetime="2013-01-04 11:09:00 -0800" pubdate="pubdate">
+        04 Jan 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/01/04/raking-podspecs/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>I spend a decent amount of time these days helping maintain the <a href="http://cocoapods.org/">CocoaPods</a> <a href="http://github.com/cocoapods/specs">specs repo</a> by managing pull requests and issues. CococaPods is an awesome dependency manager similar to <a href="http://rubygems.org/">Rubygems</a> for Objective-C projects. Unfortunately a lot of submitted podspecs haven't been correctly formatted or they're missing required information. CocoaPods has an awesome build in command <code>pod spec lint</code> that allows you to make sure the spec is valid and complete. Understandably people who are new to CocoaPods trying to submit their libraries are unaware of this awesome tool. Therefore when I look through the pull requests, I like to lint them myself (CocoaPods does <a href="https://travis-ci.org/CocoaPods/Specs">utilize Travis</a> but unfortunately it can't do everything).</p>
+
+<p>Since CocoaPods supports multiple versions of Ruby (1.8.7 and 1.9.3) to be complete ideally you'd lint them on both versions. Tools like <a href="https://rvm.io/">RVM</a> and <a href="https://github.com/sstephenson/rbenv">rbenv</a>(my tool of choice) make it easy to quickly switch between different versions of Ruby using <code>.rvmrc</code> and <code>.rbenv-version</code> respectively. As you can probably assume I wanted to automate this. So I wrote a quick <a href="http://rake.rubyforge.org/">Rakefile</a> to do this for me.</p>
+
+<div class="highlight"><pre><code class="ruby"><span class="c1">#!/usr/bin/env rake</span>
+
+<span class="c1"># NOTE: Must be using rbenv 4.0 to use `system` and `.ruby-version`</span>
+<span class="c1">## Set your preferred ruby versions</span>
+<span class="vg">$V18</span> <span class="o">=</span> <span class="s1">&#39;system&#39;</span>
+<span class="vg">$V19</span> <span class="o">=</span> <span class="s1">&#39;1.9.3-p385&#39;</span>
+<span class="vg">$RBENV</span> <span class="o">=</span> <span class="s1">&#39;.ruby-version&#39;</span>
+
+<span class="c1"># The gem to use</span>
+<span class="vg">$GEM</span> <span class="o">=</span> <span class="s1">&#39;cocoapods&#39;</span>
+
+<span class="n">task</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="ss">:lint</span>
+<span class="n">task</span> <span class="ss">:c</span>       <span class="o">=&gt;</span> <span class="ss">:clean</span>
+
+<span class="n">desc</span> <span class="s2">&quot;Lint podspecs on multiple versions of ruby with rbenv&quot;</span>
+<span class="n">task</span> <span class="ss">:lint</span> <span class="k">do</span>
+  <span class="k">if</span> <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span> <span class="o">&lt;</span> <span class="mi">1</span>
+    <span class="nb">puts</span> <span class="s2">&quot;No podspecs in </span><span class="si">#{</span> <span class="no">Dir</span><span class="o">.</span><span class="n">pwd</span> <span class="si">}</span><span class="s2">&quot;</span>
+    <span class="nb">exit</span>
+  <span class="k">end</span>
+
+  <span class="n">existed</span> <span class="o">=</span> <span class="n">versionFileExists?</span>
+  <span class="k">if</span> <span class="n">existed</span>
+    <span class="n">old_version</span> <span class="o">=</span> <span class="n">currentVersion</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Loop through all podspecs</span>
+  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span>
+    <span class="c1"># Loop through ruby versions</span>
+    <span class="mi">2</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+      <span class="n">version</span> <span class="o">=</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">?</span> <span class="vg">$V18</span> <span class="p">:</span> <span class="vg">$V19</span>
+      <span class="n">writeVersion</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+
+      <span class="nb">puts</span> <span class="s2">&quot;Linting </span><span class="si">#{</span> <span class="n">file</span> <span class="si">}</span><span class="s2"> on Ruby version </span><span class="si">#{</span> <span class="n">currentVersion</span> <span class="si">}</span><span class="s2">&quot;</span>
+      <span class="nb">puts</span> <span class="n">lint</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="c1"># If the dotfile already existed rewrite the original code</span>
+  <span class="k">if</span> <span class="n">existed</span>
+    <span class="n">writeVersion</span><span class="p">(</span><span class="n">old_version</span><span class="p">)</span>
+  <span class="k">else</span>
+    <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span> <span class="k">if</span> <span class="n">versionFileExists?</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">desc</span> <span class="s2">&quot;Delete all podspec files&quot;</span>
+<span class="n">task</span> <span class="ss">:clean</span> <span class="k">do</span>
+  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">}</span>
+  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Check to see if the current dotfile exists</span>
+<span class="k">def</span> <span class="nf">versionFileExists?</span>
+  <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c1"># Retrieve the current version from the rbenv dotfile</span>
+<span class="k">def</span> <span class="nf">currentVersion</span>
+  <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">io</span><span class="o">|</span> <span class="n">io</span><span class="o">.</span><span class="n">read</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Write out a version to .rbenv-version</span>
+<span class="k">def</span> <span class="nf">writeVersion</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+  <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span> <span class="n">version</span> <span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="c1"># Run the lint</span>
+<span class="k">def</span> <span class="nf">lint</span><span class="p">(</span><span class="n">podspec</span><span class="p">)</span>
+  <span class="sx">%x[pod spec lint &quot;</span><span class="si">#{</span> <span class="n">podspec</span> <span class="si">}</span><span class="sx">&quot;]</span>
+<span class="k">end</span>
+</code></pre></div>
+
+
+
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
       <h2><a href="/2013/01/03/spawn-iterm/">Spawning iTerm Windows</a></h2>
     
     <p>

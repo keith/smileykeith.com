@@ -2,16 +2,47 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2014-09-28T17:11:57-07:00</updated>
+  <updated>2015-03-14T18:43:49-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
   
   <link rel="self" type="application/atom+xml" href="http://smileykeith.com/atom.xml" />
   
-  <rights>Copyright (c) 2014 Keith Smiley</rights>
+  <rights>Copyright (c) 2015 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
+  
+    <entry>
+      <title type="html"><![CDATA[Clojure]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2015/03/14/clojure/" />
+      <id>http://smileykeith.com/2015/03/14/clojure</id>
+      <updated>2015-03-14T18:27:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>I haven't had anything to write in a while. Mainly because, as I've been
+working at <a href="https://thoughtbot.com">thoughtbot</a>, I've been writing
+everything I can on <a href="https://robots.thoughtbot.com">the thoughtbot
+blog</a>. I spent a little while writing
+<a href="http://clojure.org">Clojure</a>, and out of that came a few posts.</p>
+
+<p>Overall I wasn't a big fan of Clojure. I definitely lean more towards
+functional languages <a href="https://www.haskell.org">with types</a> but I wanted
+to link these articles here regardless.</p>
+
+<ul>
+<li><a href="https://robots.thoughtbot.com/getting-started-with-liberator">Getting Started with Liberator</a></li>
+<li><a href="https://robots.thoughtbot.com/using-yesql-in-clojure">Using Yesql in Clojure</a></li>
+<li><a href="https://robots.thoughtbot.com/writing-clojure-in-vim">Writing Clojure in Vim</a></li>
+</ul>
+
+]]>
+      </content>
+    </entry>
   
     <entry>
       <title type="html"><![CDATA[Vim TagBar with Objective-C]]></title>
