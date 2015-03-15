@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2015-03-14T18:49:43-07:00</updated>
+  <updated>2015-03-14T18:55:33-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -12,6 +12,26 @@
   <rights>Copyright (c) 2015 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
+  
+    <entry>
+      <title type="html"><![CDATA[Reactive Cocoa and Core Data]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2015/03/14/reactive-cocoa-and-core-data/" />
+      <id>http://smileykeith.com/2015/03/14/reactive-cocoa-and-core-data</id>
+      <updated>2015-03-14T18:53:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>After finally starting to use <a href="https://github.com/ReactiveCocoa/ReactiveCocoa">Reactive
+Cocoa</a> I found
+integrating with Core Data to be sore spot. I wrote about improving this
+integration on the thoughtbot blog
+<a href="https://robots.thoughtbot.com/reactive-core-data">here</a>.</p>
+]]>
+      </content>
+    </entry>
   
     <entry>
       <title type="html"><![CDATA[Writing Vim Syntax Plugins]]></title>

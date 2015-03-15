@@ -41,6 +41,110 @@
 <article>
   <header class="seven columns">
     
+      <h2><a href="/2013/01/08/nstableview-vim-keys/">NSTableView vim keys</a></h2>
+    
+    <p>
+      <time datetime="2013-01-08 16:19:00 -0800" pubdate="pubdate">
+        08 Jan 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/01/08/nstableview-vim-keys/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>I'm currently working on a OS X application that uses a few different NSTableViews to display user data. I was testing them out a bit to make sure multiple deletions worked correctly from my database and I found myself pressing 'j' and 'k' to try and move down and up. I decided it would be pretty cool to implement those two vim shortcuts into my table view just in case anyone else thinks like me.</p>
+
+<p>This functionality already exists in <a href="http://www.potionfactory.com/thehitlist/">The Hit List</a> an awesome GTD app that has a lot of baggage with me, and I'm sure it exists in other applications as well.</p>
+
+<p>In my <code>NSTableView</code> subclass' <code>keyDown:</code> method I tried a few things.</p>
+
+<p>Attempt 1: First I tried to re implement the functionality myself. In retrospect this doesn't make any sense but at first it was pretty simple. It looked something like this.</p>
+
+<div class="highlight"><pre><code class="objc"><span class="n">NSUInteger</span> <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">theEvent</span> <span class="n">modifierFlags</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">NSDeviceIndependentModifierFlagsMask</span><span class="p">;</span>
+<span class="n">NSNumber</span> <span class="o">*</span><span class="n">shiftPressed</span> <span class="o">=</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">NSShiftKeyMask</span><span class="p">);</span>
+ 
+<span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
+    <span class="n">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="n">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
+        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">NO</span><span class="p">];</span>
+    <span class="p">}</span>
+<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
+    <span class="n">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="n">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
+        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">NO</span><span class="p">];</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>The issue with this is the way <code>NSTableView</code> typically expands it's selection. I think of it as a pivot point where you start. Then you go up and down relative to that point. So if you start at index 2 and go down till index 4, you should have 2 rows selected. Then when you go back up you should deselect the rows and indexes 3 and 4 and select the rows and index 1 and 0. At this point I realized it was more difficult than I realized at first and went in search on another solution.</p>
+
+<p>Attempt 2: The next solution I discovered used the <a href="https://developer.apple.com/library/mac/#documentation/Carbon/Reference/QuartzEventServicesRef/Reference/reference.html">Quartz Event Services</a> APIs.</p>
+
+<div class="highlight"><pre><code class="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter &#39;j&#39;</span>
+    <span class="n">CGEventRef</span> <span class="n">e</span> <span class="o">=</span> <span class="n">CGEventCreateKeyboardEvent</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="n">CGKeyCode</span><span class="p">)</span><span class="mi">125</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+    <span class="n">CGEventPost</span><span class="p">(</span><span class="n">kCGSessionEventTap</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+    <span class="n">CFRelease</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
+<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter &#39;k&#39;</span>
+    <span class="n">CGEventRef</span> <span class="n">e</span> <span class="o">=</span> <span class="n">CGEventCreateKeyboardEvent</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="n">CGKeyCode</span><span class="p">)</span><span class="mi">126</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+    <span class="n">CGEventPost</span><span class="p">(</span><span class="n">kCGSessionEventTap</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
+    <span class="n">CFRelease</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>This solution worked perfectly, at first. This mainly emulates a key press with a different key code. So as you can see I was catching j and k and spitting them out as down and up. I spent a few minutes testing this before I remembered that I had sandboxing disabled so I could more easily delete my application support folder while messing with my Core Data stack. There went that solution.</p>
+
+<p>Attempt 3: Before I used the weird <code>CGEventRef</code> solution I tried to create my own <code>NSEvent</code> passing it all the same attributes from the original event (all this code is being used in the <code>keyDown:</code> function of my subclass) but I couldn't figure out how to get the correct character string for the up and down arrows. I typically use <a href="http://manytricks.com/keycodes/">Key Codes</a> to get all the possible information you could want about each key you press. But for some keys, including the arrow keys, it returns garbage for the character code. Then I discovered <a href="http://stackoverflow.com/a/4434934/902968">this answer</a> on StackOverflow where there is a brief mention of <code>NSUpArrowFunctionKey</code>. With that I came up with this.</p>
+
+<div class="highlight"><pre><code class="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
+    <span class="kt">unichar</span> <span class="n">down</span> <span class="o">=</span> <span class="n">NSDownArrowFunctionKey</span><span class="p">;</span>
+    <span class="n">NSString</span> <span class="o">*</span><span class="n">downString</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span> <span class="n">stringWithCharacters</span><span class="o">:&amp;</span><span class="n">down</span> <span class="n">length</span><span class="o">:</span><span class="mi">1</span><span class="p">];</span>
+    <span class="n">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="n">NSEvent</span> <span class="n">keyEventWithType</span><span class="o">:</span><span class="n">NSKeyDown</span>
+                                        <span class="nl">location:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
+                                   <span class="nl">modifierFlags:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
+                                       <span class="nl">timestamp:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
+                                    <span class="nl">windowNumber:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
+                                         <span class="nl">context:</span><span class="nb">nil</span>
+                                      <span class="nl">characters:</span><span class="n">downString</span>
+                     <span class="nl">charactersIgnoringModifiers:</span><span class="n">downString</span>
+                                       <span class="nl">isARepeat:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
+                                         <span class="nl">keyCode:</span><span class="n">down</span><span class="p">];</span>
+    
+    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">newEvent</span><span class="p">];</span>
+<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
+    <span class="kt">unichar</span> <span class="n">up</span> <span class="o">=</span> <span class="n">NSUpArrowFunctionKey</span><span class="p">;</span>
+    <span class="n">NSString</span> <span class="o">*</span><span class="n">upString</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span> <span class="n">stringWithCharacters</span><span class="o">:&amp;</span><span class="n">up</span> <span class="n">length</span><span class="o">:</span><span class="mi">1</span><span class="p">];</span>
+    <span class="n">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="n">NSEvent</span> <span class="n">keyEventWithType</span><span class="o">:</span><span class="n">NSKeyDown</span>
+                                        <span class="nl">location:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
+                                   <span class="nl">modifierFlags:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
+                                       <span class="nl">timestamp:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
+                                    <span class="nl">windowNumber:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
+                                         <span class="nl">context:</span><span class="nb">nil</span>
+                                      <span class="nl">characters:</span><span class="n">upString</span>
+                     <span class="nl">charactersIgnoringModifiers:</span><span class="n">upString</span>
+                                       <span class="nl">isARepeat:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
+                                         <span class="nl">keyCode:</span><span class="n">up</span><span class="p">];</span>
+    
+    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">newEvent</span><span class="p">];</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">theEvent</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>Not the prettiest solution I but one that seems to work perfectly, even sandboxed, to provide the expected behavior in an <code>NSTableView</code> subclass.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
       <h2><a href="/2013/01/05/backing-up-with-capistrano/">Backing up with Capistrano</a></h2>
     
     <p>
@@ -260,32 +364,6 @@
 
 
 
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2 class="link">
-        <a href="http://feross.org/how-to-setup-your-linode/">Linode Setup</a>
-        <span class="linkarrow">&rarr;</span>
-      </h2>
-    
-    <p>
-      <time datetime="2013-01-02 15:19:00 -0800" pubdate="pubdate">
-        02 Jan 2013
-      </time>
-      <a class="permalink" title="Permalink" href="/2013/01/02/linode-setup/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>I've been using <a href="http://www.linode.com/?r=c190426bf1ff0f144b48997675bae8b32d339824">Linode</a> for about the past 4 months. I was previously using <a href="http://www.hostmonster.com/">HostMonster</a> for all of my hosting, while I would recommend them 80% of the time, Linode and the nature of a VPS allows many things you cannot do with shared hosting.</p>
-
-<p>I was looking around for some recommendations on how to deal with user accounts and permissions and ran across this great article that has almost every piece of information you need to get your server from nothing to deployed.</p>
-
-<p>Linode allows you complete control over your VPS which, for beginners (like me when I started with Linode), difficult to get started with. Just follow this guide and you'll be good to go.</p>
 
   </div>
 </article>

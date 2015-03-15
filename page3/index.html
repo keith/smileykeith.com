@@ -41,6 +41,29 @@
 <article>
   <header class="seven columns">
     
+      <h2><a href="/2013/02/21/os-x-plus-zfs/">OS X + ZFS</a></h2>
+    
+    <p>
+      <time datetime="2013-02-21 11:28:00 -0800" pubdate="pubdate">
+        21 Feb 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/02/21/os-x-plus-zfs/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>For a long time people have talked about how horrible <a href="http://en.wikipedia.org/wiki/HFS_Plus">HFS+</a> is. Most notably, in my opinion, <a href="http://en.wikipedia.org/wiki/Linus_Torvalds">Linus Torvalds</a> (the creator of Linux and Git) who <a href="http://www.smh.com.au/news/technology/torvalds-pans-apples-os-x/2008/02/05/1202090393959.html">said</a> "Their file system is complete and utter crap, which is scary." <a href="https://twitter.com/siracusa">John Siracusa</a> also wrote about the problems with HFS+ in his <a href="http://arstechnica.com/apple/2011/07/mac-os-x-10-7/12/#hfs-problems">10.7 review</a> along with talking about it on his podcast, <a href="http://5by5.tv/hypercritical/">Hypercritical</a> in episodes <a href="http://5by5.tv/hypercritical/56">56</a> and <a href="http://5by5.tv/hypercritical/57">57</a>.</p>
+
+<p>The gist of all this really is that Apple needs a new filesystem. It has been a while since Apple had <a href="http://en.wikipedia.org/wiki/ZFS">ZFS</a> support <a href="http://gizmodo.com/5018512/mac-os-x-snow-leopard-for-servers-getting-zfs">on their website</a> for release in Snow Leopard. After which Apple dropped ZFS support because of <a href="http://arstechnica.com/apple/2009/10/apple-abandons-zfs-on-mac-os-x-project-over-licensing-issues/">licensing issues</a>. There had been talks of Apple developing their own file system, although I think that's the wrong way to go. I think Apple needs to approach file systems the way they approached Safari with <a href="http://www.webkit.org/">Webkit</a>. I think they would be best served by picking up a liberally open source file system, such as <a href="http://en.wikipedia.org/wiki/Btrfs">BTRFS</a>, or grabbing up one of the ZFS <a href="http://code.google.com/p/maczfs/">ports</a> and continuing development while leaving it open for anyone to use. One of the great things about this approach is exactly what happened with Webkit and Google Chrome. Google decided to use the Webkit engine to make a product that competes with the main developers of the Webkit project. By doing this with a file system other vendors could use the same implementation and therefore increase development and in turn stability of whichever system was chosen (not to mention compatibility).</p>
+
+<p>One thing is for sure. People who understand how integral a file system is <a href="http://arstechnica.com/apple/2013/02/zfs-loving-mac-users-demand-support-in-os-x-10-9/">want</a> something <a href="https://www.change.org/petitions/apple-os-x-10-9-support-opengl-4-3-and-zfs">modern</a>.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
       <h2><a href="/2013/02/08/terminal-shortcut-in-os-x/">Terminal Shortcut in OS X</a></h2>
     
     <p>
@@ -255,110 +278,6 @@
     <p>I've been using Objective-C and C++ for a while now. While I feel like I know them pretty well I had absolutely no grasp on C itself. Obviously when using those languages you pick up a bit about data types and conditionals but you couldn't take that knowledge and completely write something non-trivial in C. Because of this I figured it might be worth some time so I started looking for viable resources. In that search I found Learn Code the Hard way. They publish physical and online books on different languages and so far I've found it to be a delight. It's not your typical easy walk through and on lessons 17 (of 51) you'll start actually having to think. This for me has been much better so far than typically online learning where the introductory course ends on how to write a for loop.</p>
 
 <p>If you're interested in picking up a C background I would definitely recommend you start here.</p>
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2013/01/08/nstableview-vim-keys/">NSTableView vim keys</a></h2>
-    
-    <p>
-      <time datetime="2013-01-08 16:19:00 -0800" pubdate="pubdate">
-        08 Jan 2013
-      </time>
-      <a class="permalink" title="Permalink" href="/2013/01/08/nstableview-vim-keys/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>I'm currently working on a OS X application that uses a few different NSTableViews to display user data. I was testing them out a bit to make sure multiple deletions worked correctly from my database and I found myself pressing 'j' and 'k' to try and move down and up. I decided it would be pretty cool to implement those two vim shortcuts into my table view just in case anyone else thinks like me.</p>
-
-<p>This functionality already exists in <a href="http://www.potionfactory.com/thehitlist/">The Hit List</a> an awesome GTD app that has a lot of baggage with me, and I'm sure it exists in other applications as well.</p>
-
-<p>In my <code>NSTableView</code> subclass' <code>keyDown:</code> method I tried a few things.</p>
-
-<p>Attempt 1: First I tried to re implement the functionality myself. In retrospect this doesn't make any sense but at first it was pretty simple. It looked something like this.</p>
-
-<div class="highlight"><pre><code class="objc"><span class="n">NSUInteger</span> <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">theEvent</span> <span class="n">modifierFlags</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">NSDeviceIndependentModifierFlagsMask</span><span class="p">;</span>
-<span class="n">NSNumber</span> <span class="o">*</span><span class="n">shiftPressed</span> <span class="o">=</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">NSShiftKeyMask</span><span class="p">);</span>
- 
-<span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
-    <span class="n">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="n">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">NO</span><span class="p">];</span>
-    <span class="p">}</span>
-<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
-    <span class="n">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="n">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">NO</span><span class="p">];</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-<p>The issue with this is the way <code>NSTableView</code> typically expands it's selection. I think of it as a pivot point where you start. Then you go up and down relative to that point. So if you start at index 2 and go down till index 4, you should have 2 rows selected. Then when you go back up you should deselect the rows and indexes 3 and 4 and select the rows and index 1 and 0. At this point I realized it was more difficult than I realized at first and went in search on another solution.</p>
-
-<p>Attempt 2: The next solution I discovered used the <a href="https://developer.apple.com/library/mac/#documentation/Carbon/Reference/QuartzEventServicesRef/Reference/reference.html">Quartz Event Services</a> APIs.</p>
-
-<div class="highlight"><pre><code class="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter &#39;j&#39;</span>
-    <span class="n">CGEventRef</span> <span class="n">e</span> <span class="o">=</span> <span class="n">CGEventCreateKeyboardEvent</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="n">CGKeyCode</span><span class="p">)</span><span class="mi">125</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
-    <span class="n">CGEventPost</span><span class="p">(</span><span class="n">kCGSessionEventTap</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
-    <span class="n">CFRelease</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
-<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter &#39;k&#39;</span>
-    <span class="n">CGEventRef</span> <span class="n">e</span> <span class="o">=</span> <span class="n">CGEventCreateKeyboardEvent</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="n">CGKeyCode</span><span class="p">)</span><span class="mi">126</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
-    <span class="n">CGEventPost</span><span class="p">(</span><span class="n">kCGSessionEventTap</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
-    <span class="n">CFRelease</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-<p>This solution worked perfectly, at first. This mainly emulates a key press with a different key code. So as you can see I was catching j and k and spitting them out as down and up. I spent a few minutes testing this before I remembered that I had sandboxing disabled so I could more easily delete my application support folder while messing with my Core Data stack. There went that solution.</p>
-
-<p>Attempt 3: Before I used the weird <code>CGEventRef</code> solution I tried to create my own <code>NSEvent</code> passing it all the same attributes from the original event (all this code is being used in the <code>keyDown:</code> function of my subclass) but I couldn't figure out how to get the correct character string for the up and down arrows. I typically use <a href="http://manytricks.com/keycodes/">Key Codes</a> to get all the possible information you could want about each key you press. But for some keys, including the arrow keys, it returns garbage for the character code. Then I discovered <a href="http://stackoverflow.com/a/4434934/902968">this answer</a> on StackOverflow where there is a brief mention of <code>NSUpArrowFunctionKey</code>. With that I came up with this.</p>
-
-<div class="highlight"><pre><code class="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
-    <span class="kt">unichar</span> <span class="n">down</span> <span class="o">=</span> <span class="n">NSDownArrowFunctionKey</span><span class="p">;</span>
-    <span class="n">NSString</span> <span class="o">*</span><span class="n">downString</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span> <span class="n">stringWithCharacters</span><span class="o">:&amp;</span><span class="n">down</span> <span class="n">length</span><span class="o">:</span><span class="mi">1</span><span class="p">];</span>
-    <span class="n">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="n">NSEvent</span> <span class="n">keyEventWithType</span><span class="o">:</span><span class="n">NSKeyDown</span>
-                                        <span class="nl">location:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
-                                   <span class="nl">modifierFlags:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
-                                       <span class="nl">timestamp:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
-                                    <span class="nl">windowNumber:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
-                                         <span class="nl">context:</span><span class="nb">nil</span>
-                                      <span class="nl">characters:</span><span class="n">downString</span>
-                     <span class="nl">charactersIgnoringModifiers:</span><span class="n">downString</span>
-                                       <span class="nl">isARepeat:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
-                                         <span class="nl">keyCode:</span><span class="n">down</span><span class="p">];</span>
-    
-    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">newEvent</span><span class="p">];</span>
-<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
-    <span class="kt">unichar</span> <span class="n">up</span> <span class="o">=</span> <span class="n">NSUpArrowFunctionKey</span><span class="p">;</span>
-    <span class="n">NSString</span> <span class="o">*</span><span class="n">upString</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span> <span class="n">stringWithCharacters</span><span class="o">:&amp;</span><span class="n">up</span> <span class="n">length</span><span class="o">:</span><span class="mi">1</span><span class="p">];</span>
-    <span class="n">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="n">NSEvent</span> <span class="n">keyEventWithType</span><span class="o">:</span><span class="n">NSKeyDown</span>
-                                        <span class="nl">location:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
-                                   <span class="nl">modifierFlags:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
-                                       <span class="nl">timestamp:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
-                                    <span class="nl">windowNumber:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
-                                         <span class="nl">context:</span><span class="nb">nil</span>
-                                      <span class="nl">characters:</span><span class="n">upString</span>
-                     <span class="nl">charactersIgnoringModifiers:</span><span class="n">upString</span>
-                                       <span class="nl">isARepeat:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
-                                         <span class="nl">keyCode:</span><span class="n">up</span><span class="p">];</span>
-    
-    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">newEvent</span><span class="p">];</span>
-<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">theEvent</span><span class="p">];</span>
-<span class="p">}</span>
-</code></pre></div>
-
-
-<p>Not the prettiest solution I but one that seems to work perfectly, even sandboxed, to provide the expected behavior in an <code>NSTableView</code> subclass.</p>
 
   </div>
 </article>

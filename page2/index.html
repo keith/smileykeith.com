@@ -41,6 +41,59 @@
 <article>
   <header class="seven columns">
     
+      <h2><a href="/2013/09/03/iterm-theme-based-on-the-time-of-day/">iTerm theme based on the time of day</a></h2>
+    
+    <p>
+      <time datetime="2013-09-03 10:56:00 -0700" pubdate="pubdate">
+        03 Sep 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/09/03/iterm-theme-based-on-the-time-of-day/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>One of the great things about Vim's textual configuration is it's
+ability to contain logic based on outside factors. For the purpose of
+this post I'm referring to the ability to set your colorscheme based on
+the time of day with something like
+<a href="https://github.com/Keithbsmiley/dotfiles/blob/a34e432b59e26225ebdb05737b30729b7ea670d9/vimrc#L102-L108">this</a>.</p>
+
+<p>Having this functionality in Vim with the
+<a href="http://ethanschoonover.com/solarized">Solarized</a> theme at night really
+made me want this in <a href="http://www.iterm2.com/#/section/home">iTerm</a> as
+well. Unfortunately iTerm's conifguration doesn't allow anything similar
+to this. The closest you get is profiles which you can assign keyboard
+shortcuts to for quickly opening windows with different colorschemes.
+Luckily, thanks to this <a href="https://github.com/gnachman/iTerm2/pull/10">pull
+request</a> two years ago from
+<a href="https://twitter.com/junkiesxl">Piet Jaspers</a>, support was added for
+scripting iTerm's entire colorscheme with AppleScript. Using these
+AppleScript bindings I was able to create a
+<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/scripts/itermcolors.applescript">script</a>
+that changes the entire colorscheme of iTerm based on the time of day
+between Solarized light and dark. As you can see the
+<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/scripts/itermcolors.applescript#L27-L49">bulk</a>
+of this script is just setting different color attributes based on the
+theme you want. While you could do this conversion by hand to 65535
+flavored RGB, I made a
+tiny Objective-C app to automate the process which is <a href="https://github.com/Keithbsmiley/ColorConvert">on
+Github</a>. You can download
+the signed binary
+<a href="https://github.com/Keithbsmiley/ColorConvert/releases/tag/1.0">here</a>.</p>
+
+<p>Using this newly created AppleScript I then made a zsh
+<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/functions/colorize">function</a> so that I could call <code>colorize</code> from anywhere to update the color scheme of the current terminal.
+I also chose to do this at the end of my <code>.zshrc</code> <a href="https://github.com/Keithbsmiley/dotfiles/blob/763e6f3f2bbcd93775c70e0d9ed9878ac99896a3/zshrc#L51">here</a>.
+This way everytime I open a new session my theme is automatically set.</p>
+
+<p>If you have any input on how I could optimize this let me know.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
       <h2><a href="/2013/08/14/global-htaccess/">Global htaccess</a></h2>
     
     <p>
@@ -386,29 +439,6 @@ git submodule update --init --recursive
 
 
 <p>You can read more about other Travis configuration options in their <a href="http://about.travis-ci.org/docs/user/build-configuration/">documentation</a>.</p>
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2013/02/21/os-x-plus-zfs/">OS X + ZFS</a></h2>
-    
-    <p>
-      <time datetime="2013-02-21 11:28:00 -0800" pubdate="pubdate">
-        21 Feb 2013
-      </time>
-      <a class="permalink" title="Permalink" href="/2013/02/21/os-x-plus-zfs/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>For a long time people have talked about how horrible <a href="http://en.wikipedia.org/wiki/HFS_Plus">HFS+</a> is. Most notably, in my opinion, <a href="http://en.wikipedia.org/wiki/Linus_Torvalds">Linus Torvalds</a> (the creator of Linux and Git) who <a href="http://www.smh.com.au/news/technology/torvalds-pans-apples-os-x/2008/02/05/1202090393959.html">said</a> "Their file system is complete and utter crap, which is scary." <a href="https://twitter.com/siracusa">John Siracusa</a> also wrote about the problems with HFS+ in his <a href="http://arstechnica.com/apple/2011/07/mac-os-x-10-7/12/#hfs-problems">10.7 review</a> along with talking about it on his podcast, <a href="http://5by5.tv/hypercritical/">Hypercritical</a> in episodes <a href="http://5by5.tv/hypercritical/56">56</a> and <a href="http://5by5.tv/hypercritical/57">57</a>.</p>
-
-<p>The gist of all this really is that Apple needs a new filesystem. It has been a while since Apple had <a href="http://en.wikipedia.org/wiki/ZFS">ZFS</a> support <a href="http://gizmodo.com/5018512/mac-os-x-snow-leopard-for-servers-getting-zfs">on their website</a> for release in Snow Leopard. After which Apple dropped ZFS support because of <a href="http://arstechnica.com/apple/2009/10/apple-abandons-zfs-on-mac-os-x-project-over-licensing-issues/">licensing issues</a>. There had been talks of Apple developing their own file system, although I think that's the wrong way to go. I think Apple needs to approach file systems the way they approached Safari with <a href="http://www.webkit.org/">Webkit</a>. I think they would be best served by picking up a liberally open source file system, such as <a href="http://en.wikipedia.org/wiki/Btrfs">BTRFS</a>, or grabbing up one of the ZFS <a href="http://code.google.com/p/maczfs/">ports</a> and continuing development while leaving it open for anyone to use. One of the great things about this approach is exactly what happened with Webkit and Google Chrome. Google decided to use the Webkit engine to make a product that competes with the main developers of the Webkit project. By doing this with a file system other vendors could use the same implementation and therefore increase development and in turn stability of whichever system was chosen (not to mention compatibility).</p>
-
-<p>One thing is for sure. People who understand how integral a file system is <a href="http://arstechnica.com/apple/2013/02/zfs-loving-mac-users-demand-support-in-os-x-10-9/">want</a> something <a href="https://www.change.org/petitions/apple-os-x-10-9-support-opengl-4-3-and-zfs">modern</a>.</p>
 
   </div>
 </article>

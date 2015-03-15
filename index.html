@@ -41,6 +41,29 @@
 <article>
   <header class="seven columns">
     
+      <h2><a href="/2015/03/14/reactive-cocoa-and-core-data/">Reactive Cocoa and Core Data</a></h2>
+    
+    <p>
+      <time datetime="2015-03-14 18:53:00 -0700" pubdate="pubdate">
+        14 Mar 2015
+      </time>
+      <a class="permalink" title="Permalink" href="/2015/03/14/reactive-cocoa-and-core-data/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>After finally starting to use <a href="https://github.com/ReactiveCocoa/ReactiveCocoa">Reactive
+Cocoa</a> I found
+integrating with Core Data to be sore spot. I wrote about improving this
+integration on the thoughtbot blog
+<a href="https://robots.thoughtbot.com/reactive-core-data">here</a>.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
       <h2><a href="/2015/03/14/writing-vim-syntax-plugins/">Writing Vim Syntax Plugins</a></h2>
     
     <p>
@@ -501,59 +524,6 @@ page</a>
 for some more info on how systemd settings work. Please let me know if
 there's anything here that could be done easier/better for this
 configuration.</p>
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2013/09/03/iterm-theme-based-on-the-time-of-day/">iTerm theme based on the time of day</a></h2>
-    
-    <p>
-      <time datetime="2013-09-03 10:56:00 -0700" pubdate="pubdate">
-        03 Sep 2013
-      </time>
-      <a class="permalink" title="Permalink" href="/2013/09/03/iterm-theme-based-on-the-time-of-day/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>One of the great things about Vim's textual configuration is it's
-ability to contain logic based on outside factors. For the purpose of
-this post I'm referring to the ability to set your colorscheme based on
-the time of day with something like
-<a href="https://github.com/Keithbsmiley/dotfiles/blob/a34e432b59e26225ebdb05737b30729b7ea670d9/vimrc#L102-L108">this</a>.</p>
-
-<p>Having this functionality in Vim with the
-<a href="http://ethanschoonover.com/solarized">Solarized</a> theme at night really
-made me want this in <a href="http://www.iterm2.com/#/section/home">iTerm</a> as
-well. Unfortunately iTerm's conifguration doesn't allow anything similar
-to this. The closest you get is profiles which you can assign keyboard
-shortcuts to for quickly opening windows with different colorschemes.
-Luckily, thanks to this <a href="https://github.com/gnachman/iTerm2/pull/10">pull
-request</a> two years ago from
-<a href="https://twitter.com/junkiesxl">Piet Jaspers</a>, support was added for
-scripting iTerm's entire colorscheme with AppleScript. Using these
-AppleScript bindings I was able to create a
-<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/scripts/itermcolors.applescript">script</a>
-that changes the entire colorscheme of iTerm based on the time of day
-between Solarized light and dark. As you can see the
-<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/scripts/itermcolors.applescript#L27-L49">bulk</a>
-of this script is just setting different color attributes based on the
-theme you want. While you could do this conversion by hand to 65535
-flavored RGB, I made a
-tiny Objective-C app to automate the process which is <a href="https://github.com/Keithbsmiley/ColorConvert">on
-Github</a>. You can download
-the signed binary
-<a href="https://github.com/Keithbsmiley/ColorConvert/releases/tag/1.0">here</a>.</p>
-
-<p>Using this newly created AppleScript I then made a zsh
-<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/functions/colorize">function</a> so that I could call <code>colorize</code> from anywhere to update the color scheme of the current terminal.
-I also chose to do this at the end of my <code>.zshrc</code> <a href="https://github.com/Keithbsmiley/dotfiles/blob/763e6f3f2bbcd93775c70e0d9ed9878ac99896a3/zshrc#L51">here</a>.
-This way everytime I open a new session my theme is automatically set.</p>
-
-<p>If you have any input on how I could optimize this let me know.</p>
 
   </div>
 </article>
