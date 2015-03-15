@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2015-03-14T18:43:49-07:00</updated>
+  <updated>2015-03-14T18:49:43-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -12,6 +12,25 @@
   <rights>Copyright (c) 2015 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
+  
+    <entry>
+      <title type="html"><![CDATA[Writing Vim Syntax Plugins]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2015/03/14/writing-vim-syntax-plugins/" />
+      <id>http://smileykeith.com/2015/03/14/writing-vim-syntax-plugins</id>
+      <updated>2015-03-14T18:48:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>After <a href="http://www.smileykeith.com/2015/03/14/clojure/">writing about
+Clojure</a> I wrote about
+writing Vim syntax plugins. Check it out
+<a href="https://robots.thoughtbot.com/writing-vim-syntax-plugins">here</a>.</p>
+]]>
+      </content>
+    </entry>
   
     <entry>
       <title type="html"><![CDATA[Clojure]]></title>

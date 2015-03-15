@@ -41,6 +41,39 @@
 <article>
   <header class="seven columns">
     
+      <h2><a href="/2013/02/08/terminal-shortcut-in-os-x/">Terminal Shortcut in OS X</a></h2>
+    
+    <p>
+      <time datetime="2013-02-08 09:59:00 -0800" pubdate="pubdate">
+        08 Feb 2013
+      </time>
+      <a class="permalink" title="Permalink" href="/2013/02/08/terminal-shortcut-in-os-x/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>One of my favorite defaults in some Linux distros is the ability to use CTRL+ALT+T to open a new terminal window. I wanted to enable this same functionality in OS X using <a href="http://qsapp.com/">Quicksilver</a>. I did this using <a href="http://www.iterm2.com/">iTerm 2</a> but you can do it with the default Terminal if that's what you want.</p>
+
+<ol>
+<li><p>Enable the <code>Terminal</code> and <code>iTerm2</code> Quicksilver plugins.
+<img src="/images/qs-terminal/qs-plugins.png" alt="Quicksilver plugins" /></p></li>
+<li><p>Create a new custom hotkey trigger. Using the <code>Home</code> directory with the action <code>Open Directory in Terminal</code>
+<img src="/images/qs-terminal/qs-triggers.png" alt="Quicksilver trigger" /></p></li>
+<li><p>Set it's hotkey using the drawer to whatever you want.
+<img src="/images/qs-terminal/qs-hotkey.png" alt="Quicksilver hotkey" /></p></li>
+<li><p>Set your default <code>Command Line Interface</code> <code>Trigger</code> to <code>iTerm</code> (if that's what you want)
+<img src="/images/qs-terminal/qs-cli.png" alt="Quicksilver CLI" /></p></li>
+</ol>
+
+
+<p>You're done! Now you can easily press your hotkey and pull up a new iTerm/Terminal window whenever and wherever.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
       <h2><a href="/2013/02/01/automated-google-reader-backups/">Automated Google Reader Backups</a></h2>
     
     <p>
@@ -326,50 +359,6 @@
 
 
 <p>Not the prettiest solution I but one that seems to work perfectly, even sandboxed, to provide the expected behavior in an <code>NSTableView</code> subclass.</p>
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2013/01/05/backing-up-with-capistrano/">Backing up with Capistrano</a></h2>
-    
-    <p>
-      <time datetime="2013-01-05 12:12:00 -0800" pubdate="pubdate">
-        05 Jan 2013
-      </time>
-      <a class="permalink" title="Permalink" href="/2013/01/05/backing-up-with-capistrano/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>We all know not backing up has <a href="http://www.wired.com/gadgetlab/2012/08/apple-amazon-mat-honan-hacking/">consequences</a>. While losing sentimental files would definitely ruin your day, losing your web server's data could be even worse. I've mentioned <a href="http://smileykeith.com/2013/01/02/linode-setup/">before</a> that I use <a href="http://www.linode.com/?r=c190426bf1ff0f144b48997675bae8b32d339824">Linode</a> for my server hosting, and while they do offer an <a href="http://library.linode.com/backup-service">automated backup service</a> I decided I'd rather setup my own solution to back up periodically to my local machine.</p>
-
-<p>Many people use <a href="http://en.wikipedia.org/wiki/Rsync">rsync</a> to do their server backups. In fact Linode even has a <a href="http://library.linode.com/linux-tools/utilities/rsync#sph_use-rsync-to-back-up-production-environments">guide</a> on how to set it up (there's a better one <a href="http://feross.org/how-to-setup-your-linode/">here</a>). I decided that instead of a 1 for 1 directory backup, I would prefer to have a <a href="http://en.wikipedia.org/wiki/Tar_(file_format">tarball</a>) of the contents. While I could've easily done this with a few bash commands from the server that's not particular ideal for my setup. My local machines don't run 24/7 so if I set it up on the server to automate the backup every week, it may try to initiate the backup when my machine was off (I could try to guess when it's on every week but that's not ideal either).</p>
-
-<p>The obvious solution to this is run it from my local machine instead every week. That way once a week when it's powered up it would log in to the server, create the tarball and pull it down. Insert <a href="https://github.com/capistrano/capistrano">Capistrano</a> (<code>[sudo] gem install capistrano</code>) a <a href="http://rubygems.org/">RubyGem</a> for 'Remote multi-server automation.' So I wrote a very basic <code>Capfile</code> to automate this for me (replace the path to your <code>www</code> folder accordingly).</p>
-
-<div class="highlight"><pre><code class="ruby"><span class="nb">load</span> <span class="s1">&#39;deploy&#39;</span>
-
-<span class="vg">$SERVER_USER</span> <span class="o">=</span> <span class="s2">&quot;username&quot;</span>
-<span class="vg">$SERVER_IP</span>   <span class="o">=</span> <span class="s2">&quot;1.1.1.1&quot;</span>
-
-<span class="n">desc</span> <span class="s2">&quot;Backs up server www files&quot;</span>
-<span class="n">task</span> <span class="ss">:backup</span><span class="p">,</span> <span class="ss">:hosts</span> <span class="o">=&gt;</span> <span class="vg">$SERVER_IP</span> <span class="k">do</span>
-  <span class="n">run</span> <span class="s2">&quot;cd /srv; tar -pvczf ~/backup.tar.gz www/&quot;</span>
-  <span class="n">run_locally</span> <span class="s2">&quot;scp </span><span class="si">#{</span> <span class="vg">$SERVER_USER</span> <span class="si">}</span><span class="s2">@</span><span class="si">#{</span> <span class="vg">$SERVER_IP</span> <span class="si">}</span><span class="s2">:~/backup.tar.gz ~/Dropbox/Backups/Server&quot;</span>
-<span class="k">end</span>
-</code></pre></div>
-
-
-<p>Then I added this to my crontab on my local machine by running <code>crontab -e</code> and adding the line:</p>
-
-<div class="highlight"><pre><code class="bash">@weekly /Users/ksmiley/.rbenv/shims/cap -f ~/path/to/Capfile backup
-</code></pre></div>
-
-
-<p>I included the path to the Capistrano executable since cron (on OS X) executes tasks with <code>sh</code>, which isn't setup with my <code>$PATH</code>.</p>
 
   </div>
 </article>
