@@ -84,32 +84,31 @@
 
 <p>Attempt 1: First I tried to re implement the functionality myself. In retrospect this doesn't make any sense but at first it was pretty simple. It looked something like this.</p>
 
-<div class="highlight"><pre><code class="objc"><span class="n">NSUInteger</span> <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">theEvent</span> <span class="n">modifierFlags</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">NSDeviceIndependentModifierFlagsMask</span><span class="p">;</span>
-<span class="n">NSNumber</span> <span class="o">*</span><span class="n">shiftPressed</span> <span class="o">=</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">NSShiftKeyMask</span><span class="p">);</span>
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="bp">NSUInteger</span> <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">theEvent</span> <span class="n">modifierFlags</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">NSDeviceIndependentModifierFlagsMask</span><span class="p">;</span>
+<span class="bp">NSNumber</span> <span class="o">*</span><span class="n">shiftPressed</span> <span class="o">=</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">NSShiftKeyMask</span><span class="p">);</span>
  
 <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
-    <span class="n">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="n">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="bp">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
     <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
+        <span class="p">[</span><span class="nb">self</span> <span class="nl">selectRowIndexes</span><span class="p">:[</span><span class="bp">NSIndexSet</span> <span class="nl">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nl">byExtendingSelection</span><span class="p">:</span><span class="nb">YES</span><span class="p">];</span>
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">NO</span><span class="p">];</span>
+        <span class="p">[</span><span class="nb">self</span> <span class="nl">selectRowIndexes</span><span class="p">:[</span><span class="bp">NSIndexSet</span> <span class="nl">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nl">byExtendingSelection</span><span class="p">:</span><span class="nb">NO</span><span class="p">];</span>
     <span class="p">}</span>
 <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
-    <span class="n">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="n">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="bp">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
     <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
+        <span class="p">[</span><span class="nb">self</span> <span class="nl">selectRowIndexes</span><span class="p">:[</span><span class="bp">NSIndexSet</span> <span class="nl">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nl">byExtendingSelection</span><span class="p">:</span><span class="nb">YES</span><span class="p">];</span>
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">NO</span><span class="p">];</span>
+        <span class="p">[</span><span class="nb">self</span> <span class="nl">selectRowIndexes</span><span class="p">:[</span><span class="bp">NSIndexSet</span> <span class="nl">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nl">byExtendingSelection</span><span class="p">:</span><span class="nb">NO</span><span class="p">];</span>
     <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
+<span class="p">}</span></code></pre></div>
 
 
 <p>The issue with this is the way <code>NSTableView</code> typically expands it's selection. I think of it as a pivot point where you start. Then you go up and down relative to that point. So if you start at index 2 and go down till index 4, you should have 2 rows selected. Then when you go back up you should deselect the rows and indexes 3 and 4 and select the rows and index 1 and 0. At this point I realized it was more difficult than I realized at first and went in search on another solution.</p>
 
 <p>Attempt 2: The next solution I discovered used the <a href="https://developer.apple.com/library/mac/#documentation/Carbon/Reference/QuartzEventServicesRef/Reference/reference.html">Quartz Event Services</a> APIs.</p>
 
-<div class="highlight"><pre><code class="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter &#39;j&#39;</span>
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter &#39;j&#39;</span>
     <span class="n">CGEventRef</span> <span class="n">e</span> <span class="o">=</span> <span class="n">CGEventCreateKeyboardEvent</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="n">CGKeyCode</span><span class="p">)</span><span class="mi">125</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
     <span class="n">CGEventPost</span><span class="p">(</span><span class="n">kCGSessionEventTap</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
     <span class="n">CFRelease</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
@@ -117,48 +116,46 @@
     <span class="n">CGEventRef</span> <span class="n">e</span> <span class="o">=</span> <span class="n">CGEventCreateKeyboardEvent</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="n">CGKeyCode</span><span class="p">)</span><span class="mi">126</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
     <span class="n">CGEventPost</span><span class="p">(</span><span class="n">kCGSessionEventTap</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
     <span class="n">CFRelease</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div>
+<span class="p">}</span></code></pre></div>
 
 
 <p>This solution worked perfectly, at first. This mainly emulates a key press with a different key code. So as you can see I was catching j and k and spitting them out as down and up. I spent a few minutes testing this before I remembered that I had sandboxing disabled so I could more easily delete my application support folder while messing with my Core Data stack. There went that solution.</p>
 
 <p>Attempt 3: Before I used the weird <code>CGEventRef</code> solution I tried to create my own <code>NSEvent</code> passing it all the same attributes from the original event (all this code is being used in the <code>keyDown:</code> function of my subclass) but I couldn't figure out how to get the correct character string for the up and down arrows. I typically use <a href="http://manytricks.com/keycodes/">Key Codes</a> to get all the possible information you could want about each key you press. But for some keys, including the arrow keys, it returns garbage for the character code. Then I discovered <a href="http://stackoverflow.com/a/4434934/902968">this answer</a> on StackOverflow where there is a brief mention of <code>NSUpArrowFunctionKey</code>. With that I came up with this.</p>
 
-<div class="highlight"><pre><code class="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
     <span class="kt">unichar</span> <span class="n">down</span> <span class="o">=</span> <span class="n">NSDownArrowFunctionKey</span><span class="p">;</span>
-    <span class="n">NSString</span> <span class="o">*</span><span class="n">downString</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span> <span class="n">stringWithCharacters</span><span class="o">:&amp;</span><span class="n">down</span> <span class="n">length</span><span class="o">:</span><span class="mi">1</span><span class="p">];</span>
-    <span class="n">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="n">NSEvent</span> <span class="n">keyEventWithType</span><span class="o">:</span><span class="n">NSKeyDown</span>
-                                        <span class="nl">location:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
-                                   <span class="nl">modifierFlags:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
-                                       <span class="nl">timestamp:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
-                                    <span class="nl">windowNumber:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
-                                         <span class="nl">context:</span><span class="nb">nil</span>
-                                      <span class="nl">characters:</span><span class="n">downString</span>
-                     <span class="nl">charactersIgnoringModifiers:</span><span class="n">downString</span>
-                                       <span class="nl">isARepeat:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
-                                         <span class="nl">keyCode:</span><span class="n">down</span><span class="p">];</span>
+    <span class="bp">NSString</span> <span class="o">*</span><span class="n">downString</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSString</span> <span class="nl">stringWithCharacters</span><span class="p">:</span><span class="o">&amp;</span><span class="n">down</span> <span class="nl">length</span><span class="p">:</span><span class="mi">1</span><span class="p">];</span>
+    <span class="bp">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="bp">NSEvent</span> <span class="nl">keyEventWithType</span><span class="p">:</span><span class="n">NSKeyDown</span>
+                                        <span class="nl">location</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
+                                   <span class="nl">modifierFlags</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
+                                       <span class="nl">timestamp</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
+                                    <span class="nl">windowNumber</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
+                                         <span class="nl">context</span><span class="p">:</span><span class="nb">nil</span>
+                                      <span class="nl">characters</span><span class="p">:</span><span class="n">downString</span>
+                     <span class="nl">charactersIgnoringModifiers</span><span class="p">:</span><span class="n">downString</span>
+                                       <span class="nl">isARepeat</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
+                                         <span class="nl">keyCode</span><span class="p">:</span><span class="n">down</span><span class="p">];</span>
     
-    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">newEvent</span><span class="p">];</span>
+    <span class="p">[</span><span class="nb">super</span> <span class="nl">keyDown</span><span class="p">:</span><span class="n">newEvent</span><span class="p">];</span>
 <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
     <span class="kt">unichar</span> <span class="n">up</span> <span class="o">=</span> <span class="n">NSUpArrowFunctionKey</span><span class="p">;</span>
-    <span class="n">NSString</span> <span class="o">*</span><span class="n">upString</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span> <span class="n">stringWithCharacters</span><span class="o">:&amp;</span><span class="n">up</span> <span class="n">length</span><span class="o">:</span><span class="mi">1</span><span class="p">];</span>
-    <span class="n">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="n">NSEvent</span> <span class="n">keyEventWithType</span><span class="o">:</span><span class="n">NSKeyDown</span>
-                                        <span class="nl">location:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
-                                   <span class="nl">modifierFlags:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
-                                       <span class="nl">timestamp:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
-                                    <span class="nl">windowNumber:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
-                                         <span class="nl">context:</span><span class="nb">nil</span>
-                                      <span class="nl">characters:</span><span class="n">upString</span>
-                     <span class="nl">charactersIgnoringModifiers:</span><span class="n">upString</span>
-                                       <span class="nl">isARepeat:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
-                                         <span class="nl">keyCode:</span><span class="n">up</span><span class="p">];</span>
+    <span class="bp">NSString</span> <span class="o">*</span><span class="n">upString</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSString</span> <span class="nl">stringWithCharacters</span><span class="p">:</span><span class="o">&amp;</span><span class="n">up</span> <span class="nl">length</span><span class="p">:</span><span class="mi">1</span><span class="p">];</span>
+    <span class="bp">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="bp">NSEvent</span> <span class="nl">keyEventWithType</span><span class="p">:</span><span class="n">NSKeyDown</span>
+                                        <span class="nl">location</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
+                                   <span class="nl">modifierFlags</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
+                                       <span class="nl">timestamp</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
+                                    <span class="nl">windowNumber</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
+                                         <span class="nl">context</span><span class="p">:</span><span class="nb">nil</span>
+                                      <span class="nl">characters</span><span class="p">:</span><span class="n">upString</span>
+                     <span class="nl">charactersIgnoringModifiers</span><span class="p">:</span><span class="n">upString</span>
+                                       <span class="nl">isARepeat</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
+                                         <span class="nl">keyCode</span><span class="p">:</span><span class="n">up</span><span class="p">];</span>
     
-    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">newEvent</span><span class="p">];</span>
+    <span class="p">[</span><span class="nb">super</span> <span class="nl">keyDown</span><span class="p">:</span><span class="n">newEvent</span><span class="p">];</span>
 <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">theEvent</span><span class="p">];</span>
-<span class="p">}</span>
-</code></pre></div>
+    <span class="p">[</span><span class="nb">super</span> <span class="nl">keyDown</span><span class="p">:</span><span class="n">theEvent</span><span class="p">];</span>
+<span class="p">}</span></code></pre></div>
 
 
 <p>Not the prettiest solution I but one that seems to work perfectly, even sandboxed, to provide the expected behavior in an <code>NSTableView</code> subclass.</p>
@@ -186,7 +183,7 @@
 
 <p>The obvious solution to this is run it from my local machine instead every week. That way once a week when it's powered up it would log in to the server, create the tarball and pull it down. Insert <a href="https://github.com/capistrano/capistrano">Capistrano</a> (<code>[sudo] gem install capistrano</code>) a <a href="http://rubygems.org/">RubyGem</a> for 'Remote multi-server automation.' So I wrote a very basic <code>Capfile</code> to automate this for me (replace the path to your <code>www</code> folder accordingly).</p>
 
-<div class="highlight"><pre><code class="ruby"><span class="nb">load</span> <span class="s1">&#39;deploy&#39;</span>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="nb">load</span> <span class="s1">&#39;deploy&#39;</span>
 
 <span class="vg">$SERVER_USER</span> <span class="o">=</span> <span class="s2">&quot;username&quot;</span>
 <span class="vg">$SERVER_IP</span>   <span class="o">=</span> <span class="s2">&quot;1.1.1.1&quot;</span>
@@ -195,14 +192,12 @@
 <span class="n">task</span> <span class="ss">:backup</span><span class="p">,</span> <span class="ss">:hosts</span> <span class="o">=&gt;</span> <span class="vg">$SERVER_IP</span> <span class="k">do</span>
   <span class="n">run</span> <span class="s2">&quot;cd /srv; tar -pvczf ~/backup.tar.gz www/&quot;</span>
   <span class="n">run_locally</span> <span class="s2">&quot;scp </span><span class="si">#{</span> <span class="vg">$SERVER_USER</span> <span class="si">}</span><span class="s2">@</span><span class="si">#{</span> <span class="vg">$SERVER_IP</span> <span class="si">}</span><span class="s2">:~/backup.tar.gz ~/Dropbox/Backups/Server&quot;</span>
-<span class="k">end</span>
-</code></pre></div>
+<span class="k">end</span></code></pre></div>
 
 
 <p>Then I added this to my crontab on my local machine by running <code>crontab -e</code> and adding the line:</p>
 
-<div class="highlight"><pre><code class="bash">@weekly /Users/ksmiley/.rbenv/shims/cap -f ~/path/to/Capfile backup
-</code></pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">@weekly /Users/ksmiley/.rbenv/shims/cap -f ~/path/to/Capfile backup</code></pre></div>
 
 
 <p>I included the path to the Capistrano executable since cron (on OS X) executes tasks with <code>sh</code>, which isn't setup with my <code>$PATH</code>.</p>
@@ -228,7 +223,7 @@
 
 <p>Since CocoaPods supports multiple versions of Ruby (1.8.7 and 1.9.3) to be complete ideally you'd lint them on both versions. Tools like <a href="https://rvm.io/">RVM</a> and <a href="https://github.com/sstephenson/rbenv">rbenv</a>(my tool of choice) make it easy to quickly switch between different versions of Ruby using <code>.rvmrc</code> and <code>.rbenv-version</code> respectively. As you can probably assume I wanted to automate this. So I wrote a quick <a href="http://rake.rubyforge.org/">Rakefile</a> to do this for me.</p>
 
-<div class="highlight"><pre><code class="ruby"><span class="c1">#!/usr/bin/env rake</span>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#!/usr/bin/env rake</span>
 
 <span class="c1"># NOTE: Must be using rbenv 4.0 to use `system` and `.ruby-version`</span>
 <span class="c1">## Set your preferred ruby versions</span>
@@ -298,8 +293,7 @@
 <span class="c1"># Run the lint</span>
 <span class="k">def</span> <span class="nf">lint</span><span class="p">(</span><span class="n">podspec</span><span class="p">)</span>
   <span class="sx">%x[pod spec lint &quot;</span><span class="si">#{</span> <span class="n">podspec</span> <span class="si">}</span><span class="sx">&quot;]</span>
-<span class="k">end</span>
-</code></pre></div>
+<span class="k">end</span></code></pre></div>
 
 
 
@@ -323,7 +317,7 @@
   <div class="post ten columns">
     <p>I've recently been searching around for a good way to 'spawn' an <a href="http://www.iterm2.com/">iTerm</a> window (no I don't use tabs in iTerm), at the <code>pwd</code> in my current iTerm window. I couldn't find any good way to do it so I jumped in to AppleScript Editor and made something happen.</p>
 
-<div class="highlight"><pre><code class="applescript"><span class="k">on</span> <span class="nb">run</span> <span class="nv">argv</span>
+<div class="highlight"><pre><code class="language-applescript" data-lang="applescript"><span class="k">on</span> <span class="nb">run</span> <span class="nv">argv</span>
     <span class="k">tell</span> <span class="nb">application</span> <span class="s2">&quot;iTerm&quot;</span>
         <span class="k">set</span> <span class="nv">t</span> <span class="k">to</span> <span class="nb">make</span> <span class="nb">new</span> <span class="nv">terminal</span>
         <span class="k">tell</span> <span class="nv">t</span>
@@ -334,8 +328,7 @@
             <span class="k">end</span> <span class="k">tell</span>
         <span class="k">end</span> <span class="k">tell</span>
     <span class="k">end</span> <span class="k">tell</span>
-<span class="k">end</span> <span class="nb">run</span>
-</code></pre></div>
+<span class="k">end</span> <span class="nb">run</span></code></pre></div>
 
 
 <p>I then added it to my <a href="http://www.zsh.org/">zsh</a> aliases with:</p>

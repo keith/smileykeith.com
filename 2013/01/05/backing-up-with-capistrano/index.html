@@ -59,7 +59,7 @@
 
 <p>The obvious solution to this is run it from my local machine instead every week. That way once a week when it's powered up it would log in to the server, create the tarball and pull it down. Insert <a href="https://github.com/capistrano/capistrano">Capistrano</a> (<code>[sudo] gem install capistrano</code>) a <a href="http://rubygems.org/">RubyGem</a> for 'Remote multi-server automation.' So I wrote a very basic <code>Capfile</code> to automate this for me (replace the path to your <code>www</code> folder accordingly).</p>
 
-<div class="highlight"><pre><code class="ruby"><span class="nb">load</span> <span class="s1">&#39;deploy&#39;</span>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="nb">load</span> <span class="s1">&#39;deploy&#39;</span>
 
 <span class="vg">$SERVER_USER</span> <span class="o">=</span> <span class="s2">&quot;username&quot;</span>
 <span class="vg">$SERVER_IP</span>   <span class="o">=</span> <span class="s2">&quot;1.1.1.1&quot;</span>
@@ -68,14 +68,12 @@
 <span class="n">task</span> <span class="ss">:backup</span><span class="p">,</span> <span class="ss">:hosts</span> <span class="o">=&gt;</span> <span class="vg">$SERVER_IP</span> <span class="k">do</span>
   <span class="n">run</span> <span class="s2">&quot;cd /srv; tar -pvczf ~/backup.tar.gz www/&quot;</span>
   <span class="n">run_locally</span> <span class="s2">&quot;scp </span><span class="si">#{</span> <span class="vg">$SERVER_USER</span> <span class="si">}</span><span class="s2">@</span><span class="si">#{</span> <span class="vg">$SERVER_IP</span> <span class="si">}</span><span class="s2">:~/backup.tar.gz ~/Dropbox/Backups/Server&quot;</span>
-<span class="k">end</span>
-</code></pre></div>
+<span class="k">end</span></code></pre></div>
 
 
 <p>Then I added this to my crontab on my local machine by running <code>crontab -e</code> and adding the line:</p>
 
-<div class="highlight"><pre><code class="bash">@weekly /Users/ksmiley/.rbenv/shims/cap -f ~/path/to/Capfile backup
-</code></pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">@weekly /Users/ksmiley/.rbenv/shims/cap -f ~/path/to/Capfile backup</code></pre></div>
 
 
 <p>I included the path to the Capistrano executable since cron (on OS X) executes tasks with <code>sh</code>, which isn't setup with my <code>$PATH</code>.</p>

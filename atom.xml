@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2015-03-14T18:59:52-07:00</updated>
+  <updated>2015-05-04T10:52:09-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -155,7 +155,7 @@ will define its path in your vimrc.</p>
 
 <p>Then in your vimrc:</p>
 
-<div class="highlight"><pre><code class="vim"><span class="k">let</span> <span class="k">g</span>:tagbar_type_objc <span class="p">=</span> {
+<div class="highlight"><pre><code class="language-vim" data-lang="vim"><span class="k">let</span> <span class="k">g</span>:tagbar_type_objc <span class="p">=</span> {
   \ <span class="s1">&#39;ctagstype&#39;</span>: <span class="s1">&#39;objc&#39;</span><span class="p">,</span>
   \ <span class="s1">&#39;ctagsargs&#39;</span>: [
     \ <span class="s1">&#39;-f&#39;</span><span class="p">,</span>
@@ -179,8 +179,7 @@ will define its path in your vimrc.</p>
     \ <span class="s1">&#39;M:method&#39;</span><span class="p">,</span>
     \ <span class="s1">&#39;g:pragma&#39;</span><span class="p">,</span>
   \ ]<span class="p">,</span>
-\ }
-</code></pre></div>
+\ }</code></pre></div>
 
 
 <p>Replace the <code>~/.vim/objctags</code> with the path where you chose to put the
@@ -243,14 +242,13 @@ up nuking the work I had done and starting over.</p>
 
 <p>You need to do some configuration of the firewall and redirects:</p>
 
-<div class="highlight"><pre><code class="bash"><span class="nb">echo</span> <span class="s2">&quot;net.ipv4.ip_forward = 1&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="s2">&quot;net.ipv4.ip_forward = 1&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
 <span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.all.accept_redirects = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
 <span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.all.send_redirects = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
 <span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.default.rp_filter = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
 <span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.default.accept_source_route = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
 <span class="nb">echo</span> <span class="s2">&quot;net.ipv4.conf.default.send_redirects = 0&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
-<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.icmp_ignore_bogus_error_responses = 1&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf
-</code></pre></div>
+<span class="nb">echo</span> <span class="s2">&quot;net.ipv4.icmp_ignore_bogus_error_responses = 1&quot;</span> <span class="p">|</span>  tee -a /etc/sysctl.conf</code></pre></div>
 
 
 <p>To make these settings persist we need to create a script that gets launched by
@@ -258,17 +256,16 @@ systemd each time we restart the system. As recommended in the original
 article, and being a <a href="http://brew.sh/">Homebrew</a> user I created the script in
 <code>/usr/local/bin/vpn-boot.sh</code>:</p>
 
-<div class="highlight"><pre><code class="bash"><span class="c">#!/usr/bin/bash</span>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/usr/bin/bash</span>
 
 iptables --table nat --append POSTROUTING --jump MASQUERADE
 
-<span class="k">for </span>vpn in /proc/sys/net/ipv4/conf/*<span class="p">;</span> <span class="k">do</span>
-<span class="k">    </span><span class="nb">echo </span>0 &gt; <span class="nv">$vpn</span>/accept_redirects<span class="p">;</span>
-    <span class="nb">echo </span>0 &gt; <span class="nv">$vpn</span>/send_redirects<span class="p">;</span>
+<span class="k">for</span> vpn in /proc/sys/net/ipv4/conf/*<span class="p">;</span> <span class="k">do</span>
+    <span class="nb">echo </span><span class="m">0</span> &gt; <span class="nv">$vpn</span>/accept_redirects<span class="p">;</span>
+    <span class="nb">echo </span><span class="m">0</span> &gt; <span class="nv">$vpn</span>/send_redirects<span class="p">;</span>
 <span class="k">done</span>
 
-sysctl -p
-</code></pre></div>
+sysctl -p</code></pre></div>
 
 
 <p>There are a few things that differ here to the original article. First
@@ -279,8 +276,7 @@ to be changed, but I think it's better in the long run. I also added
 <code>sysctl -p</code> since these settings didn't seemed to be applied otherwise.
 Then you must make this script executable with something like:</p>
 
-<div class="highlight"><pre><code class="bash">chmod +x /usr/local/bin/vpn-boot.sh
-</code></pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">chmod +x /usr/local/bin/vpn-boot.sh</code></pre></div>
 
 
 <p>Since Arch uses systemd to this script has to be launched by creating a
@@ -523,7 +519,7 @@ configuration.</p>
 ability to contain logic based on outside factors. For the purpose of
 this post I'm referring to the ability to set your colorscheme based on
 the time of day with something like
-<a href="https://github.com/Keithbsmiley/dotfiles/blob/a34e432b59e26225ebdb05737b30729b7ea670d9/vimrc#L102-L108">this</a>.</p>
+<a href="https://github.com/keith/dotfiles/blob/a34e432b59e26225ebdb05737b30729b7ea670d9/vimrc#L102-L108">this</a>.</p>
 
 <p>Having this functionality in Vim with the
 <a href="http://ethanschoonover.com/solarized">Solarized</a> theme at night really
@@ -536,21 +532,21 @@ request</a> two years ago from
 <a href="https://twitter.com/junkiesxl">Piet Jaspers</a>, support was added for
 scripting iTerm's entire colorscheme with AppleScript. Using these
 AppleScript bindings I was able to create a
-<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/scripts/itermcolors.applescript">script</a>
+<a href="https://github.com/keith/dotfiles/blob/master/scripts/itermcolors.applescript">script</a>
 that changes the entire colorscheme of iTerm based on the time of day
 between Solarized light and dark. As you can see the
-<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/scripts/itermcolors.applescript#L27-L49">bulk</a>
+<a href="https://github.com/keith/dotfiles/blob/master/scripts/itermcolors.applescript#L27-L49">bulk</a>
 of this script is just setting different color attributes based on the
 theme you want. While you could do this conversion by hand to 65535
 flavored RGB, I made a
-tiny Objective-C app to automate the process which is <a href="https://github.com/Keithbsmiley/ColorConvert">on
+tiny Objective-C app to automate the process which is <a href="https://github.com/keith/ColorConvert">on
 Github</a>. You can download
 the signed binary
-<a href="https://github.com/Keithbsmiley/ColorConvert/releases/tag/1.0">here</a>.</p>
+<a href="https://github.com/keith/ColorConvert/releases/tag/1.0">here</a>.</p>
 
 <p>Using this newly created AppleScript I then made a zsh
-<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/functions/colorize">function</a> so that I could call <code>colorize</code> from anywhere to update the color scheme of the current terminal.
-I also chose to do this at the end of my <code>.zshrc</code> <a href="https://github.com/Keithbsmiley/dotfiles/blob/763e6f3f2bbcd93775c70e0d9ed9878ac99896a3/zshrc#L51">here</a>.
+<a href="https://github.com/keith/dotfiles/blob/master/functions/colorize">function</a> so that I could call <code>colorize</code> from anywhere to update the color scheme of the current terminal.
+I also chose to do this at the end of my <code>.zshrc</code> <a href="https://github.com/keith/dotfiles/blob/763e6f3f2bbcd93775c70e0d9ed9878ac99896a3/zshrc#L51">here</a>.
 This way everytime I open a new session my theme is automatically set.</p>
 
 <p>If you have any input on how I could optimize this let me know.</p>
@@ -614,10 +610,9 @@ configuration. For example only required configuration for one of my sites
 was the <code>ErrorDocument</code>s. Now my <code>.htaccess</code> file went from 300+ lines
 to</p>
 
-<div class="highlight"><pre><code class="apache"><span class="nb">ErrorDocument</span> <span class="m">403</span> <span class="sx">/403.php</span>
+<div class="highlight"><pre><code class="language-apache" data-lang="apache"><span class="nb">ErrorDocument</span> <span class="m">403</span> <span class="sx">/403.php</span>
 <span class="nb">ErrorDocument</span> <span class="m">404</span> <span class="sx">/404.php</span>
-<span class="nb">ErrorDocument</span> <span class="m">500</span> <span class="sx">/500.php</span>
-</code></pre></div>
+<span class="nb">ErrorDocument</span> <span class="m">500</span> <span class="sx">/500.php</span></code></pre></div>
 
 
 
@@ -834,7 +829,7 @@ it's obviously worth it.</p>
         
       </author>
       <content type="html">
-        <![CDATA[<p>Recently <a href="https://travis-ci.org/">Travis</a> added support for Objective-C and there for OS X and iOS projects for continuous integration testing. I gather that people have previously done this with self-hosted dedicated <a href="http://jenkins-ci.org/">Jenkins</a> machines but since Apple is so aggressive about dropping support for previous versions of the OS it seems like a pain to have to replace your build server every few years. Enter Travis, a great hosted <a href="http://en.wikipedia.org/wiki/Continuous_integration">continuous integration</a> server that hosts a huge amount of open source projects. I figured with this new support I could host some of my <a href="https://github.com/Keithbsmiley/KSADNTwitterFormatter">smaller</a> libraries just to set how well it worked. The initial setup process was a bit tedious but I eventually got it to work.</p>
+        <![CDATA[<p>Recently <a href="https://travis-ci.org/">Travis</a> added support for Objective-C and there for OS X and iOS projects for continuous integration testing. I gather that people have previously done this with self-hosted dedicated <a href="http://jenkins-ci.org/">Jenkins</a> machines but since Apple is so aggressive about dropping support for previous versions of the OS it seems like a pain to have to replace your build server every few years. Enter Travis, a great hosted <a href="http://en.wikipedia.org/wiki/Continuous_integration">continuous integration</a> server that hosts a huge amount of open source projects. I figured with this new support I could host some of my <a href="https://github.com/keith/KSADNTwitterFormatter">smaller</a> libraries just to set how well it worked. The initial setup process was a bit tedious but I eventually got it to work.</p>
 
 <h3>Assumtions:</h3>
 
@@ -851,8 +846,7 @@ it's obviously worth it.</p>
 </ul>
 
 
-<div class="highlight"><pre><code class="yaml"><span class="l-Scalar-Plain">language</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">objective-c</span>
-</code></pre></div>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">language</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">objective-c</span></code></pre></div>
 
 
 <p><del>By default Travis runs <a href="https://gist.github.com/henrikhodne/73151fccea7af3201f63">this script</a> for Objective-C projects</del> I was informed <a href="https://twitter.com/henrikhodne/status/322665896806060032">on Twitter</a> that the current script that runs Objective-C projects is actually located <a href="https://github.com/travis-ci/travis-cookbooks/blob/osx/ci_environment/travis_build_environment/files/default/ci_user/travis-utils/osx-cibuild.sh">here</a>. It was originally created by <a href="https://github.com/jspahrsummers">Justin Spahr-Summers</a> <a href="https://github.com/jspahrsummers/objc-build-scripts">here</a>. This script seems to run my projects without any issue, they just occasionally require more initial setup (we'll get to that).</p>
@@ -874,23 +868,21 @@ it's obviously worth it.</p>
 
 <p>For one of my projects I created a <code>setup.sh</code> file at the root of my repo that looks like this:</p>
 
-<div class="highlight"><pre><code class="bash"><span class="c">#!/usr/bin/env bash</span>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/usr/bin/env bash</span>
 
 git submodule update --init --recursive
 <span class="nb">echo</span> <span class="s2">&quot;Setting up test frameworks...&quot;</span>
 <span class="nb">cd </span>Example/Vendor/Specta<span class="p">;</span> rake &gt; /dev/null
 <span class="nb">cd</span> ../Expecta<span class="p">;</span> rake &gt; /dev/null
 <span class="nb">echo</span> <span class="s2">&quot;Done&quot;</span>
-<span class="nb">cd</span> ../../../
-</code></pre></div>
+<span class="nb">cd</span> ../../../</code></pre></div>
 
 
 <p>This script which I run using the <code>before_install: ./setup.sh</code> option in my <code>.travis.yml</code> gets all my submodules, sets up Specta and Expecta and then goes back to the root directory for running. If you just have a few simple steps you can also have multiple <code>before_install</code> actions like:</p>
 
-<div class="highlight"><pre><code class="yaml"><span class="l-Scalar-Plain">before_install</span><span class="p-Indicator">:</span>
+<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">before_install</span><span class="p-Indicator">:</span>
   <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cd Example</span>
-  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">make</span>
-</code></pre></div>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">make</span></code></pre></div>
 
 
 <p>You can read more about other Travis configuration options in their <a href="http://about.travis-ci.org/docs/user/build-configuration/">documentation</a>.</p>
@@ -965,19 +957,17 @@ git submodule update --init --recursive
 
 <p>To run the script I came up with use something like:</p>
 
-<div class="highlight"><pre><code class="bash">ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword
-</code></pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword</code></pre></div>
 
 
 <p>To add it to your crontab (to run every Sunday at 1:01am) use something like:</p>
 
-<div class="highlight"><pre><code class="bash">1 1 * * 7 ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword
-</code></pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="m">1</span> <span class="m">1</span> * * <span class="m">7</span> ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword</code></pre></div>
 
 
 
 
-<div class="highlight"><pre><code class="ruby"><span class="c1">#!/usr/bin/env ruby</span>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#!/usr/bin/env ruby</span>
 
 <span class="c1">#</span>
 <span class="c1"># =&gt; This script will authorize your Google credentials and download your Google Reader subscriptions</span>
@@ -1079,8 +1069,7 @@ git submodule update --init --recursive
 <span class="k">else</span>
     <span class="c1"># If the file wasn&#39;t created print an error</span>
     <span class="nb">puts</span> <span class="s2">&quot;Couldn&#39;t write to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2"> (the process running this script may not have sufficient privileges&quot;</span><span class="o">.</span><span class="n">red</span>
-<span class="k">end</span>
-</code></pre></div>
+<span class="k">end</span></code></pre></div>
 
 
 
@@ -1143,32 +1132,31 @@ git submodule update --init --recursive
 
 <p>Attempt 1: First I tried to re implement the functionality myself. In retrospect this doesn't make any sense but at first it was pretty simple. It looked something like this.</p>
 
-<div class="highlight"><pre><code class="objc"><span class="n">NSUInteger</span> <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">theEvent</span> <span class="n">modifierFlags</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">NSDeviceIndependentModifierFlagsMask</span><span class="p">;</span>
-<span class="n">NSNumber</span> <span class="o">*</span><span class="n">shiftPressed</span> <span class="o">=</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">NSShiftKeyMask</span><span class="p">);</span>
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="bp">NSUInteger</span> <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">theEvent</span> <span class="n">modifierFlags</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">NSDeviceIndependentModifierFlagsMask</span><span class="p">;</span>
+<span class="bp">NSNumber</span> <span class="o">*</span><span class="n">shiftPressed</span> <span class="o">=</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">NSShiftKeyMask</span><span class="p">);</span>
  
 <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
-    <span class="n">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="n">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="bp">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
     <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
+        <span class="p">[</span><span class="nb">self</span> <span class="nl">selectRowIndexes</span><span class="p">:[</span><span class="bp">NSIndexSet</span> <span class="nl">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nl">byExtendingSelection</span><span class="p">:</span><span class="nb">YES</span><span class="p">];</span>
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">NO</span><span class="p">];</span>
+        <span class="p">[</span><span class="nb">self</span> <span class="nl">selectRowIndexes</span><span class="p">:[</span><span class="bp">NSIndexSet</span> <span class="nl">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nl">byExtendingSelection</span><span class="p">:</span><span class="nb">NO</span><span class="p">];</span>
     <span class="p">}</span>
 <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
-    <span class="n">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="n">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="bp">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
     <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
+        <span class="p">[</span><span class="nb">self</span> <span class="nl">selectRowIndexes</span><span class="p">:[</span><span class="bp">NSIndexSet</span> <span class="nl">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nl">byExtendingSelection</span><span class="p">:</span><span class="nb">YES</span><span class="p">];</span>
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="p">[</span><span class="n">self</span> <span class="n">selectRowIndexes</span><span class="o">:</span><span class="p">[</span><span class="n">NSIndexSet</span> <span class="n">indexSetWithIndex</span><span class="o">:</span><span class="n">index</span><span class="p">]</span> <span class="n">byExtendingSelection</span><span class="o">:</span><span class="nb">NO</span><span class="p">];</span>
+        <span class="p">[</span><span class="nb">self</span> <span class="nl">selectRowIndexes</span><span class="p">:[</span><span class="bp">NSIndexSet</span> <span class="nl">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nl">byExtendingSelection</span><span class="p">:</span><span class="nb">NO</span><span class="p">];</span>
     <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
+<span class="p">}</span></code></pre></div>
 
 
 <p>The issue with this is the way <code>NSTableView</code> typically expands it's selection. I think of it as a pivot point where you start. Then you go up and down relative to that point. So if you start at index 2 and go down till index 4, you should have 2 rows selected. Then when you go back up you should deselect the rows and indexes 3 and 4 and select the rows and index 1 and 0. At this point I realized it was more difficult than I realized at first and went in search on another solution.</p>
 
 <p>Attempt 2: The next solution I discovered used the <a href="https://developer.apple.com/library/mac/#documentation/Carbon/Reference/QuartzEventServicesRef/Reference/reference.html">Quartz Event Services</a> APIs.</p>
 
-<div class="highlight"><pre><code class="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter &#39;j&#39;</span>
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter &#39;j&#39;</span>
     <span class="n">CGEventRef</span> <span class="n">e</span> <span class="o">=</span> <span class="n">CGEventCreateKeyboardEvent</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="n">CGKeyCode</span><span class="p">)</span><span class="mi">125</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
     <span class="n">CGEventPost</span><span class="p">(</span><span class="n">kCGSessionEventTap</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
     <span class="n">CFRelease</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
@@ -1176,48 +1164,46 @@ git submodule update --init --recursive
     <span class="n">CGEventRef</span> <span class="n">e</span> <span class="o">=</span> <span class="n">CGEventCreateKeyboardEvent</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="n">CGKeyCode</span><span class="p">)</span><span class="mi">126</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
     <span class="n">CGEventPost</span><span class="p">(</span><span class="n">kCGSessionEventTap</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
     <span class="n">CFRelease</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div>
+<span class="p">}</span></code></pre></div>
 
 
 <p>This solution worked perfectly, at first. This mainly emulates a key press with a different key code. So as you can see I was catching j and k and spitting them out as down and up. I spent a few minutes testing this before I remembered that I had sandboxing disabled so I could more easily delete my application support folder while messing with my Core Data stack. There went that solution.</p>
 
 <p>Attempt 3: Before I used the weird <code>CGEventRef</code> solution I tried to create my own <code>NSEvent</code> passing it all the same attributes from the original event (all this code is being used in the <code>keyDown:</code> function of my subclass) but I couldn't figure out how to get the correct character string for the up and down arrows. I typically use <a href="http://manytricks.com/keycodes/">Key Codes</a> to get all the possible information you could want about each key you press. But for some keys, including the arrow keys, it returns garbage for the character code. Then I discovered <a href="http://stackoverflow.com/a/4434934/902968">this answer</a> on StackOverflow where there is a brief mention of <code>NSUpArrowFunctionKey</code>. With that I came up with this.</p>
 
-<div class="highlight"><pre><code class="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
     <span class="kt">unichar</span> <span class="n">down</span> <span class="o">=</span> <span class="n">NSDownArrowFunctionKey</span><span class="p">;</span>
-    <span class="n">NSString</span> <span class="o">*</span><span class="n">downString</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span> <span class="n">stringWithCharacters</span><span class="o">:&amp;</span><span class="n">down</span> <span class="n">length</span><span class="o">:</span><span class="mi">1</span><span class="p">];</span>
-    <span class="n">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="n">NSEvent</span> <span class="n">keyEventWithType</span><span class="o">:</span><span class="n">NSKeyDown</span>
-                                        <span class="nl">location:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
-                                   <span class="nl">modifierFlags:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
-                                       <span class="nl">timestamp:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
-                                    <span class="nl">windowNumber:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
-                                         <span class="nl">context:</span><span class="nb">nil</span>
-                                      <span class="nl">characters:</span><span class="n">downString</span>
-                     <span class="nl">charactersIgnoringModifiers:</span><span class="n">downString</span>
-                                       <span class="nl">isARepeat:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
-                                         <span class="nl">keyCode:</span><span class="n">down</span><span class="p">];</span>
+    <span class="bp">NSString</span> <span class="o">*</span><span class="n">downString</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSString</span> <span class="nl">stringWithCharacters</span><span class="p">:</span><span class="o">&amp;</span><span class="n">down</span> <span class="nl">length</span><span class="p">:</span><span class="mi">1</span><span class="p">];</span>
+    <span class="bp">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="bp">NSEvent</span> <span class="nl">keyEventWithType</span><span class="p">:</span><span class="n">NSKeyDown</span>
+                                        <span class="nl">location</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
+                                   <span class="nl">modifierFlags</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
+                                       <span class="nl">timestamp</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
+                                    <span class="nl">windowNumber</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
+                                         <span class="nl">context</span><span class="p">:</span><span class="nb">nil</span>
+                                      <span class="nl">characters</span><span class="p">:</span><span class="n">downString</span>
+                     <span class="nl">charactersIgnoringModifiers</span><span class="p">:</span><span class="n">downString</span>
+                                       <span class="nl">isARepeat</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
+                                         <span class="nl">keyCode</span><span class="p">:</span><span class="n">down</span><span class="p">];</span>
     
-    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">newEvent</span><span class="p">];</span>
+    <span class="p">[</span><span class="nb">super</span> <span class="nl">keyDown</span><span class="p">:</span><span class="n">newEvent</span><span class="p">];</span>
 <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
     <span class="kt">unichar</span> <span class="n">up</span> <span class="o">=</span> <span class="n">NSUpArrowFunctionKey</span><span class="p">;</span>
-    <span class="n">NSString</span> <span class="o">*</span><span class="n">upString</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span> <span class="n">stringWithCharacters</span><span class="o">:&amp;</span><span class="n">up</span> <span class="n">length</span><span class="o">:</span><span class="mi">1</span><span class="p">];</span>
-    <span class="n">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="n">NSEvent</span> <span class="n">keyEventWithType</span><span class="o">:</span><span class="n">NSKeyDown</span>
-                                        <span class="nl">location:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
-                                   <span class="nl">modifierFlags:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
-                                       <span class="nl">timestamp:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
-                                    <span class="nl">windowNumber:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
-                                         <span class="nl">context:</span><span class="nb">nil</span>
-                                      <span class="nl">characters:</span><span class="n">upString</span>
-                     <span class="nl">charactersIgnoringModifiers:</span><span class="n">upString</span>
-                                       <span class="nl">isARepeat:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
-                                         <span class="nl">keyCode:</span><span class="n">up</span><span class="p">];</span>
+    <span class="bp">NSString</span> <span class="o">*</span><span class="n">upString</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSString</span> <span class="nl">stringWithCharacters</span><span class="p">:</span><span class="o">&amp;</span><span class="n">up</span> <span class="nl">length</span><span class="p">:</span><span class="mi">1</span><span class="p">];</span>
+    <span class="bp">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="bp">NSEvent</span> <span class="nl">keyEventWithType</span><span class="p">:</span><span class="n">NSKeyDown</span>
+                                        <span class="nl">location</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
+                                   <span class="nl">modifierFlags</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
+                                       <span class="nl">timestamp</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
+                                    <span class="nl">windowNumber</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
+                                         <span class="nl">context</span><span class="p">:</span><span class="nb">nil</span>
+                                      <span class="nl">characters</span><span class="p">:</span><span class="n">upString</span>
+                     <span class="nl">charactersIgnoringModifiers</span><span class="p">:</span><span class="n">upString</span>
+                                       <span class="nl">isARepeat</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
+                                         <span class="nl">keyCode</span><span class="p">:</span><span class="n">up</span><span class="p">];</span>
     
-    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">newEvent</span><span class="p">];</span>
+    <span class="p">[</span><span class="nb">super</span> <span class="nl">keyDown</span><span class="p">:</span><span class="n">newEvent</span><span class="p">];</span>
 <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="p">[</span><span class="n">super</span> <span class="n">keyDown</span><span class="o">:</span><span class="n">theEvent</span><span class="p">];</span>
-<span class="p">}</span>
-</code></pre></div>
+    <span class="p">[</span><span class="nb">super</span> <span class="nl">keyDown</span><span class="p">:</span><span class="n">theEvent</span><span class="p">];</span>
+<span class="p">}</span></code></pre></div>
 
 
 <p>Not the prettiest solution I but one that seems to work perfectly, even sandboxed, to provide the expected behavior in an <code>NSTableView</code> subclass.</p>
@@ -1242,7 +1228,7 @@ git submodule update --init --recursive
 
 <p>The obvious solution to this is run it from my local machine instead every week. That way once a week when it's powered up it would log in to the server, create the tarball and pull it down. Insert <a href="https://github.com/capistrano/capistrano">Capistrano</a> (<code>[sudo] gem install capistrano</code>) a <a href="http://rubygems.org/">RubyGem</a> for 'Remote multi-server automation.' So I wrote a very basic <code>Capfile</code> to automate this for me (replace the path to your <code>www</code> folder accordingly).</p>
 
-<div class="highlight"><pre><code class="ruby"><span class="nb">load</span> <span class="s1">&#39;deploy&#39;</span>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="nb">load</span> <span class="s1">&#39;deploy&#39;</span>
 
 <span class="vg">$SERVER_USER</span> <span class="o">=</span> <span class="s2">&quot;username&quot;</span>
 <span class="vg">$SERVER_IP</span>   <span class="o">=</span> <span class="s2">&quot;1.1.1.1&quot;</span>
@@ -1251,14 +1237,12 @@ git submodule update --init --recursive
 <span class="n">task</span> <span class="ss">:backup</span><span class="p">,</span> <span class="ss">:hosts</span> <span class="o">=&gt;</span> <span class="vg">$SERVER_IP</span> <span class="k">do</span>
   <span class="n">run</span> <span class="s2">&quot;cd /srv; tar -pvczf ~/backup.tar.gz www/&quot;</span>
   <span class="n">run_locally</span> <span class="s2">&quot;scp </span><span class="si">#{</span> <span class="vg">$SERVER_USER</span> <span class="si">}</span><span class="s2">@</span><span class="si">#{</span> <span class="vg">$SERVER_IP</span> <span class="si">}</span><span class="s2">:~/backup.tar.gz ~/Dropbox/Backups/Server&quot;</span>
-<span class="k">end</span>
-</code></pre></div>
+<span class="k">end</span></code></pre></div>
 
 
 <p>Then I added this to my crontab on my local machine by running <code>crontab -e</code> and adding the line:</p>
 
-<div class="highlight"><pre><code class="bash">@weekly /Users/ksmiley/.rbenv/shims/cap -f ~/path/to/Capfile backup
-</code></pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">@weekly /Users/ksmiley/.rbenv/shims/cap -f ~/path/to/Capfile backup</code></pre></div>
 
 
 <p>I included the path to the Capistrano executable since cron (on OS X) executes tasks with <code>sh</code>, which isn't setup with my <code>$PATH</code>.</p>
@@ -1281,7 +1265,7 @@ git submodule update --init --recursive
 
 <p>Since CocoaPods supports multiple versions of Ruby (1.8.7 and 1.9.3) to be complete ideally you'd lint them on both versions. Tools like <a href="https://rvm.io/">RVM</a> and <a href="https://github.com/sstephenson/rbenv">rbenv</a>(my tool of choice) make it easy to quickly switch between different versions of Ruby using <code>.rvmrc</code> and <code>.rbenv-version</code> respectively. As you can probably assume I wanted to automate this. So I wrote a quick <a href="http://rake.rubyforge.org/">Rakefile</a> to do this for me.</p>
 
-<div class="highlight"><pre><code class="ruby"><span class="c1">#!/usr/bin/env rake</span>
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#!/usr/bin/env rake</span>
 
 <span class="c1"># NOTE: Must be using rbenv 4.0 to use `system` and `.ruby-version`</span>
 <span class="c1">## Set your preferred ruby versions</span>
@@ -1351,8 +1335,7 @@ git submodule update --init --recursive
 <span class="c1"># Run the lint</span>
 <span class="k">def</span> <span class="nf">lint</span><span class="p">(</span><span class="n">podspec</span><span class="p">)</span>
   <span class="sx">%x[pod spec lint &quot;</span><span class="si">#{</span> <span class="n">podspec</span> <span class="si">}</span><span class="sx">&quot;]</span>
-<span class="k">end</span>
-</code></pre></div>
+<span class="k">end</span></code></pre></div>
 
 
 
@@ -1373,7 +1356,7 @@ git submodule update --init --recursive
       <content type="html">
         <![CDATA[<p>I've recently been searching around for a good way to 'spawn' an <a href="http://www.iterm2.com/">iTerm</a> window (no I don't use tabs in iTerm), at the <code>pwd</code> in my current iTerm window. I couldn't find any good way to do it so I jumped in to AppleScript Editor and made something happen.</p>
 
-<div class="highlight"><pre><code class="applescript"><span class="k">on</span> <span class="nb">run</span> <span class="nv">argv</span>
+<div class="highlight"><pre><code class="language-applescript" data-lang="applescript"><span class="k">on</span> <span class="nb">run</span> <span class="nv">argv</span>
     <span class="k">tell</span> <span class="nb">application</span> <span class="s2">&quot;iTerm&quot;</span>
         <span class="k">set</span> <span class="nv">t</span> <span class="k">to</span> <span class="nb">make</span> <span class="nb">new</span> <span class="nv">terminal</span>
         <span class="k">tell</span> <span class="nv">t</span>
@@ -1384,8 +1367,7 @@ git submodule update --init --recursive
             <span class="k">end</span> <span class="k">tell</span>
         <span class="k">end</span> <span class="k">tell</span>
     <span class="k">end</span> <span class="k">tell</span>
-<span class="k">end</span> <span class="nb">run</span>
-</code></pre></div>
+<span class="k">end</span> <span class="nb">run</span></code></pre></div>
 
 
 <p>I then added it to my <a href="http://www.zsh.org/">zsh</a> aliases with:</p>
@@ -1408,30 +1390,29 @@ git submodule update --init --recursive
         
       </author>
       <content type="html">
-        <![CDATA[<p>For quite a while I was having trouble dealing with a global show/hide hotkey for windows in Objective-C. Global hotkeys are already <a href="http://stackoverflow.com/questions/4807319/register-hotkey">hard</a> <a href="https://github.com/Keithbsmiley/PTHotKeyTest">enough</a>. Although <a href="https://github.com/shpakovski/MASShortcut">MASShortcut</a> has solved that. Yes I know of <a href="http://wafflesoftware.net/shortcut/">ShortcutRecorder</a> but it's very dated (MASShortcut even uses blocks!).</p>
+        <![CDATA[<p>For quite a while I was having trouble dealing with a global show/hide hotkey for windows in Objective-C. Global hotkeys are already <a href="http://stackoverflow.com/questions/4807319/register-hotkey">hard</a> <a href="https://github.com/keith/PTHotKeyTest">enough</a>. Although <a href="https://github.com/shpakovski/MASShortcut">MASShortcut</a> has solved that. Yes I know of <a href="http://wafflesoftware.net/shortcut/">ShortcutRecorder</a> but it's very dated (MASShortcut even uses blocks!).</p>
 
 <p>I found that once I had the shortcut working I was having a hard time dealing with opening and closing, showing and hiding the application. What seemed to happen was when the method was called and <code>[[NSRunningApplication currentApplication] isActive]</code> was evaluated in an <code>if</code> statement along with an <code>else</code> clause, if the application was hidden using <code>[[NSApplication sharedApplication] hide:self];</code> it was reevaluated and it hit the <code>else</code> case. This also happened with an <code>if</code> statement checking if the window was already visible with <code>[myWindow isVisible]</code> even with <code>return;</code> statements inserted in appropriate places.</p>
 
 <p>My solution was adding <code>NSNumber</code>s acting as booleans to keep track of the value allowing me to avoid <code>else</code> statements altogether and use <code>else if</code>s instead.</p>
 
-<div class="highlight"><pre><code class="objc"><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">showHideMainWindow</span> <span class="p">{</span>
-    <span class="n">NSNumber</span> <span class="o">*</span><span class="n">wasActive</span> <span class="o">=</span> <span class="p">@</span><span class="nb">NO</span><span class="p">;</span>
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">showHideMainWindow</span> <span class="p">{</span>
+    <span class="bp">NSNumber</span> <span class="o">*</span><span class="n">wasActive</span> <span class="o">=</span> <span class="m">@NO</span><span class="p">;</span>
     <span class="k">if</span> <span class="p">([[</span><span class="n">NSRunningApplication</span> <span class="n">currentApplication</span><span class="p">]</span> <span class="n">isActive</span><span class="p">])</span> <span class="p">{</span>
-        <span class="n">wasActive</span> <span class="o">=</span> <span class="p">@</span><span class="nb">YES</span><span class="p">;</span>
-        <span class="n">NSNumber</span> <span class="o">*</span><span class="n">wasOpen</span> <span class="o">=</span> <span class="p">@</span><span class="nb">NO</span><span class="p">;</span>
-        <span class="k">if</span> <span class="p">([</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">isVisible</span><span class="p">])</span> <span class="p">{</span>
-            <span class="n">wasOpen</span> <span class="o">=</span> <span class="p">@</span><span class="nb">YES</span><span class="p">;</span>
-            <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">close</span><span class="p">];</span>
-            <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="n">hide</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
+        <span class="n">wasActive</span> <span class="o">=</span> <span class="m">@YES</span><span class="p">;</span>
+        <span class="bp">NSNumber</span> <span class="o">*</span><span class="n">wasOpen</span> <span class="o">=</span> <span class="m">@NO</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">([</span><span class="nb">self</span><span class="p">.</span><span class="n">window</span> <span class="n">isVisible</span><span class="p">])</span> <span class="p">{</span>
+            <span class="n">wasOpen</span> <span class="o">=</span> <span class="m">@YES</span><span class="p">;</span>
+            <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">window</span> <span class="n">close</span><span class="p">];</span>
+            <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="nl">hide</span><span class="p">:</span><span class="nb">self</span><span class="p">];</span>
         <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">[</span><span class="n">wasOpen</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-            <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">makeKeyAndOrderFront</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
+            <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">window</span> <span class="nl">makeKeyAndOrderFront</span><span class="p">:</span><span class="nb">self</span><span class="p">];</span>
         <span class="p">}</span>
     <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">[</span><span class="n">wasActive</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-        <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="n">activateIgnoringOtherApps</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
-        <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">makeKeyAndOrderFront</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
+        <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="nl">activateIgnoringOtherApps</span><span class="p">:</span><span class="nb">YES</span><span class="p">];</span>
+        <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">window</span> <span class="nl">makeKeyAndOrderFront</span><span class="p">:</span><span class="nb">self</span><span class="p">];</span>
     <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
+<span class="p">}</span></code></pre></div>
 
 
 

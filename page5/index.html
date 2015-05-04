@@ -52,30 +52,29 @@
   </header>
 
   <div class="post ten columns">
-    <p>For quite a while I was having trouble dealing with a global show/hide hotkey for windows in Objective-C. Global hotkeys are already <a href="http://stackoverflow.com/questions/4807319/register-hotkey">hard</a> <a href="https://github.com/Keithbsmiley/PTHotKeyTest">enough</a>. Although <a href="https://github.com/shpakovski/MASShortcut">MASShortcut</a> has solved that. Yes I know of <a href="http://wafflesoftware.net/shortcut/">ShortcutRecorder</a> but it's very dated (MASShortcut even uses blocks!).</p>
+    <p>For quite a while I was having trouble dealing with a global show/hide hotkey for windows in Objective-C. Global hotkeys are already <a href="http://stackoverflow.com/questions/4807319/register-hotkey">hard</a> <a href="https://github.com/keith/PTHotKeyTest">enough</a>. Although <a href="https://github.com/shpakovski/MASShortcut">MASShortcut</a> has solved that. Yes I know of <a href="http://wafflesoftware.net/shortcut/">ShortcutRecorder</a> but it's very dated (MASShortcut even uses blocks!).</p>
 
 <p>I found that once I had the shortcut working I was having a hard time dealing with opening and closing, showing and hiding the application. What seemed to happen was when the method was called and <code>[[NSRunningApplication currentApplication] isActive]</code> was evaluated in an <code>if</code> statement along with an <code>else</code> clause, if the application was hidden using <code>[[NSApplication sharedApplication] hide:self];</code> it was reevaluated and it hit the <code>else</code> case. This also happened with an <code>if</code> statement checking if the window was already visible with <code>[myWindow isVisible]</code> even with <code>return;</code> statements inserted in appropriate places.</p>
 
 <p>My solution was adding <code>NSNumber</code>s acting as booleans to keep track of the value allowing me to avoid <code>else</code> statements altogether and use <code>else if</code>s instead.</p>
 
-<div class="highlight"><pre><code class="objc"><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">showHideMainWindow</span> <span class="p">{</span>
-    <span class="n">NSNumber</span> <span class="o">*</span><span class="n">wasActive</span> <span class="o">=</span> <span class="p">@</span><span class="nb">NO</span><span class="p">;</span>
+<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">showHideMainWindow</span> <span class="p">{</span>
+    <span class="bp">NSNumber</span> <span class="o">*</span><span class="n">wasActive</span> <span class="o">=</span> <span class="m">@NO</span><span class="p">;</span>
     <span class="k">if</span> <span class="p">([[</span><span class="n">NSRunningApplication</span> <span class="n">currentApplication</span><span class="p">]</span> <span class="n">isActive</span><span class="p">])</span> <span class="p">{</span>
-        <span class="n">wasActive</span> <span class="o">=</span> <span class="p">@</span><span class="nb">YES</span><span class="p">;</span>
-        <span class="n">NSNumber</span> <span class="o">*</span><span class="n">wasOpen</span> <span class="o">=</span> <span class="p">@</span><span class="nb">NO</span><span class="p">;</span>
-        <span class="k">if</span> <span class="p">([</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">isVisible</span><span class="p">])</span> <span class="p">{</span>
-            <span class="n">wasOpen</span> <span class="o">=</span> <span class="p">@</span><span class="nb">YES</span><span class="p">;</span>
-            <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">close</span><span class="p">];</span>
-            <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="n">hide</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
+        <span class="n">wasActive</span> <span class="o">=</span> <span class="m">@YES</span><span class="p">;</span>
+        <span class="bp">NSNumber</span> <span class="o">*</span><span class="n">wasOpen</span> <span class="o">=</span> <span class="m">@NO</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">([</span><span class="nb">self</span><span class="p">.</span><span class="n">window</span> <span class="n">isVisible</span><span class="p">])</span> <span class="p">{</span>
+            <span class="n">wasOpen</span> <span class="o">=</span> <span class="m">@YES</span><span class="p">;</span>
+            <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">window</span> <span class="n">close</span><span class="p">];</span>
+            <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="nl">hide</span><span class="p">:</span><span class="nb">self</span><span class="p">];</span>
         <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">[</span><span class="n">wasOpen</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-            <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">makeKeyAndOrderFront</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
+            <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">window</span> <span class="nl">makeKeyAndOrderFront</span><span class="p">:</span><span class="nb">self</span><span class="p">];</span>
         <span class="p">}</span>
     <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">[</span><span class="n">wasActive</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-        <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="n">activateIgnoringOtherApps</span><span class="o">:</span><span class="nb">YES</span><span class="p">];</span>
-        <span class="p">[</span><span class="n">self</span><span class="p">.</span><span class="n">window</span> <span class="n">makeKeyAndOrderFront</span><span class="o">:</span><span class="n">self</span><span class="p">];</span>
+        <span class="p">[[</span><span class="n">NSApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="nl">activateIgnoringOtherApps</span><span class="p">:</span><span class="nb">YES</span><span class="p">];</span>
+        <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">window</span> <span class="nl">makeKeyAndOrderFront</span><span class="p">:</span><span class="nb">self</span><span class="p">];</span>
     <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
+<span class="p">}</span></code></pre></div>
 
 
 

@@ -57,7 +57,7 @@
 ability to contain logic based on outside factors. For the purpose of
 this post I'm referring to the ability to set your colorscheme based on
 the time of day with something like
-<a href="https://github.com/Keithbsmiley/dotfiles/blob/a34e432b59e26225ebdb05737b30729b7ea670d9/vimrc#L102-L108">this</a>.</p>
+<a href="https://github.com/keith/dotfiles/blob/a34e432b59e26225ebdb05737b30729b7ea670d9/vimrc#L102-L108">this</a>.</p>
 
 <p>Having this functionality in Vim with the
 <a href="http://ethanschoonover.com/solarized">Solarized</a> theme at night really
@@ -70,21 +70,21 @@ request</a> two years ago from
 <a href="https://twitter.com/junkiesxl">Piet Jaspers</a>, support was added for
 scripting iTerm's entire colorscheme with AppleScript. Using these
 AppleScript bindings I was able to create a
-<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/scripts/itermcolors.applescript">script</a>
+<a href="https://github.com/keith/dotfiles/blob/master/scripts/itermcolors.applescript">script</a>
 that changes the entire colorscheme of iTerm based on the time of day
 between Solarized light and dark. As you can see the
-<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/scripts/itermcolors.applescript#L27-L49">bulk</a>
+<a href="https://github.com/keith/dotfiles/blob/master/scripts/itermcolors.applescript#L27-L49">bulk</a>
 of this script is just setting different color attributes based on the
 theme you want. While you could do this conversion by hand to 65535
 flavored RGB, I made a
-tiny Objective-C app to automate the process which is <a href="https://github.com/Keithbsmiley/ColorConvert">on
+tiny Objective-C app to automate the process which is <a href="https://github.com/keith/ColorConvert">on
 Github</a>. You can download
 the signed binary
-<a href="https://github.com/Keithbsmiley/ColorConvert/releases/tag/1.0">here</a>.</p>
+<a href="https://github.com/keith/ColorConvert/releases/tag/1.0">here</a>.</p>
 
 <p>Using this newly created AppleScript I then made a zsh
-<a href="https://github.com/Keithbsmiley/dotfiles/blob/master/functions/colorize">function</a> so that I could call <code>colorize</code> from anywhere to update the color scheme of the current terminal.
-I also chose to do this at the end of my <code>.zshrc</code> <a href="https://github.com/Keithbsmiley/dotfiles/blob/763e6f3f2bbcd93775c70e0d9ed9878ac99896a3/zshrc#L51">here</a>.
+<a href="https://github.com/keith/dotfiles/blob/master/functions/colorize">function</a> so that I could call <code>colorize</code> from anywhere to update the color scheme of the current terminal.
+I also chose to do this at the end of my <code>.zshrc</code> <a href="https://github.com/keith/dotfiles/blob/763e6f3f2bbcd93775c70e0d9ed9878ac99896a3/zshrc#L51">here</a>.
 This way everytime I open a new session my theme is automatically set.</p>
 
 <p>If you have any input on how I could optimize this let me know.</p>

@@ -55,7 +55,7 @@
   <div class="post ten columns">
     <p>I've recently been searching around for a good way to 'spawn' an <a href="http://www.iterm2.com/">iTerm</a> window (no I don't use tabs in iTerm), at the <code>pwd</code> in my current iTerm window. I couldn't find any good way to do it so I jumped in to AppleScript Editor and made something happen.</p>
 
-<div class="highlight"><pre><code class="applescript"><span class="k">on</span> <span class="nb">run</span> <span class="nv">argv</span>
+<div class="highlight"><pre><code class="language-applescript" data-lang="applescript"><span class="k">on</span> <span class="nb">run</span> <span class="nv">argv</span>
     <span class="k">tell</span> <span class="nb">application</span> <span class="s2">&quot;iTerm&quot;</span>
         <span class="k">set</span> <span class="nv">t</span> <span class="k">to</span> <span class="nb">make</span> <span class="nb">new</span> <span class="nv">terminal</span>
         <span class="k">tell</span> <span class="nv">t</span>
@@ -66,8 +66,7 @@
             <span class="k">end</span> <span class="k">tell</span>
         <span class="k">end</span> <span class="k">tell</span>
     <span class="k">end</span> <span class="k">tell</span>
-<span class="k">end</span> <span class="nb">run</span>
-</code></pre></div>
+<span class="k">end</span> <span class="nb">run</span></code></pre></div>
 
 
 <p>I then added it to my <a href="http://www.zsh.org/">zsh</a> aliases with:</p>
