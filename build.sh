@@ -7,7 +7,7 @@ git_dir="gh-pages"
 bundle check && bundle install
 rake
 
-git clone --branch gh-pages https://github.com/Keithbsmiley/smileykeith.com.git $git_dir
+git clone --branch gh-pages https://github.com/keith/smileykeith.com.git $git_dir
 rm -rf $git_dir/*
 mv _site/* $git_dir
 cd $git_dir; git add --all; git commit -m "`date`"; true

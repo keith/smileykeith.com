@@ -4,7 +4,7 @@ title: "Objective-C on Travis-CI"
 date: 2013-04-11 15:58
 ---
 
-Recently [Travis](https://travis-ci.org/) added support for Objective-C and there for OS X and iOS projects for continuous integration testing. I gather that people have previously done this with self-hosted dedicated [Jenkins](http://jenkins-ci.org/) machines but since Apple is so aggressive about dropping support for previous versions of the OS it seems like a pain to have to replace your build server every few years. Enter Travis, a great hosted [continuous integration](http://en.wikipedia.org/wiki/Continuous_integration) server that hosts a huge amount of open source projects. I figured with this new support I could host some of my [smaller](https://github.com/Keithbsmiley/KSADNTwitterFormatter) libraries just to set how well it worked. The initial setup process was a bit tedious but I eventually got it to work.
+Recently [Travis](https://travis-ci.org/) added support for Objective-C and there for OS X and iOS projects for continuous integration testing. I gather that people have previously done this with self-hosted dedicated [Jenkins](http://jenkins-ci.org/) machines but since Apple is so aggressive about dropping support for previous versions of the OS it seems like a pain to have to replace your build server every few years. Enter Travis, a great hosted [continuous integration](http://en.wikipedia.org/wiki/Continuous_integration) server that hosts a huge amount of open source projects. I figured with this new support I could host some of my [smaller](https://github.com/keith/KSADNTwitterFormatter) libraries just to set how well it worked. The initial setup process was a bit tedious but I eventually got it to work.
 
 ### Assumtions:
 
