@@ -16,18 +16,20 @@
     <link rel="icon" href="/images/favicon.png" type="image/x-icon">
     <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon">
 
-    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
+    <style>
+      body,h1,h2,h3,h4,h5,h6{font-family:SF UI Text,Roboto,Helvetica Neue,Helvetica,sans-serif}dl,ol,p,pre,ul{margin-top:0;margin-bottom:1rem}.nowrap,.truncate{white-space:nowrap}.fit,.truncate,img{max-width:100%}body{margin:0;line-height:1.5;font-size:100%}svg{max-height:100%}h1,h2,h3,h4,h5,h6{font-weight:700;line-height:1.25;margin-top:1em;margin-bottom:.5em}code,pre,samp{font-family:'Source Code Pro',Consolas,monospace;font-size:inherit}pre{overflow-x:scroll}.overflow-hidden,.truncate{overflow:hidden}.h1,h1{font-size:2rem}h2{font-size:1.5rem}h3{font-size:1.25rem}h4{font-size:1rem}h5{font-size:.875rem}h6{font-size:.75rem}.h2{font-size:1.5rem}.h3{font-size:1.25rem}.h4{font-size:1rem}.h5{font-size:.875rem}.h6{font-size:.75rem}.bold{font-weight:700}.regular{font-weight:400}.italic{font-style:italic}.caps{text-transform:uppercase;letter-spacing:.2em}.left-align{text-align:left}.center{text-align:center}.right-align{text-align:right}.justify{text-align:justify}.break-word{word-wrap:break-word}.truncate{text-overflow:ellipsis}.list-reset{list-style:none;padding-left:0}.inline{display:inline}.block{display:block}.inline-block{display:inline-block}.table{display:table}.table-cell{display:table-cell}.overflow-scroll{overflow:scroll}.overflow-auto{overflow:auto}.clearfix:after,.clearfix:before{content:" ";display:table}.clearfix:after{clear:both}.left{float:left}.right{float:right}.border-box{box-sizing:border-box}
+      .container{max-width:40rem;margin-right:auto;margin-left:auto;}
+    </style>
   </head>
   <body>
     <section class="container">
-      <div id="masthead">
+      <header>
         <h1>
           <a href="/">Keith Smiley</a>
           - <a href="http://keith.so" title="Who is this guy?">Who?</a>
         </h1>
-      </div>
-
-      <section class="content">
+      </header>
+      <section>
         {{ content }}
       </section>
     </section>
