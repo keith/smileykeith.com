@@ -23,6 +23,10 @@ end run
 
 I then added it to my [zsh](http://www.zsh.org/) aliases with:
 
-`function spawn { osascript ~/Dropbox/Code/Applescript/Spawn/SpawniTerm.applescript $PWD }`
+{% highlight bash %}
+function spawn {
+  osascript ~/Dropbox/Code/Applescript/Spawn/SpawniTerm.applescript $PWD
+}
+{% endhighlight %}
 
 Now I can call `spawn` from any iTerm or Terminal window to open a new iTerm session wherever I called it from.
