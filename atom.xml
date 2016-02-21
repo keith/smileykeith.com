@@ -2,14 +2,14 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2015-10-11T20:23:44-07:00</updated>
+  <updated>2016-02-21T15:52:36-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
   
   <link rel="self" type="application/atom+xml" href="http://smileykeith.com/atom.xml" />
   
-  <rights>Copyright (c) 2015 Keith Smiley</rights>
+  <rights>Copyright (c) 2016 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
   
@@ -1372,7 +1372,10 @@ git submodule update --init --recursive
 
 <p>I then added it to my <a href="http://www.zsh.org/">zsh</a> aliases with:</p>
 
-<p><code>function spawn { osascript ~/Dropbox/Code/Applescript/Spawn/SpawniTerm.applescript $PWD }</code></p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="k">function</span> spawn <span class="o">{</span>
+  osascript ~/Dropbox/Code/Applescript/Spawn/SpawniTerm.applescript <span class="nv">$PWD</span>
+<span class="o">}</span></code></pre></div>
+
 
 <p>Now I can call <code>spawn</code> from any iTerm or Terminal window to open a new iTerm session wherever I called it from.</p>
 ]]>

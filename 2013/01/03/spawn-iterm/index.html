@@ -71,7 +71,10 @@
 
 <p>I then added it to my <a href="http://www.zsh.org/">zsh</a> aliases with:</p>
 
-<p><code>function spawn { osascript ~/Dropbox/Code/Applescript/Spawn/SpawniTerm.applescript $PWD }</code></p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="k">function</span> spawn <span class="o">{</span>
+  osascript ~/Dropbox/Code/Applescript/Spawn/SpawniTerm.applescript <span class="nv">$PWD</span>
+<span class="o">}</span></code></pre></div>
+
 
 <p>Now I can call <code>spawn</code> from any iTerm or Terminal window to open a new iTerm session wherever I called it from.</p>
 
