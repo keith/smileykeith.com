@@ -6,9 +6,6 @@ task :default => :build
 
 desc "Build the site"
 task :build do
-  puts "Pulling down submodules..."
-  puts %x[git submodule update --init --recursive]
-
   puts "Compiling sass..."
   puts %x[bundle exec sass _sass/style.scss css/style.css --style=compressed]
 
