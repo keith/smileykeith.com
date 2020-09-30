@@ -45,7 +45,7 @@ If you're debugging a program on your Mac, there are a few steps:
    you're not comfortable sharing with Apple, zip it up, and [submit a
    radar][radar]!
 
-## iOS simulator app
+## iOS app on the simulator
 
 Unfortunately running iOS simulator apps directly in lldb is [a bit more
 difficult](https://forums.swift.org/t/using-lldb-with-ios-simulator-from-cli/33990/6)
