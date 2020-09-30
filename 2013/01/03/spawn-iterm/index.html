@@ -42,30 +42,28 @@
   </header>
 
   <div class="post ten columns">
-    <p>I've recently been searching around for a good way to 'spawn' an <a href="http://www.iterm2.com/">iTerm</a> window (no I don't use tabs in iTerm), at the <code>pwd</code> in my current iTerm window. I couldn't find any good way to do it so I jumped in to AppleScript Editor and made something happen.</p>
+    <p>I've recently been searching around for a good way to 'spawn' an <a href="http://www.iterm2.com/">iTerm</a> window (no I don't use tabs in iTerm), at the <code class="highlighter-rouge">pwd</code> in my current iTerm window. I couldn't find any good way to do it so I jumped in to AppleScript Editor and made something happen.</p>
 
-<div class="highlight"><pre><code class="language-applescript" data-lang="applescript"><span class="k">on</span> <span class="nb">run</span> <span class="nv">argv</span>
-    <span class="k">tell</span> <span class="nb">application</span> <span class="s2">&quot;iTerm&quot;</span>
-        <span class="k">set</span> <span class="nv">t</span> <span class="k">to</span> <span class="nb">make</span> <span class="nb">new</span> <span class="nv">terminal</span>
-        <span class="k">tell</span> <span class="nv">t</span>
-            <span class="nb">activate</span> <span class="nv">current</span> <span class="nv">session</span>
-            <span class="nb">launch</span> <span class="nv">session</span> <span class="s2">&quot;Default Session&quot;</span>
-            <span class="k">tell</span> <span class="nb">the</span> <span class="nb">last</span> <span class="nv">session</span>
-                <span class="nb">write</span> <span class="nb">text</span> <span class="s2">&quot;cd \&quot;&quot;</span> <span class="o">&amp;</span> <span class="nb">item</span> <span class="mi">1</span> <span class="k">of</span> <span class="nv">argv</span> <span class="o">&amp;</span> <span class="s2">&quot;\&quot;; clear; pwd&quot;</span>
-            <span class="k">end</span> <span class="k">tell</span>
-        <span class="k">end</span> <span class="k">tell</span>
-    <span class="k">end</span> <span class="k">tell</span>
-<span class="k">end</span> <span class="nb">run</span></code></pre></div>
-
+<figure class="highlight"><pre><code class="language-applescript" data-lang="applescript"><span class="k">on</span> <span class="nb">run</span><span class="w"> </span><span class="nv">argv</span><span class="w">
+	</span><span class="k">tell</span><span class="w"> </span><span class="nb">application</span><span class="w"> </span><span class="s2">"iTerm"</span><span class="w">
+		</span><span class="k">set</span><span class="w"> </span><span class="nv">t</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">make</span><span class="w"> </span><span class="nb">new</span><span class="w"> </span><span class="nv">terminal</span><span class="w">
+		</span><span class="k">tell</span><span class="w"> </span><span class="nv">t</span><span class="w">
+			</span><span class="nb">activate</span><span class="w"> </span><span class="nv">current</span><span class="w"> </span><span class="nv">session</span><span class="w">
+			</span><span class="nb">launch</span><span class="w"> </span><span class="nv">session</span><span class="w"> </span><span class="s2">"Default Session"</span><span class="w">
+			</span><span class="k">tell</span><span class="w"> </span><span class="nb">the</span><span class="w"> </span><span class="nb">last</span><span class="w"> </span><span class="nv">session</span><span class="w">
+				</span><span class="nb">write</span><span class="w"> </span><span class="nb">text</span><span class="w"> </span><span class="s2">"cd \""</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">item</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">argv</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="s2">"\"; clear; pwd"</span><span class="w">
+			</span><span class="k">end</span><span class="w"> </span><span class="k">tell</span><span class="w">
+		</span><span class="k">end</span><span class="w"> </span><span class="k">tell</span><span class="w">
+	</span><span class="k">end</span><span class="w"> </span><span class="k">tell</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">run</span></code></pre></figure>
 
 <p>I then added it to my <a href="http://www.zsh.org/">zsh</a> aliases with:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="k">function</span> spawn <span class="o">{</span>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="k">function </span>spawn <span class="o">{</span>
   osascript ~/Dropbox/Code/Applescript/Spawn/SpawniTerm.applescript <span class="nv">$PWD</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
-
-<p>Now I can call <code>spawn</code> from any iTerm or Terminal window to open a new iTerm session wherever I called it from.</p>
+<p>Now I can call <code class="highlighter-rouge">spawn</code> from any iTerm or Terminal window to open a new iTerm session wherever I called it from.</p>
 
   </div>
 </article>

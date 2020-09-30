@@ -48,6 +48,7 @@
 
 <p>If you're interested in picking up a C background I would definitely recommend you start here.</p>
 
+
   </div>
 </article>
 
@@ -69,85 +70,82 @@
 
 <p>This functionality already exists in <a href="http://www.potionfactory.com/thehitlist/">The Hit List</a> an awesome GTD app that has a lot of baggage with me, and I'm sure it exists in other applications as well.</p>
 
-<p>In my <code>NSTableView</code> subclass' <code>keyDown:</code> method I tried a few things.</p>
+<p>In my <code class="highlighter-rouge">NSTableView</code> subclass' <code class="highlighter-rouge">keyDown:</code> method I tried a few things.</p>
 
 <p>Attempt 1: First I tried to re implement the functionality myself. In retrospect this doesn't make any sense but at first it was pretty simple. It looked something like this.</p>
 
-<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="bp">NSUInteger</span> <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">theEvent</span> <span class="n">modifierFlags</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">NSDeviceIndependentModifierFlagsMask</span><span class="p">;</span>
-<span class="bp">NSNumber</span> <span class="o">*</span><span class="n">shiftPressed</span> <span class="o">=</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">NSShiftKeyMask</span><span class="p">);</span>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="n">NSUInteger</span> <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">theEvent</span> <span class="nf">modifierFlags</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">NSDeviceIndependentModifierFlagsMask</span><span class="p">;</span>
+<span class="n">NSNumber</span> <span class="o">*</span><span class="n">shiftPressed</span> <span class="o">=</span> <span class="p">(</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">NSShiftKeyMask</span><span class="p">);</span>
  
-<span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
-    <span class="bp">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-        <span class="p">[</span><span class="nb">self</span> <span class="nl">selectRowIndexes</span><span class="p">:[</span><span class="bp">NSIndexSet</span> <span class="nl">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nl">byExtendingSelection</span><span class="p">:</span><span class="nb">YES</span><span class="p">];</span>
+<span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="nf">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
+    <span class="n">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="n">self</span> <span class="nf">selectedRowIndexes</span><span class="p">]</span> <span class="nf">lastIndex</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="nf">boolValue</span><span class="p">])</span> <span class="p">{</span>
+        <span class="p">[</span><span class="n">self</span> <span class="nf">selectRowIndexes</span><span class="p">:[</span><span class="n">NSIndexSet</span> <span class="nf">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nf">byExtendingSelection</span><span class="p">:</span><span class="nb">YES</span><span class="p">];</span>
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="p">[</span><span class="nb">self</span> <span class="nl">selectRowIndexes</span><span class="p">:[</span><span class="bp">NSIndexSet</span> <span class="nl">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nl">byExtendingSelection</span><span class="p">:</span><span class="nb">NO</span><span class="p">];</span>
+        <span class="p">[</span><span class="n">self</span> <span class="nf">selectRowIndexes</span><span class="p">:[</span><span class="n">NSIndexSet</span> <span class="nf">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nf">byExtendingSelection</span><span class="p">:</span><span class="nb">NO</span><span class="p">];</span>
     <span class="p">}</span>
-<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
-    <span class="bp">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">self</span> <span class="n">selectedRowIndexes</span><span class="p">]</span> <span class="n">lastIndex</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
-    <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="n">boolValue</span><span class="p">])</span> <span class="p">{</span>
-        <span class="p">[</span><span class="nb">self</span> <span class="nl">selectRowIndexes</span><span class="p">:[</span><span class="bp">NSIndexSet</span> <span class="nl">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nl">byExtendingSelection</span><span class="p">:</span><span class="nb">YES</span><span class="p">];</span>
+<span class="p">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="nf">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
+    <span class="n">NSUInteger</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[[</span><span class="n">self</span> <span class="nf">selectedRowIndexes</span><span class="p">]</span> <span class="nf">lastIndex</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">([</span><span class="n">shiftPressed</span> <span class="nf">boolValue</span><span class="p">])</span> <span class="p">{</span>
+        <span class="p">[</span><span class="n">self</span> <span class="nf">selectRowIndexes</span><span class="p">:[</span><span class="n">NSIndexSet</span> <span class="nf">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nf">byExtendingSelection</span><span class="p">:</span><span class="nb">YES</span><span class="p">];</span>
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="p">[</span><span class="nb">self</span> <span class="nl">selectRowIndexes</span><span class="p">:[</span><span class="bp">NSIndexSet</span> <span class="nl">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nl">byExtendingSelection</span><span class="p">:</span><span class="nb">NO</span><span class="p">];</span>
+        <span class="p">[</span><span class="n">self</span> <span class="nf">selectRowIndexes</span><span class="p">:[</span><span class="n">NSIndexSet</span> <span class="nf">indexSetWithIndex</span><span class="p">:</span><span class="n">index</span><span class="p">]</span> <span class="nf">byExtendingSelection</span><span class="p">:</span><span class="nb">NO</span><span class="p">];</span>
     <span class="p">}</span>
-<span class="p">}</span></code></pre></div>
+<span class="p">}</span></code></pre></figure>
 
-
-<p>The issue with this is the way <code>NSTableView</code> typically expands it's selection. I think of it as a pivot point where you start. Then you go up and down relative to that point. So if you start at index 2 and go down till index 4, you should have 2 rows selected. Then when you go back up you should deselect the rows and indexes 3 and 4 and select the rows and index 1 and 0. At this point I realized it was more difficult than I realized at first and went in search on another solution.</p>
+<p>The issue with this is the way <code class="highlighter-rouge">NSTableView</code> typically expands it's selection. I think of it as a pivot point where you start. Then you go up and down relative to that point. So if you start at index 2 and go down till index 4, you should have 2 rows selected. Then when you go back up you should deselect the rows and indexes 3 and 4 and select the rows and index 1 and 0. At this point I realized it was more difficult than I realized at first and went in search on another solution.</p>
 
 <p>Attempt 2: The next solution I discovered used the <a href="https://developer.apple.com/library/mac/#documentation/Carbon/Reference/QuartzEventServicesRef/Reference/reference.html">Quartz Event Services</a> APIs.</p>
 
-<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter &#39;j&#39;</span>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="nf">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter 'j'</span>
     <span class="n">CGEventRef</span> <span class="n">e</span> <span class="o">=</span> <span class="n">CGEventCreateKeyboardEvent</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="n">CGKeyCode</span><span class="p">)</span><span class="mi">125</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
     <span class="n">CGEventPost</span><span class="p">(</span><span class="n">kCGSessionEventTap</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
     <span class="n">CFRelease</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
-<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter &#39;k&#39;</span>
+<span class="p">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="nf">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// The letter 'k'</span>
     <span class="n">CGEventRef</span> <span class="n">e</span> <span class="o">=</span> <span class="n">CGEventCreateKeyboardEvent</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="n">CGKeyCode</span><span class="p">)</span><span class="mi">126</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
     <span class="n">CGEventPost</span><span class="p">(</span><span class="n">kCGSessionEventTap</span><span class="p">,</span> <span class="n">e</span><span class="p">);</span>
     <span class="n">CFRelease</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
-<span class="p">}</span></code></pre></div>
-
+<span class="p">}</span></code></pre></figure>
 
 <p>This solution worked perfectly, at first. This mainly emulates a key press with a different key code. So as you can see I was catching j and k and spitting them out as down and up. I spent a few minutes testing this before I remembered that I had sandboxing disabled so I could more easily delete my application support folder while messing with my Core Data stack. There went that solution.</p>
 
-<p>Attempt 3: Before I used the weird <code>CGEventRef</code> solution I tried to create my own <code>NSEvent</code> passing it all the same attributes from the original event (all this code is being used in the <code>keyDown:</code> function of my subclass) but I couldn't figure out how to get the correct character string for the up and down arrows. I typically use <a href="http://manytricks.com/keycodes/">Key Codes</a> to get all the possible information you could want about each key you press. But for some keys, including the arrow keys, it returns garbage for the character code. Then I discovered <a href="http://stackoverflow.com/a/4434934/902968">this answer</a> on StackOverflow where there is a brief mention of <code>NSUpArrowFunctionKey</code>. With that I came up with this.</p>
+<p>Attempt 3: Before I used the weird <code class="highlighter-rouge">CGEventRef</code> solution I tried to create my own <code class="highlighter-rouge">NSEvent</code> passing it all the same attributes from the original event (all this code is being used in the <code class="highlighter-rouge">keyDown:</code> function of my subclass) but I couldn't figure out how to get the correct character string for the up and down arrows. I typically use <a href="http://manytricks.com/keycodes/">Key Codes</a> to get all the possible information you could want about each key you press. But for some keys, including the arrow keys, it returns garbage for the character code. Then I discovered <a href="http://stackoverflow.com/a/4434934/902968">this answer</a> on StackOverflow where there is a brief mention of <code class="highlighter-rouge">NSUpArrowFunctionKey</code>. With that I came up with this.</p>
 
-<div class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
-    <span class="kt">unichar</span> <span class="n">down</span> <span class="o">=</span> <span class="n">NSDownArrowFunctionKey</span><span class="p">;</span>
-    <span class="bp">NSString</span> <span class="o">*</span><span class="n">downString</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSString</span> <span class="nl">stringWithCharacters</span><span class="p">:</span><span class="o">&amp;</span><span class="n">down</span> <span class="nl">length</span><span class="p">:</span><span class="mi">1</span><span class="p">];</span>
-    <span class="bp">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="bp">NSEvent</span> <span class="nl">keyEventWithType</span><span class="p">:</span><span class="n">NSKeyDown</span>
-                                        <span class="nl">location</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
-                                   <span class="nl">modifierFlags</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
-                                       <span class="nl">timestamp</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
-                                    <span class="nl">windowNumber</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
-                                         <span class="nl">context</span><span class="p">:</span><span class="nb">nil</span>
-                                      <span class="nl">characters</span><span class="p">:</span><span class="n">downString</span>
-                     <span class="nl">charactersIgnoringModifiers</span><span class="p">:</span><span class="n">downString</span>
-                                       <span class="nl">isARepeat</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
-                                         <span class="nl">keyCode</span><span class="p">:</span><span class="n">down</span><span class="p">];</span>
+<figure class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="nf">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
+    <span class="n">unichar</span> <span class="n">down</span> <span class="o">=</span> <span class="n">NSDownArrowFunctionKey</span><span class="p">;</span>
+    <span class="n">NSString</span> <span class="o">*</span><span class="n">downString</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span> <span class="nf">stringWithCharacters</span><span class="p">:</span><span class="o">&amp;</span><span class="n">down</span> <span class="nf">length</span><span class="p">:</span><span class="mi">1</span><span class="p">];</span>
+    <span class="n">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="n">NSEvent</span> <span class="nf">keyEventWithType</span><span class="p">:</span><span class="n">NSKeyDown</span>
+                                        <span class="nl">location:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
+                                   <span class="nl">modifierFlags:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
+                                       <span class="nl">timestamp:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
+                                    <span class="nl">windowNumber:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
+                                         <span class="nl">context:</span><span class="nb">nil</span>
+                                      <span class="nl">characters:</span><span class="n">downString</span>
+                     <span class="nl">charactersIgnoringModifiers:</span><span class="n">downString</span>
+                                       <span class="nl">isARepeat:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
+                                         <span class="nl">keyCode:</span><span class="n">down</span><span class="p">];</span>
     
-    <span class="p">[</span><span class="nb">super</span> <span class="nl">keyDown</span><span class="p">:</span><span class="n">newEvent</span><span class="p">];</span>
-<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="n">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
-    <span class="kt">unichar</span> <span class="n">up</span> <span class="o">=</span> <span class="n">NSUpArrowFunctionKey</span><span class="p">;</span>
-    <span class="bp">NSString</span> <span class="o">*</span><span class="n">upString</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSString</span> <span class="nl">stringWithCharacters</span><span class="p">:</span><span class="o">&amp;</span><span class="n">up</span> <span class="nl">length</span><span class="p">:</span><span class="mi">1</span><span class="p">];</span>
-    <span class="bp">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="bp">NSEvent</span> <span class="nl">keyEventWithType</span><span class="p">:</span><span class="n">NSKeyDown</span>
-                                        <span class="nl">location</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
-                                   <span class="nl">modifierFlags</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
-                                       <span class="nl">timestamp</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
-                                    <span class="nl">windowNumber</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
-                                         <span class="nl">context</span><span class="p">:</span><span class="nb">nil</span>
-                                      <span class="nl">characters</span><span class="p">:</span><span class="n">upString</span>
-                     <span class="nl">charactersIgnoringModifiers</span><span class="p">:</span><span class="n">upString</span>
-                                       <span class="nl">isARepeat</span><span class="p">:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
-                                         <span class="nl">keyCode</span><span class="p">:</span><span class="n">up</span><span class="p">];</span>
+    <span class="p">[</span><span class="n">super</span> <span class="nf">keyDown</span><span class="p">:</span><span class="n">newEvent</span><span class="p">];</span>
+<span class="p">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="nf">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">40</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// k</span>
+    <span class="n">unichar</span> <span class="n">up</span> <span class="o">=</span> <span class="n">NSUpArrowFunctionKey</span><span class="p">;</span>
+    <span class="n">NSString</span> <span class="o">*</span><span class="n">upString</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSString</span> <span class="nf">stringWithCharacters</span><span class="p">:</span><span class="o">&amp;</span><span class="n">up</span> <span class="nf">length</span><span class="p">:</span><span class="mi">1</span><span class="p">];</span>
+    <span class="n">NSEvent</span> <span class="o">*</span><span class="n">newEvent</span> <span class="o">=</span><span class="p">[</span><span class="n">NSEvent</span> <span class="nf">keyEventWithType</span><span class="p">:</span><span class="n">NSKeyDown</span>
+                                        <span class="nl">location:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">locationInWindow</span>
+                                   <span class="nl">modifierFlags:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">modifierFlags</span>
+                                       <span class="nl">timestamp:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">timestamp</span>
+                                    <span class="nl">windowNumber:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">windowNumber</span>
+                                         <span class="nl">context:</span><span class="nb">nil</span>
+                                      <span class="nl">characters:</span><span class="n">upString</span>
+                     <span class="nl">charactersIgnoringModifiers:</span><span class="n">upString</span>
+                                       <span class="nl">isARepeat:</span><span class="n">theEvent</span><span class="p">.</span><span class="n">isARepeat</span>
+                                         <span class="nl">keyCode:</span><span class="n">up</span><span class="p">];</span>
     
-    <span class="p">[</span><span class="nb">super</span> <span class="nl">keyDown</span><span class="p">:</span><span class="n">newEvent</span><span class="p">];</span>
+    <span class="p">[</span><span class="n">super</span> <span class="nf">keyDown</span><span class="p">:</span><span class="n">newEvent</span><span class="p">];</span>
 <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-    <span class="p">[</span><span class="nb">super</span> <span class="nl">keyDown</span><span class="p">:</span><span class="n">theEvent</span><span class="p">];</span>
-<span class="p">}</span></code></pre></div>
+    <span class="p">[</span><span class="n">super</span> <span class="nf">keyDown</span><span class="p">:</span><span class="n">theEvent</span><span class="p">];</span>
+<span class="p">}</span></code></pre></figure>
 
-
-<p>Not the prettiest solution I but one that seems to work perfectly, even sandboxed, to provide the expected behavior in an <code>NSTableView</code> subclass.</p>
+<p>Not the prettiest solution I but one that seems to work perfectly, even sandboxed, to provide the expected behavior in an <code class="highlighter-rouge">NSTableView</code> subclass.</p>
 
   </div>
 </article>
@@ -168,28 +166,27 @@
   <div class="post ten columns">
     <p>We all know not backing up has <a href="http://www.wired.com/gadgetlab/2012/08/apple-amazon-mat-honan-hacking/">consequences</a>. While losing sentimental files would definitely ruin your day, losing your web server's data could be even worse. I've mentioned <a href="http://smileykeith.com/2013/01/02/linode-setup/">before</a> that I use <a href="http://www.linode.com/?r=c190426bf1ff0f144b48997675bae8b32d339824">Linode</a> for my server hosting, and while they do offer an <a href="http://library.linode.com/backup-service">automated backup service</a> I decided I'd rather setup my own solution to back up periodically to my local machine.</p>
 
-<p>Many people use <a href="http://en.wikipedia.org/wiki/Rsync">rsync</a> to do their server backups. In fact Linode even has a <a href="http://library.linode.com/linux-tools/utilities/rsync#sph_use-rsync-to-back-up-production-environments">guide</a> on how to set it up (there's a better one <a href="http://feross.org/how-to-setup-your-linode/">here</a>). I decided that instead of a 1 for 1 directory backup, I would prefer to have a <a href="http://en.wikipedia.org/wiki/Tar_(file_format">tarball</a>) of the contents. While I could've easily done this with a few bash commands from the server that's not particular ideal for my setup. My local machines don't run 24/7 so if I set it up on the server to automate the backup every week, it may try to initiate the backup when my machine was off (I could try to guess when it's on every week but that's not ideal either).</p>
+<p>Many people use <a href="http://en.wikipedia.org/wiki/Rsync">rsync</a> to do their server backups. In fact Linode even has a <a href="http://library.linode.com/linux-tools/utilities/rsync#sph_use-rsync-to-back-up-production-environments">guide</a> on how to set it up (there's a better one <a href="http://feross.org/how-to-setup-your-linode/">here</a>). I decided that instead of a 1 for 1 directory backup, I would prefer to have a <a href="http://en.wikipedia.org/wiki/Tar_(file_format)">tarball</a> of the contents. While I could've easily done this with a few bash commands from the server that's not particular ideal for my setup. My local machines don't run 24/7 so if I set it up on the server to automate the backup every week, it may try to initiate the backup when my machine was off (I could try to guess when it's on every week but that's not ideal either).</p>
 
-<p>The obvious solution to this is run it from my local machine instead every week. That way once a week when it's powered up it would log in to the server, create the tarball and pull it down. Insert <a href="https://github.com/capistrano/capistrano">Capistrano</a> (<code>[sudo] gem install capistrano</code>) a <a href="http://rubygems.org/">RubyGem</a> for 'Remote multi-server automation.' So I wrote a very basic <code>Capfile</code> to automate this for me (replace the path to your <code>www</code> folder accordingly).</p>
+<p>The obvious solution to this is run it from my local machine instead every week. That way once a week when it's powered up it would log in to the server, create the tarball and pull it down. Insert <a href="https://github.com/capistrano/capistrano">Capistrano</a> (<code class="highlighter-rouge">[sudo] gem install capistrano</code>) a <a href="http://rubygems.org/">RubyGem</a> for 'Remote multi-server automation.' So I wrote a very basic <code class="highlighter-rouge">Capfile</code> to automate this for me (replace the path to your <code class="highlighter-rouge">www</code> folder accordingly).</p>
 
-<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="nb">load</span> <span class="s1">&#39;deploy&#39;</span>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="nb">load</span> <span class="s1">'deploy'</span>
 
-<span class="vg">$SERVER_USER</span> <span class="o">=</span> <span class="s2">&quot;username&quot;</span>
-<span class="vg">$SERVER_IP</span>   <span class="o">=</span> <span class="s2">&quot;1.1.1.1&quot;</span>
+<span class="vg">$SERVER_USER</span> <span class="o">=</span> <span class="s2">"username"</span>
+<span class="vg">$SERVER_IP</span>   <span class="o">=</span> <span class="s2">"1.1.1.1"</span>
 
-<span class="n">desc</span> <span class="s2">&quot;Backs up server www files&quot;</span>
+<span class="n">desc</span> <span class="s2">"Backs up server www files"</span>
 <span class="n">task</span> <span class="ss">:backup</span><span class="p">,</span> <span class="ss">:hosts</span> <span class="o">=&gt;</span> <span class="vg">$SERVER_IP</span> <span class="k">do</span>
-  <span class="n">run</span> <span class="s2">&quot;cd /srv; tar -pvczf ~/backup.tar.gz www/&quot;</span>
-  <span class="n">run_locally</span> <span class="s2">&quot;scp </span><span class="si">#{</span> <span class="vg">$SERVER_USER</span> <span class="si">}</span><span class="s2">@</span><span class="si">#{</span> <span class="vg">$SERVER_IP</span> <span class="si">}</span><span class="s2">:~/backup.tar.gz ~/Dropbox/Backups/Server&quot;</span>
-<span class="k">end</span></code></pre></div>
+  <span class="n">run</span> <span class="s2">"cd /srv; tar -pvczf ~/backup.tar.gz www/"</span>
+  <span class="n">run_locally</span> <span class="s2">"scp </span><span class="si">#{</span> <span class="vg">$SERVER_USER</span> <span class="si">}</span><span class="s2">@</span><span class="si">#{</span> <span class="vg">$SERVER_IP</span> <span class="si">}</span><span class="s2">:~/backup.tar.gz ~/Dropbox/Backups/Server"</span>
+<span class="k">end</span></code></pre></figure>
 
+<p>Then I added this to my crontab on my local machine by running <code class="highlighter-rouge">crontab -e</code> and adding the line:</p>
 
-<p>Then I added this to my crontab on my local machine by running <code>crontab -e</code> and adding the line:</p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">@weekly /Users/ksmiley/.rbenv/shims/cap <span class="nt">-f</span> ~/path/to/Capfile backup</code></pre></figure>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">@weekly /Users/ksmiley/.rbenv/shims/cap -f ~/path/to/Capfile backup</code></pre></div>
+<p>I included the path to the Capistrano executable since cron (on OS X) executes tasks with <code class="highlighter-rouge">sh</code>, which isn't setup with my <code class="highlighter-rouge">$PATH</code>.</p>
 
-
-<p>I included the path to the Capistrano executable since cron (on OS X) executes tasks with <code>sh</code>, which isn't setup with my <code>$PATH</code>.</p>
 
   </div>
 </article>
@@ -208,28 +205,28 @@
   </header>
 
   <div class="post ten columns">
-    <p>I spend a decent amount of time these days helping maintain the <a href="http://cocoapods.org/">CocoaPods</a> <a href="http://github.com/cocoapods/specs">specs repo</a> by managing pull requests and issues. CococaPods is an awesome dependency manager similar to <a href="http://rubygems.org/">Rubygems</a> for Objective-C projects. Unfortunately a lot of submitted podspecs haven't been correctly formatted or they're missing required information. CocoaPods has an awesome build in command <code>pod spec lint</code> that allows you to make sure the spec is valid and complete. Understandably people who are new to CocoaPods trying to submit their libraries are unaware of this awesome tool. Therefore when I look through the pull requests, I like to lint them myself (CocoaPods does <a href="https://travis-ci.org/CocoaPods/Specs">utilize Travis</a> but unfortunately it can't do everything).</p>
+    <p>I spend a decent amount of time these days helping maintain the <a href="http://cocoapods.org/">CocoaPods</a> <a href="http://github.com/cocoapods/specs">specs repo</a> by managing pull requests and issues. CococaPods is an awesome dependency manager similar to <a href="http://rubygems.org/">Rubygems</a> for Objective-C projects. Unfortunately a lot of submitted podspecs haven't been correctly formatted or they're missing required information. CocoaPods has an awesome build in command <code class="highlighter-rouge">pod spec lint</code> that allows you to make sure the spec is valid and complete. Understandably people who are new to CocoaPods trying to submit their libraries are unaware of this awesome tool. Therefore when I look through the pull requests, I like to lint them myself (CocoaPods does <a href="https://travis-ci.org/CocoaPods/Specs">utilize Travis</a> but unfortunately it can't do everything).</p>
 
-<p>Since CocoaPods supports multiple versions of Ruby (1.8.7 and 1.9.3) to be complete ideally you'd lint them on both versions. Tools like <a href="https://rvm.io/">RVM</a> and <a href="https://github.com/sstephenson/rbenv">rbenv</a>(my tool of choice) make it easy to quickly switch between different versions of Ruby using <code>.rvmrc</code> and <code>.rbenv-version</code> respectively. As you can probably assume I wanted to automate this. So I wrote a quick <a href="http://rake.rubyforge.org/">Rakefile</a> to do this for me.</p>
+<p>Since CocoaPods supports multiple versions of Ruby (1.8.7 and 1.9.3) to be complete ideally you'd lint them on both versions. Tools like <a href="https://rvm.io/">RVM</a> and <a href="https://github.com/sstephenson/rbenv">rbenv</a>(my tool of choice) make it easy to quickly switch between different versions of Ruby using <code class="highlighter-rouge">.rvmrc</code> and <code class="highlighter-rouge">.rbenv-version</code> respectively. As you can probably assume I wanted to automate this. So I wrote a quick <a href="http://rake.rubyforge.org/">Rakefile</a> to do this for me.</p>
 
-<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#!/usr/bin/env rake</span>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#!/usr/bin/env rake</span>
 
 <span class="c1"># NOTE: Must be using rbenv 4.0 to use `system` and `.ruby-version`</span>
 <span class="c1">## Set your preferred ruby versions</span>
-<span class="vg">$V18</span> <span class="o">=</span> <span class="s1">&#39;system&#39;</span>
-<span class="vg">$V19</span> <span class="o">=</span> <span class="s1">&#39;1.9.3-p385&#39;</span>
-<span class="vg">$RBENV</span> <span class="o">=</span> <span class="s1">&#39;.ruby-version&#39;</span>
+<span class="vg">$V18</span> <span class="o">=</span> <span class="s1">'system'</span>
+<span class="vg">$V19</span> <span class="o">=</span> <span class="s1">'1.9.3-p385'</span>
+<span class="vg">$RBENV</span> <span class="o">=</span> <span class="s1">'.ruby-version'</span>
 
 <span class="c1"># The gem to use</span>
-<span class="vg">$GEM</span> <span class="o">=</span> <span class="s1">&#39;cocoapods&#39;</span>
+<span class="vg">$GEM</span> <span class="o">=</span> <span class="s1">'cocoapods'</span>
 
 <span class="n">task</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="ss">:lint</span>
 <span class="n">task</span> <span class="ss">:c</span>       <span class="o">=&gt;</span> <span class="ss">:clean</span>
 
-<span class="n">desc</span> <span class="s2">&quot;Lint podspecs on multiple versions of ruby with rbenv&quot;</span>
+<span class="n">desc</span> <span class="s2">"Lint podspecs on multiple versions of ruby with rbenv"</span>
 <span class="n">task</span> <span class="ss">:lint</span> <span class="k">do</span>
-  <span class="k">if</span> <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span> <span class="o">&lt;</span> <span class="mi">1</span>
-    <span class="nb">puts</span> <span class="s2">&quot;No podspecs in </span><span class="si">#{</span> <span class="no">Dir</span><span class="o">.</span><span class="n">pwd</span> <span class="si">}</span><span class="s2">&quot;</span>
+  <span class="k">if</span> <span class="no">Dir</span><span class="p">.</span><span class="nf">glob</span><span class="p">(</span><span class="s1">'*.podspec'</span><span class="p">).</span><span class="nf">count</span> <span class="o">&lt;</span> <span class="mi">1</span>
+    <span class="nb">puts</span> <span class="s2">"No podspecs in </span><span class="si">#{</span> <span class="no">Dir</span><span class="p">.</span><span class="nf">pwd</span> <span class="si">}</span><span class="s2">"</span>
     <span class="nb">exit</span>
   <span class="k">end</span>
 
@@ -239,13 +236,13 @@
   <span class="k">end</span>
 
   <span class="c1"># Loop through all podspecs</span>
-  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span>
+  <span class="no">Dir</span><span class="p">.</span><span class="nf">glob</span><span class="p">(</span><span class="s1">'*.podspec'</span><span class="p">).</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span>
     <span class="c1"># Loop through ruby versions</span>
-    <span class="mi">2</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
-      <span class="n">version</span> <span class="o">=</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">?</span> <span class="vg">$V18</span> <span class="p">:</span> <span class="vg">$V19</span>
+    <span class="mi">2</span><span class="p">.</span><span class="nf">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+      <span class="n">version</span> <span class="o">=</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">?</span> <span class="vg">$V18</span> <span class="p">:</span> <span class="vg">$V19</span>
       <span class="n">writeVersion</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
 
-      <span class="nb">puts</span> <span class="s2">&quot;Linting </span><span class="si">#{</span> <span class="n">file</span> <span class="si">}</span><span class="s2"> on Ruby version </span><span class="si">#{</span> <span class="n">currentVersion</span> <span class="si">}</span><span class="s2">&quot;</span>
+      <span class="nb">puts</span> <span class="s2">"Linting </span><span class="si">#{</span> <span class="n">file</span> <span class="si">}</span><span class="s2"> on Ruby version </span><span class="si">#{</span> <span class="n">currentVersion</span> <span class="si">}</span><span class="s2">"</span>
       <span class="nb">puts</span> <span class="n">lint</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
     <span class="k">end</span>
   <span class="k">end</span>
@@ -254,37 +251,35 @@
   <span class="k">if</span> <span class="n">existed</span>
     <span class="n">writeVersion</span><span class="p">(</span><span class="n">old_version</span><span class="p">)</span>
   <span class="k">else</span>
-    <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span> <span class="k">if</span> <span class="n">versionFileExists?</span>
+    <span class="no">File</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span> <span class="k">if</span> <span class="n">versionFileExists?</span>
   <span class="k">end</span>
 <span class="k">end</span>
 
-<span class="n">desc</span> <span class="s2">&quot;Delete all podspec files&quot;</span>
+<span class="n">desc</span> <span class="s2">"Delete all podspec files"</span>
 <span class="n">task</span> <span class="ss">:clean</span> <span class="k">do</span>
-  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.podspec&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">}</span>
-  <span class="no">Dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">}</span>
+  <span class="no">Dir</span><span class="p">.</span><span class="nf">glob</span><span class="p">(</span><span class="s1">'*.podspec'</span><span class="p">).</span><span class="nf">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="no">File</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">}</span>
+  <span class="no">Dir</span><span class="p">.</span><span class="nf">glob</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">).</span><span class="nf">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="no">File</span><span class="p">.</span><span class="nf">delete</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="p">}</span>
 <span class="k">end</span>
 
 <span class="c1"># Check to see if the current dotfile exists</span>
 <span class="k">def</span> <span class="nf">versionFileExists?</span>
-  <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span>
+  <span class="no">File</span><span class="p">.</span><span class="nf">exists?</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">)</span>
 <span class="k">end</span>
 
 <span class="c1"># Retrieve the current version from the rbenv dotfile</span>
 <span class="k">def</span> <span class="nf">currentVersion</span>
-  <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">io</span><span class="o">|</span> <span class="n">io</span><span class="o">.</span><span class="n">read</span> <span class="p">}</span>
+  <span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">io</span><span class="o">|</span> <span class="n">io</span><span class="p">.</span><span class="nf">read</span> <span class="p">}</span>
 <span class="k">end</span>
 
 <span class="c1"># Write out a version to .rbenv-version</span>
 <span class="k">def</span> <span class="nf">writeVersion</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
-  <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span> <span class="n">version</span> <span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="p">}</span>
+  <span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="vg">$RBENV</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span> <span class="n">file</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="s2">"</span><span class="si">#{</span> <span class="n">version</span> <span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="p">}</span>
 <span class="k">end</span>
 
 <span class="c1"># Run the lint</span>
 <span class="k">def</span> <span class="nf">lint</span><span class="p">(</span><span class="n">podspec</span><span class="p">)</span>
-  <span class="sx">%x[pod spec lint &quot;</span><span class="si">#{</span> <span class="n">podspec</span> <span class="si">}</span><span class="sx">&quot;]</span>
-<span class="k">end</span></code></pre></div>
-
-
+  <span class="sx">%x[pod spec lint "</span><span class="si">#{</span> <span class="n">podspec</span> <span class="si">}</span><span class="sx">"]</span>
+<span class="k">end</span></code></pre></figure>
 
 
   </div>
@@ -304,30 +299,28 @@
   </header>
 
   <div class="post ten columns">
-    <p>I've recently been searching around for a good way to 'spawn' an <a href="http://www.iterm2.com/">iTerm</a> window (no I don't use tabs in iTerm), at the <code>pwd</code> in my current iTerm window. I couldn't find any good way to do it so I jumped in to AppleScript Editor and made something happen.</p>
+    <p>I've recently been searching around for a good way to 'spawn' an <a href="http://www.iterm2.com/">iTerm</a> window (no I don't use tabs in iTerm), at the <code class="highlighter-rouge">pwd</code> in my current iTerm window. I couldn't find any good way to do it so I jumped in to AppleScript Editor and made something happen.</p>
 
-<div class="highlight"><pre><code class="language-applescript" data-lang="applescript"><span class="k">on</span> <span class="nb">run</span> <span class="nv">argv</span>
-    <span class="k">tell</span> <span class="nb">application</span> <span class="s2">&quot;iTerm&quot;</span>
-        <span class="k">set</span> <span class="nv">t</span> <span class="k">to</span> <span class="nb">make</span> <span class="nb">new</span> <span class="nv">terminal</span>
-        <span class="k">tell</span> <span class="nv">t</span>
-            <span class="nb">activate</span> <span class="nv">current</span> <span class="nv">session</span>
-            <span class="nb">launch</span> <span class="nv">session</span> <span class="s2">&quot;Default Session&quot;</span>
-            <span class="k">tell</span> <span class="nb">the</span> <span class="nb">last</span> <span class="nv">session</span>
-                <span class="nb">write</span> <span class="nb">text</span> <span class="s2">&quot;cd \&quot;&quot;</span> <span class="o">&amp;</span> <span class="nb">item</span> <span class="mi">1</span> <span class="k">of</span> <span class="nv">argv</span> <span class="o">&amp;</span> <span class="s2">&quot;\&quot;; clear; pwd&quot;</span>
-            <span class="k">end</span> <span class="k">tell</span>
-        <span class="k">end</span> <span class="k">tell</span>
-    <span class="k">end</span> <span class="k">tell</span>
-<span class="k">end</span> <span class="nb">run</span></code></pre></div>
-
+<figure class="highlight"><pre><code class="language-applescript" data-lang="applescript"><span class="k">on</span> <span class="nb">run</span><span class="w"> </span><span class="nv">argv</span><span class="w">
+	</span><span class="k">tell</span><span class="w"> </span><span class="nb">application</span><span class="w"> </span><span class="s2">"iTerm"</span><span class="w">
+		</span><span class="k">set</span><span class="w"> </span><span class="nv">t</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nb">make</span><span class="w"> </span><span class="nb">new</span><span class="w"> </span><span class="nv">terminal</span><span class="w">
+		</span><span class="k">tell</span><span class="w"> </span><span class="nv">t</span><span class="w">
+			</span><span class="nb">activate</span><span class="w"> </span><span class="nv">current</span><span class="w"> </span><span class="nv">session</span><span class="w">
+			</span><span class="nb">launch</span><span class="w"> </span><span class="nv">session</span><span class="w"> </span><span class="s2">"Default Session"</span><span class="w">
+			</span><span class="k">tell</span><span class="w"> </span><span class="nb">the</span><span class="w"> </span><span class="nb">last</span><span class="w"> </span><span class="nv">session</span><span class="w">
+				</span><span class="nb">write</span><span class="w"> </span><span class="nb">text</span><span class="w"> </span><span class="s2">"cd \""</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nb">item</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nv">argv</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="s2">"\"; clear; pwd"</span><span class="w">
+			</span><span class="k">end</span><span class="w"> </span><span class="k">tell</span><span class="w">
+		</span><span class="k">end</span><span class="w"> </span><span class="k">tell</span><span class="w">
+	</span><span class="k">end</span><span class="w"> </span><span class="k">tell</span><span class="w">
+</span><span class="k">end</span><span class="w"> </span><span class="nb">run</span></code></pre></figure>
 
 <p>I then added it to my <a href="http://www.zsh.org/">zsh</a> aliases with:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="k">function</span> spawn <span class="o">{</span>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="k">function </span>spawn <span class="o">{</span>
   osascript ~/Dropbox/Code/Applescript/Spawn/SpawniTerm.applescript <span class="nv">$PWD</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
-
-<p>Now I can call <code>spawn</code> from any iTerm or Terminal window to open a new iTerm session wherever I called it from.</p>
+<p>Now I can call <code class="highlighter-rouge">spawn</code> from any iTerm or Terminal window to open a new iTerm session wherever I called it from.</p>
 
   </div>
 </article>

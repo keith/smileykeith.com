@@ -49,49 +49,51 @@ It also comes with an extremely complete <a href="https://github.com/h5bp/html5-
 file. While this is very nice for a single site they recommend you do
 something different for multiple sites at <a href="https://github.com/h5bp/html5-boilerplate/blob/21c614849afc5b518685b68d81d2b0c8f7971f0a/.htaccess#L4-L6">the very top</a>.</p>
 
-<blockquote><p>(!) Using .htaccess files slows down Apache, therefore, if you have access
+<blockquote>
+  <p>(!) Using .htaccess files slows down Apache, therefore, if you have access
 to the main server config file (usually called httpd.conf), you should add
-this logic there: http://httpd.apache.org/docs/current/howto/htaccess.html.</p></blockquote>
+this logic there: http://httpd.apache.org/docs/current/howto/htaccess.html.</p>
+</blockquote>
 
 <p>This got me to their awesome collection of <a href="https://github.com/h5bp/server-configs">server configs</a>
 which has their, and in many ways the communities, recommended settings
 depending on your webserver. The <a href="https://github.com/h5bp/server-configs-apache">apache configs</a>
-have the same <code>.htaccess</code> file so I decided to dig into how to do this.</p>
+have the same <code class="highlighter-rouge">.htaccess</code> file so I decided to dig into how to do this.</p>
 
 <p>They direct you to the <a href="http://httpd.apache.org/docs/current/howto/htaccess.html">apache article</a>
-about using <code>.htaccess</code> files which has a similar comment about their
+about using <code class="highlighter-rouge">.htaccess</code> files which has a similar comment about their
 use.</p>
 
-<blockquote><p>You should avoid using .htaccess files completely if you have access to httpd main server config file
+<blockquote>
+  <p>You should avoid using .htaccess files completely if you have access to httpd main server config file
 Using .htaccess files slows down your Apache http server. Any directive that you can include in a
-.htaccess file is better set in a Directory block, as it will have the same effect with better performance.</p></blockquote>
+.htaccess file is better set in a Directory block, as it will have the same effect with better performance.</p>
+</blockquote>
 
 <p>So I decided to set this up on my <a href="http://www.linode.com/?r=c190426bf1ff0f144b48997675bae8b32d339824">Linode VPS</a> which is running Ubuntu 10.04.
 As stated in the original file comment they recommend using the
-<code>httpd.conf</code> file for your custom configuration like this. But
+<code class="highlighter-rouge">httpd.conf</code> file for your custom configuration like this. But
 <a href="http://stackoverflow.com/a/11687212/902968">apparently</a> that file could be
 overwritten on updates of Apache which would be pretty annoying. Luckily
-the default Apache config file (<code>apache2.conf</code> on 10.04) includes the
-contents of the <code>conf.d</code> folder which is in the same location. By
-creating a <code>foo.conf</code> file in that directory Apache should immediately
+the default Apache config file (<code class="highlighter-rouge">apache2.conf</code> on 10.04) includes the
+contents of the <code class="highlighter-rouge">conf.d</code> folder which is in the same location. By
+creating a <code class="highlighter-rouge">foo.conf</code> file in that directory Apache should immediately
 load its contents. As mentioned in the comment from the Apache site the
 custom configuration needs to be wrapped in a <a href="http://httpd.apache.org/docs/current/mod/core.html#directory">Directory</a> block.
 The block expects you to provide a path to the files you want to be
 affected by the contained configuration. Since I wanted this to work for
-all the sites being served by Apache I simply used <code>/srv/www/*/</code> which
+all the sites being served by Apache I simply used <code class="highlighter-rouge">/srv/www/*/</code> which
 includes my entire sites directory.</p>
 
-<p>Besides the speed increased gained by using a global <code>.htaccess</code> file
+<p>Besides the speed increased gained by using a global <code class="highlighter-rouge">.htaccess</code> file
 this allows you to have much shorter custom files for site specific
 configuration. For example only required configuration for one of my sites
-was the <code>ErrorDocument</code>s. Now my <code>.htaccess</code> file went from 300+ lines
+was the <code class="highlighter-rouge">ErrorDocument</code>s. Now my <code class="highlighter-rouge">.htaccess</code> file went from 300+ lines
 to</p>
 
-<div class="highlight"><pre><code class="language-apache" data-lang="apache"><span class="nb">ErrorDocument</span> <span class="m">403</span> <span class="sx">/403.php</span>
-<span class="nb">ErrorDocument</span> <span class="m">404</span> <span class="sx">/404.php</span>
-<span class="nb">ErrorDocument</span> <span class="m">500</span> <span class="sx">/500.php</span></code></pre></div>
-
-
+<figure class="highlight"><pre><code class="language-apache" data-lang="apache"><span class="nc">ErrorDocument</span> 403 /403.php
+<span class="nc">ErrorDocument</span> 404 /404.php
+<span class="nc">ErrorDocument</span> 500 /500.php</code></pre></figure>
 
 
   </div>

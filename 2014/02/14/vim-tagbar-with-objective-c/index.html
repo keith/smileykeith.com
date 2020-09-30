@@ -68,7 +68,7 @@ Objective-C to ctags and then match it with Tagbar. I improved it a
 little bit and came up with this. Put this file anywhere you want, you
 will define its path in your vimrc.</p>
 
-<pre><code>--langdef=objc
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--langdef=objc
 --langmap=objc:.m..mm..h
 --regex-objc=/\@interface[[:space:]]+([[:alnum:]_]+)/\1/i,interface/
 --regex-objc=/\@implementation[[:space:]]+([[:alnum:]_]+)/\1/I,implementation/
@@ -79,38 +79,37 @@ will define its path in your vimrc.</p>
 --regex-objc=/^[[:space:]]*typedef[[:space:]][^;]+[[:space:]]([[:alpha:]_][[:alnum:]]*)[[:space:]]*;/\1/t,typedef/
 --regex-objc=/^[[:space:]]*NS_ENUM\([[:alnum:]]+[[:space:]]*,[[:space:]]([[:alnum:]]+)\)/\1/e,enum/
 --regex-objc=/^#pragma[[:space:]]+mark[[:space:]]+-?[[:space:]]+([[:alnum:][:space:]]+)/\1/g,pragma/
-</code></pre>
+</code></pre></div></div>
 
 <p>Then in your vimrc:</p>
 
-<div class="highlight"><pre><code class="language-vim" data-lang="vim"><span class="k">let</span> <span class="k">g</span>:tagbar_type_objc <span class="p">=</span> {
-  \ <span class="s1">&#39;ctagstype&#39;</span>: <span class="s1">&#39;objc&#39;</span><span class="p">,</span>
-  \ <span class="s1">&#39;ctagsargs&#39;</span>: [
-    \ <span class="s1">&#39;-f&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;-&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;--excmd=pattern&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;--extra=&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;--format=2&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;--fields=nksaSmt&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;--options=&#39;</span> . expand<span class="p">(</span><span class="s1">&#39;~/.vim/objctags&#39;</span><span class="p">),</span>
-    \ <span class="s1">&#39;--objc-kinds=-N&#39;</span><span class="p">,</span>
-  \ ]<span class="p">,</span>
-  \ <span class="s1">&#39;sro&#39;</span>: <span class="s1">&#39; &#39;</span><span class="p">,</span>
-  \ <span class="s1">&#39;kinds&#39;</span>: [
-    \ <span class="s1">&#39;c:constant&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;e:enum&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;t:typedef&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;i:interface&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;P:protocol&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;p:property&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;I:implementation&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;M:method&#39;</span><span class="p">,</span>
-    \ <span class="s1">&#39;g:pragma&#39;</span><span class="p">,</span>
-  \ ]<span class="p">,</span>
-\ }</code></pre></div>
+<figure class="highlight"><pre><code class="language-vim" data-lang="vim"><span class="k">let</span> <span class="nv">g:tagbar_type_objc</span> <span class="p">=</span> <span class="p">{</span>
+<span class="se">  \</span> <span class="s1">'ctagstype'</span><span class="p">:</span> <span class="s1">'objc'</span><span class="p">,</span>
+<span class="se">  \</span> <span class="s1">'ctagsargs'</span><span class="p">:</span> <span class="p">[</span>
+<span class="se">    \</span> <span class="s1">'-f'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'-'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'--excmd=pattern'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'--extra='</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'--format=2'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'--fields=nksaSmt'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'--options='</span> <span class="p">.</span> expand<span class="p">(</span><span class="s1">'~/.vim/objctags'</span><span class="p">),</span>
+<span class="se">    \</span> <span class="s1">'--objc-kinds=-N'</span><span class="p">,</span>
+<span class="se">  \</span> <span class="p">],</span>
+<span class="se">  \</span> <span class="s1">'sro'</span><span class="p">:</span> <span class="s1">' '</span><span class="p">,</span>
+<span class="se">  \</span> <span class="s1">'kinds'</span><span class="p">:</span> <span class="p">[</span>
+<span class="se">    \</span> <span class="s1">'c:constant'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'e:enum'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'t:typedef'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'i:interface'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'P:protocol'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'p:property'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'I:implementation'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'M:method'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'g:pragma'</span><span class="p">,</span>
+<span class="se">  \</span> <span class="p">],</span>
+<span class="se">\</span> <span class="p">}</span></code></pre></figure>
 
-
-<p>Replace the <code>~/.vim/objctags</code> with the path where you chose to put the
+<p>Replace the <code class="highlighter-rouge">~/.vim/objctags</code> with the path where you chose to put the
 first file. Please let me know if you see any way that this could be
 improved.</p>
 

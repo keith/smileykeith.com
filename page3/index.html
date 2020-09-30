@@ -43,61 +43,61 @@
   <div class="post ten columns">
     <p>Recently <a href="https://travis-ci.org/">Travis</a> added support for Objective-C and there for OS X and iOS projects for continuous integration testing. I gather that people have previously done this with self-hosted dedicated <a href="http://jenkins-ci.org/">Jenkins</a> machines but since Apple is so aggressive about dropping support for previous versions of the OS it seems like a pain to have to replace your build server every few years. Enter Travis, a great hosted <a href="http://en.wikipedia.org/wiki/Continuous_integration">continuous integration</a> server that hosts a huge amount of open source projects. I figured with this new support I could host some of my <a href="https://github.com/keith/KSADNTwitterFormatter">smaller</a> libraries just to set how well it worked. The initial setup process was a bit tedious but I eventually got it to work.</p>
 
-<h3>Assumtions:</h3>
+<h3 id="assumtions">Assumtions:</h3>
 
 <ul>
-<li>You have a test framework already integrated with your project (I like <a href="https://github.com/petejkim/specta">Specta</a>/<a href="https://github.com/petejkim/expecta">Expecta</a>)</li>
-<li>You have your project on Github in a public repository. Travis offers a <a href="http://about.travis-ci.org/docs/user/travis-pro/">pro</a> account if you'd rather</li>
+  <li>You have a test framework already integrated with your project (I like <a href="https://github.com/petejkim/specta">Specta</a>/<a href="https://github.com/petejkim/expecta">Expecta</a>)</li>
+  <li>You have your project on Github in a public repository. Travis offers a <a href="http://about.travis-ci.org/docs/user/travis-pro/">pro</a> account if you'd rather</li>
 </ul>
 
-
-<h3>Steps</h3>
+<h3 id="steps">Steps</h3>
 
 <ul>
-<li>Create a <code>.travis.yml</code> file in the root of your repository (leading dot is intentional). For many projects a file may just look like:</li>
+  <li>Create a <code class="highlighter-rouge">.travis.yml</code> file in the root of your repository (leading dot is intentional). For many projects a file may just look like:</li>
 </ul>
 
-
-<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">language</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">objective-c</span></code></pre></div>
-
+<figure class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="na">language</span><span class="pi">:</span> <span class="s">objective-c</span></code></pre></figure>
 
 <p><del>By default Travis runs <a href="https://gist.github.com/henrikhodne/73151fccea7af3201f63">this script</a> for Objective-C projects</del> I was informed <a href="https://twitter.com/henrikhodne/status/322665896806060032">on Twitter</a> that the current script that runs Objective-C projects is actually located <a href="https://github.com/travis-ci/travis-cookbooks/blob/osx/ci_environment/travis_build_environment/files/default/ci_user/travis-utils/osx-cibuild.sh">here</a>. It was originally created by <a href="https://github.com/jspahrsummers">Justin Spahr-Summers</a> <a href="https://github.com/jspahrsummers/objc-build-scripts">here</a>. This script seems to run my projects without any issue, they just occasionally require more initial setup (we'll get to that).</p>
 
 <ul>
-<li><p>Enable your repository in Travis' settings. From your <a href="https://travis-ci.org/profile">Travis profile page</a> (after signing in with Github) you should see a list of your repositories, you may have to press 'Sync now', where you can switch on the repository you're planning on adding.</p></li>
-<li><p>Configure your project within Xcode. As I assumed above you already have a test target setup. You do have to do a few things in Xcode to make everything work correctly.</p>
+  <li>
+    <p>Enable your repository in Travis' settings. From your <a href="https://travis-ci.org/profile">Travis profile page</a> (after signing in with Github) you should see a list of your repositories, you may have to press 'Sync now', where you can switch on the repository you're planning on adding.</p>
+  </li>
+  <li>
+    <p>Configure your project within Xcode. As I assumed above you already have a test target setup. You do have to do a few things in Xcode to make everything work correctly.</p>
 
-<ol>
-<li>Go to 'Manage Schemes' in Xcode. <img src="/images/travis/manageschemes.png" alt="Manage Schemes" /></li>
-<li>Check the 'Shared' box for the scheme that needs to be run. <img src="/images/travis/shareschemes.png" alt="Shared Scheme" /></li>
-<li>Click 'Edit...' in the bottom left and go to your build action. <img src="/images/travis/editscheme.png" alt="Edit Scheme" /></li>
-<li>On the row of your Tests target check the box in the 'Run' column. <img src="/images/travis/runtest.png" alt="Run Test" /></li>
-</ol>
-</li>
-<li><p>At this point for a simple project or a project using <a href="http://cocoapods.org/">CocoaPods</a> you should be good to go. If Travis finds a <code>Podfile</code> in the root of your repository it automatically runs <code>pod install</code> to get your dependencies (from their <a href="http://about.travis-ci.org/docs/user/languages/objective-c/">docs</a>). Otherwise there are a ton of <a href="http://about.travis-ci.org/docs/user/build-configuration/">configuration options</a> for your <code>.travis.yml</code> depending on how your repo is setup.</p></li>
+    <ol>
+      <li>Go to 'Manage Schemes' in Xcode. <img src="/images/travis/manageschemes.png" alt="Manage Schemes" /></li>
+      <li>Check the 'Shared' box for the scheme that needs to be run. <img src="/images/travis/shareschemes.png" alt="Shared Scheme" /></li>
+      <li>Click 'Edit…' in the bottom left and go to your build action. <img src="/images/travis/editscheme.png" alt="Edit Scheme" /></li>
+      <li>On the row of your Tests target check the box in the 'Run' column. <img src="/images/travis/runtest.png" alt="Run Test" /></li>
+    </ol>
+  </li>
+  <li>
+    <p>At this point for a simple project or a project using <a href="http://cocoapods.org/">CocoaPods</a> you should be good to go. If Travis finds a <code class="highlighter-rouge">Podfile</code> in the root of your repository it automatically runs <code class="highlighter-rouge">pod install</code> to get your dependencies (from their <a href="http://about.travis-ci.org/docs/user/languages/objective-c/">docs</a>). Otherwise there are a ton of <a href="http://about.travis-ci.org/docs/user/build-configuration/">configuration options</a> for your <code class="highlighter-rouge">.travis.yml</code> depending on how your repo is setup.</p>
+  </li>
 </ul>
 
+<p>For one of my projects I created a <code class="highlighter-rouge">setup.sh</code> file at the root of my repo that looks like this:</p>
 
-<p>For one of my projects I created a <code>setup.sh</code> file at the root of my repo that looks like this:</p>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/usr/bin/env bash</span>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/usr/bin/env bash</span>
+git submodule update <span class="nt">--init</span> <span class="nt">--recursive</span>
+<span class="nb">echo</span> <span class="s2">"Setting up test frameworks..."</span>
+<span class="nb">cd </span>Example/Vendor/Specta<span class="p">;</span> rake <span class="o">&gt;</span> /dev/null
+<span class="nb">cd</span> ../Expecta<span class="p">;</span> rake <span class="o">&gt;</span> /dev/null
+<span class="nb">echo</span> <span class="s2">"Done"</span>
+<span class="nb">cd</span> ../../../</code></pre></figure>
 
-git submodule update --init --recursive
-<span class="nb">echo</span> <span class="s2">&quot;Setting up test frameworks...&quot;</span>
-<span class="nb">cd </span>Example/Vendor/Specta<span class="p">;</span> rake &gt; /dev/null
-<span class="nb">cd</span> ../Expecta<span class="p">;</span> rake &gt; /dev/null
-<span class="nb">echo</span> <span class="s2">&quot;Done&quot;</span>
-<span class="nb">cd</span> ../../../</code></pre></div>
+<p>This script which I run using the <code class="highlighter-rouge">before_install: ./setup.sh</code> option in my <code class="highlighter-rouge">.travis.yml</code> gets all my submodules, sets up Specta and Expecta and then goes back to the root directory for running. If you just have a few simple steps you can also have multiple <code class="highlighter-rouge">before_install</code> actions like:</p>
 
-
-<p>This script which I run using the <code>before_install: ./setup.sh</code> option in my <code>.travis.yml</code> gets all my submodules, sets up Specta and Expecta and then goes back to the root directory for running. If you just have a few simple steps you can also have multiple <code>before_install</code> actions like:</p>
-
-<div class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="l-Scalar-Plain">before_install</span><span class="p-Indicator">:</span>
-  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cd Example</span>
-  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">make</span></code></pre></div>
-
+<figure class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="na">before_install</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">cd Example</span>
+  <span class="pi">-</span> <span class="s">make</span></code></pre></figure>
 
 <p>You can read more about other Travis configuration options in their <a href="http://about.travis-ci.org/docs/user/build-configuration/">documentation</a>.</p>
+
 
   </div>
 </article>
@@ -142,18 +142,26 @@ git submodule update --init --recursive
     <p>One of my favorite defaults in some Linux distros is the ability to use CTRL+ALT+T to open a new terminal window. I wanted to enable this same functionality in OS X using <a href="http://qsapp.com/">Quicksilver</a>. I did this using <a href="http://www.iterm2.com/">iTerm 2</a> but you can do it with the default Terminal if that's what you want.</p>
 
 <ol>
-<li><p>Enable the <code>Terminal</code> and <code>iTerm2</code> Quicksilver plugins.
-<img src="/images/qs-terminal/qs-plugins.png" alt="Quicksilver plugins" /></p></li>
-<li><p>Create a new custom hotkey trigger. Using the <code>Home</code> directory with the action <code>Open Directory in Terminal</code>
-<img src="/images/qs-terminal/qs-triggers.png" alt="Quicksilver trigger" /></p></li>
-<li><p>Set it's hotkey using the drawer to whatever you want.
-<img src="/images/qs-terminal/qs-hotkey.png" alt="Quicksilver hotkey" /></p></li>
-<li><p>Set your default <code>Command Line Interface</code> <code>Trigger</code> to <code>iTerm</code> (if that's what you want)
-<img src="/images/qs-terminal/qs-cli.png" alt="Quicksilver CLI" /></p></li>
+  <li>
+    <p>Enable the <code class="highlighter-rouge">Terminal</code> and <code class="highlighter-rouge">iTerm2</code> Quicksilver plugins.
+<img src="/images/qs-terminal/qs-plugins.png" alt="Quicksilver plugins" /></p>
+  </li>
+  <li>
+    <p>Create a new custom hotkey trigger. Using the <code class="highlighter-rouge">Home</code> directory with the action <code class="highlighter-rouge">Open Directory in Terminal</code>
+<img src="/images/qs-terminal/qs-triggers.png" alt="Quicksilver trigger" /></p>
+  </li>
+  <li>
+    <p>Set it's hotkey using the drawer to whatever you want.
+<img src="/images/qs-terminal/qs-hotkey.png" alt="Quicksilver hotkey" /></p>
+  </li>
+  <li>
+    <p>Set your default <code class="highlighter-rouge">Command Line Interface</code> <code class="highlighter-rouge">Trigger</code> to <code class="highlighter-rouge">iTerm</code> (if that's what you want)
+<img src="/images/qs-terminal/qs-cli.png" alt="Quicksilver CLI" /></p>
+  </li>
 </ol>
 
-
 <p>You're done! Now you can easily press your hotkey and pull up a new iTerm/Terminal window whenever and wherever.</p>
+
 
   </div>
 </article>
@@ -178,17 +186,13 @@ git submodule update --init --recursive
 
 <p>To run the script I came up with use something like:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword</code></pre></div>
-
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword</code></pre></figure>
 
 <p>To add it to your crontab (to run every Sunday at 1:01am) use something like:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="m">1</span> <span class="m">1</span> * * <span class="m">7</span> ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword</code></pre></div>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">1 1 <span class="k">*</span> <span class="k">*</span> 7 ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword</code></pre></figure>
 
-
-
-
-<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#!/usr/bin/env ruby</span>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#!/usr/bin/env ruby</span>
 
 <span class="c1">#</span>
 <span class="c1"># =&gt; This script will authorize your Google credentials and download your Google Reader subscriptions</span>
@@ -196,103 +200,101 @@ git submodule update --init --recursive
 <span class="c1">#</span>
 
 <span class="c1"># The required networking shenanigans</span>
-<span class="nb">require</span> <span class="s1">&#39;uri&#39;</span>
-<span class="nb">require</span> <span class="s1">&#39;net/http&#39;</span>
-<span class="nb">require</span> <span class="s1">&#39;open-uri&#39;</span>
+<span class="nb">require</span> <span class="s1">'uri'</span>
+<span class="nb">require</span> <span class="s1">'net/http'</span>
+<span class="nb">require</span> <span class="s1">'open-uri'</span>
 
-<span class="nb">require</span> <span class="s1">&#39;rubygems&#39;</span>
-<span class="c1"># This requires the &#39;colorize&#39; gem. Install with &#39;[sudo] gem install colorize&#39;</span>
-<span class="nb">require</span> <span class="s1">&#39;colorize&#39;</span>
+<span class="nb">require</span> <span class="s1">'rubygems'</span>
+<span class="c1"># This requires the 'colorize' gem. Install with '[sudo] gem install colorize'</span>
+<span class="nb">require</span> <span class="s1">'colorize'</span>
 
 
 <span class="c1"># The base Google URLs for callback, authentication, and subscription export</span>
-<span class="vg">$GOOGLE_URL</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com&quot;</span>
-<span class="vg">$LOGIN_URL</span> <span class="o">=</span> <span class="s2">&quot;https://www.google.com/accounts/ClientLogin&quot;</span>
-<span class="vg">$READER_URL</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/reader/subscriptions/export&quot;</span>
+<span class="vg">$GOOGLE_URL</span> <span class="o">=</span> <span class="s2">"http://www.google.com"</span>
+<span class="vg">$LOGIN_URL</span> <span class="o">=</span> <span class="s2">"https://www.google.com/accounts/ClientLogin"</span>
+<span class="vg">$READER_URL</span> <span class="o">=</span> <span class="s2">"http://www.google.com/reader/subscriptions/export"</span>
 
 <span class="c1"># The user agent string, for some reason this is required, feel free to change it</span>
-<span class="vg">$SOURCE</span> <span class="o">=</span> <span class="s2">&quot;keith.so&quot;</span>
+<span class="vg">$SOURCE</span> <span class="o">=</span> <span class="s2">"keith.so"</span>
 
 <span class="c1"># The default output filename, it is automatically overwritten if one already exists</span>
-<span class="vg">$FILE_NAME</span> <span class="o">=</span> <span class="s2">&quot;googlereadersubscriptions.opml&quot;</span>
+<span class="vg">$FILE_NAME</span> <span class="o">=</span> <span class="s2">"googlereadersubscriptions.opml"</span>
 
 
 <span class="c1"># Make sure there is the correct number of arguments</span>
-<span class="k">if</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">count</span> <span class="o">!=</span> <span class="mi">2</span>
-    <span class="c1"># Print the instruction</span>
-    <span class="nb">puts</span> <span class="s2">&quot;Usage: ./</span><span class="si">#{</span> <span class="no">File</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">)</span> <span class="si">}</span><span class="s2"> USERNAME PASSWORD&quot;</span><span class="o">.</span><span class="n">red</span>
-    <span class="nb">exit</span>
+<span class="k">if</span> <span class="no">ARGV</span><span class="p">.</span><span class="nf">count</span> <span class="o">!=</span> <span class="mi">2</span>
+	<span class="c1"># Print the instruction</span>
+	<span class="nb">puts</span> <span class="s2">"Usage: ./</span><span class="si">#{</span> <span class="no">File</span><span class="p">.</span><span class="nf">basename</span><span class="p">(</span><span class="kp">__FILE__</span><span class="p">)</span> <span class="si">}</span><span class="s2"> USERNAME PASSWORD"</span><span class="p">.</span><span class="nf">red</span>
+	<span class="nb">exit</span>
 <span class="k">end</span>
 
 <span class="c1"># Build the request URL</span>
-<span class="n">uri</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="vg">$LOGIN_URL</span><span class="p">)</span>
+<span class="n">uri</span> <span class="o">=</span> <span class="no">URI</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="vg">$LOGIN_URL</span><span class="p">)</span>
 
 <span class="c1"># Setup the Parameters</span>
-<span class="n">params</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">Email</span><span class="p">:</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">first</span><span class="p">,</span> <span class="ss">Passwd</span><span class="p">:</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">last</span><span class="p">,</span> <span class="ss">service</span><span class="p">:</span> <span class="s2">&quot;reader&quot;</span><span class="p">,</span> <span class="ss">source</span><span class="p">:</span> <span class="vg">$SOURCE</span><span class="p">,</span> <span class="ss">continue</span><span class="p">:</span> <span class="vg">$GOOGLE_URL</span> <span class="p">}</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span> <span class="no">Email</span><span class="p">:</span> <span class="no">ARGV</span><span class="p">.</span><span class="nf">first</span><span class="p">,</span> <span class="no">Passwd</span><span class="p">:</span> <span class="no">ARGV</span><span class="p">.</span><span class="nf">last</span><span class="p">,</span> <span class="ss">service: </span><span class="s2">"reader"</span><span class="p">,</span> <span class="ss">source: </span><span class="vg">$SOURCE</span><span class="p">,</span> <span class="ss">continue: </span><span class="vg">$GOOGLE_URL</span> <span class="p">}</span>
 
 <span class="c1"># Add the user-agent string, my website (feel free to replace it) to the headers</span>
-<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;User-agent&quot;</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span> <span class="p">}</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">"User-agent"</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span> <span class="p">}</span>
 
 <span class="c1"># Encode the parameters into the url</span>
-<span class="n">uri</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">encode_www_form</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+<span class="n">uri</span><span class="p">.</span><span class="nf">query</span> <span class="o">=</span> <span class="no">URI</span><span class="p">.</span><span class="nf">encode_www_form</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
 
 <span class="c1"># Create a new NET:HTTP object with the request URL</span>
-<span class="n">http</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">uri</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">uri</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+<span class="n">http</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">uri</span><span class="p">.</span><span class="nf">host</span><span class="p">,</span> <span class="n">uri</span><span class="p">.</span><span class="nf">port</span><span class="p">)</span>
 
 <span class="c1"># Require HTTPS without this net/http will not be happy with you</span>
-<span class="n">http</span><span class="o">.</span><span class="n">use_ssl</span> <span class="o">=</span> <span class="kp">true</span>
+<span class="n">http</span><span class="p">.</span><span class="nf">use_ssl</span> <span class="o">=</span> <span class="kp">true</span>
 
 <span class="c1"># Execute the request</span>
-<span class="n">request</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">::</span><span class="no">Get</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">uri</span><span class="o">.</span><span class="n">request_uri</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+<span class="n">request</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">::</span><span class="no">Get</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">uri</span><span class="p">.</span><span class="nf">request_uri</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
 
 <span class="c1"># Get the data from the request</span>
-<span class="n">response</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">http</span><span class="p">.</span><span class="nf">request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
 <span class="c1"># Check for valid response code, should ONLY be 200</span>
-<span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">code</span> <span class="o">!=</span> <span class="s1">&#39;200&#39;</span>
-    <span class="nb">puts</span> <span class="s2">&quot;Google returned </span><span class="si">#{</span> <span class="n">response</span><span class="o">.</span><span class="n">code</span> <span class="si">}</span><span class="s2">, check your username and password&quot;</span><span class="o">.</span><span class="n">red</span>
-    <span class="nb">exit</span>
+<span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="nf">code</span> <span class="o">!=</span> <span class="s1">'200'</span>
+	<span class="nb">puts</span> <span class="s2">"Google returned </span><span class="si">#{</span> <span class="n">response</span><span class="p">.</span><span class="nf">code</span> <span class="si">}</span><span class="s2">, check your username and password"</span><span class="p">.</span><span class="nf">red</span>
+	<span class="nb">exit</span>
 <span class="k">end</span>
 
 <span class="c1"># split each token into a different item then load them each into a hash with the key as the token key</span>
-<span class="n">auth_hash</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">.</span><span class="n">new</span>
-<span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sr">/\n/</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">token</span><span class="o">|</span>
-    <span class="n">split_array</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
-    <span class="n">auth_hash</span><span class="o">[</span><span class="n">split_array</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">downcase</span><span class="o">]</span> <span class="o">=</span> <span class="n">split_array</span><span class="o">.</span><span class="n">last</span>
+<span class="n">auth_hash</span> <span class="o">=</span> <span class="no">Hash</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">response</span><span class="p">.</span><span class="nf">body</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sr">/\n/</span><span class="p">).</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">token</span><span class="o">|</span>
+	<span class="n">split_array</span> <span class="o">=</span> <span class="n">token</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="s1">'='</span><span class="p">)</span>
+	<span class="n">auth_hash</span><span class="p">[</span><span class="n">split_array</span><span class="p">.</span><span class="nf">first</span><span class="p">.</span><span class="nf">downcase</span><span class="p">]</span> <span class="o">=</span> <span class="n">split_array</span><span class="p">.</span><span class="nf">last</span>
 <span class="k">end</span>
 
 <span class="c1"># Create a header hash for the request of the XML file</span>
-<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;user-agent&quot;</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span><span class="p">,</span> <span class="s2">&quot;cookie&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;Name=SID;SID=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="o">[</span><span class="s1">&#39;sid&#39;</span><span class="o">]</span> <span class="si">}</span><span class="s2">;Domain=.google.com;Path=/;Expires=160000000000&quot;</span><span class="p">,</span> <span class="s2">&quot;authorization&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;GoogleLogin auth=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="o">[</span><span class="s1">&#39;auth&#39;</span><span class="o">]</span> <span class="si">}</span><span class="s2">&quot;</span> <span class="p">}</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">"user-agent"</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span><span class="p">,</span> <span class="s2">"cookie"</span> <span class="o">=&gt;</span> <span class="s2">"Name=SID;SID=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">]</span> <span class="si">}</span><span class="s2">;Domain=.google.com;Path=/;Expires=160000000000"</span><span class="p">,</span> <span class="s2">"authorization"</span> <span class="o">=&gt;</span> <span class="s2">"GoogleLogin auth=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="p">[</span><span class="s1">'auth'</span><span class="p">]</span> <span class="si">}</span><span class="s2">"</span> <span class="p">}</span>
 
 <span class="c1"># Open the URL for the Google Reader export with the setup headers</span>
 <span class="n">request</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="vg">$READER_URL</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
 
 <span class="c1"># Open the received XML feeds file</span>
-<span class="n">google_reader_file</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">google_reader_file</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span>
 
-<span class="c1"># Read the entire feeds file into &#39;subscriptions&#39;</span>
-<span class="n">subscriptions</span> <span class="o">=</span> <span class="n">google_reader_file</span><span class="o">.</span><span class="n">read</span>
+<span class="c1"># Read the entire feeds file into 'subscriptions'</span>
+<span class="n">subscriptions</span> <span class="o">=</span> <span class="n">google_reader_file</span><span class="p">.</span><span class="nf">read</span>
 
 <span class="c1"># Close the downloaded file</span>
-<span class="n">google_reader_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">google_reader_file</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
 
 <span class="c1"># Open a new file with the global filename to write to, overwrite it if it exists</span>
-<span class="n">subscriptions_file</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$FILE_NAME</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+<span class="n">subscriptions_file</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="vg">$FILE_NAME</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span>
 
 <span class="c1"># Verify the file was created</span>
-<span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="n">subscriptions_file</span><span class="p">)</span>
-    <span class="c1"># Write the subscriptions to the file and close it</span>
-    <span class="n">subscriptions_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">)</span>
-    <span class="n">subscriptions_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="k">if</span> <span class="no">File</span><span class="p">.</span><span class="nf">exists?</span><span class="p">(</span><span class="n">subscriptions_file</span><span class="p">)</span>
+	<span class="c1"># Write the subscriptions to the file and close it</span>
+	<span class="n">subscriptions_file</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">)</span>
+	<span class="n">subscriptions_file</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
 
-    <span class="c1"># Display a success message</span>
-    <span class="nb">puts</span> <span class="s2">&quot;Wrote Google Reader subscriptions to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">green</span>
+	<span class="c1"># Display a success message</span>
+	<span class="nb">puts</span> <span class="s2">"Wrote Google Reader subscriptions to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2">"</span><span class="p">.</span><span class="nf">green</span>
 <span class="k">else</span>
-    <span class="c1"># If the file wasn&#39;t created print an error</span>
-    <span class="nb">puts</span> <span class="s2">&quot;Couldn&#39;t write to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2"> (the process running this script may not have sufficient privileges&quot;</span><span class="o">.</span><span class="n">red</span>
-<span class="k">end</span></code></pre></div>
-
-
+	<span class="c1"># If the file wasn't created print an error</span>
+	<span class="nb">puts</span> <span class="s2">"Couldn't write to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2"> (the process running this script may not have sufficient privileges"</span><span class="p">.</span><span class="nf">red</span>
+<span class="k">end</span></code></pre></figure>
 
 
   </div>

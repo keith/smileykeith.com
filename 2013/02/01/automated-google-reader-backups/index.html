@@ -48,17 +48,13 @@
 
 <p>To run the script I came up with use something like:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword</code></pre></div>
-
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword</code></pre></figure>
 
 <p>To add it to your crontab (to run every Sunday at 1:01am) use something like:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="m">1</span> <span class="m">1</span> * * <span class="m">7</span> ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword</code></pre></div>
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">1 1 <span class="k">*</span> <span class="k">*</span> 7 ruby path/to/googleReaderOPML.rb username@gmail.com SekretPassword</code></pre></figure>
 
-
-
-
-<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#!/usr/bin/env ruby</span>
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#!/usr/bin/env ruby</span>
 
 <span class="c1">#</span>
 <span class="c1"># =&gt; This script will authorize your Google credentials and download your Google Reader subscriptions</span>
@@ -66,103 +62,101 @@
 <span class="c1">#</span>
 
 <span class="c1"># The required networking shenanigans</span>
-<span class="nb">require</span> <span class="s1">&#39;uri&#39;</span>
-<span class="nb">require</span> <span class="s1">&#39;net/http&#39;</span>
-<span class="nb">require</span> <span class="s1">&#39;open-uri&#39;</span>
+<span class="nb">require</span> <span class="s1">'uri'</span>
+<span class="nb">require</span> <span class="s1">'net/http'</span>
+<span class="nb">require</span> <span class="s1">'open-uri'</span>
 
-<span class="nb">require</span> <span class="s1">&#39;rubygems&#39;</span>
-<span class="c1"># This requires the &#39;colorize&#39; gem. Install with &#39;[sudo] gem install colorize&#39;</span>
-<span class="nb">require</span> <span class="s1">&#39;colorize&#39;</span>
+<span class="nb">require</span> <span class="s1">'rubygems'</span>
+<span class="c1"># This requires the 'colorize' gem. Install with '[sudo] gem install colorize'</span>
+<span class="nb">require</span> <span class="s1">'colorize'</span>
 
 
 <span class="c1"># The base Google URLs for callback, authentication, and subscription export</span>
-<span class="vg">$GOOGLE_URL</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com&quot;</span>
-<span class="vg">$LOGIN_URL</span> <span class="o">=</span> <span class="s2">&quot;https://www.google.com/accounts/ClientLogin&quot;</span>
-<span class="vg">$READER_URL</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/reader/subscriptions/export&quot;</span>
+<span class="vg">$GOOGLE_URL</span> <span class="o">=</span> <span class="s2">"http://www.google.com"</span>
+<span class="vg">$LOGIN_URL</span> <span class="o">=</span> <span class="s2">"https://www.google.com/accounts/ClientLogin"</span>
+<span class="vg">$READER_URL</span> <span class="o">=</span> <span class="s2">"http://www.google.com/reader/subscriptions/export"</span>
 
 <span class="c1"># The user agent string, for some reason this is required, feel free to change it</span>
-<span class="vg">$SOURCE</span> <span class="o">=</span> <span class="s2">&quot;keith.so&quot;</span>
+<span class="vg">$SOURCE</span> <span class="o">=</span> <span class="s2">"keith.so"</span>
 
 <span class="c1"># The default output filename, it is automatically overwritten if one already exists</span>
-<span class="vg">$FILE_NAME</span> <span class="o">=</span> <span class="s2">&quot;googlereadersubscriptions.opml&quot;</span>
+<span class="vg">$FILE_NAME</span> <span class="o">=</span> <span class="s2">"googlereadersubscriptions.opml"</span>
 
 
 <span class="c1"># Make sure there is the correct number of arguments</span>
-<span class="k">if</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">count</span> <span class="o">!=</span> <span class="mi">2</span>
-    <span class="c1"># Print the instruction</span>
-    <span class="nb">puts</span> <span class="s2">&quot;Usage: ./</span><span class="si">#{</span> <span class="no">File</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">)</span> <span class="si">}</span><span class="s2"> USERNAME PASSWORD&quot;</span><span class="o">.</span><span class="n">red</span>
-    <span class="nb">exit</span>
+<span class="k">if</span> <span class="no">ARGV</span><span class="p">.</span><span class="nf">count</span> <span class="o">!=</span> <span class="mi">2</span>
+	<span class="c1"># Print the instruction</span>
+	<span class="nb">puts</span> <span class="s2">"Usage: ./</span><span class="si">#{</span> <span class="no">File</span><span class="p">.</span><span class="nf">basename</span><span class="p">(</span><span class="kp">__FILE__</span><span class="p">)</span> <span class="si">}</span><span class="s2"> USERNAME PASSWORD"</span><span class="p">.</span><span class="nf">red</span>
+	<span class="nb">exit</span>
 <span class="k">end</span>
 
 <span class="c1"># Build the request URL</span>
-<span class="n">uri</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="vg">$LOGIN_URL</span><span class="p">)</span>
+<span class="n">uri</span> <span class="o">=</span> <span class="no">URI</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="vg">$LOGIN_URL</span><span class="p">)</span>
 
 <span class="c1"># Setup the Parameters</span>
-<span class="n">params</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">Email</span><span class="p">:</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">first</span><span class="p">,</span> <span class="ss">Passwd</span><span class="p">:</span> <span class="no">ARGV</span><span class="o">.</span><span class="n">last</span><span class="p">,</span> <span class="ss">service</span><span class="p">:</span> <span class="s2">&quot;reader&quot;</span><span class="p">,</span> <span class="ss">source</span><span class="p">:</span> <span class="vg">$SOURCE</span><span class="p">,</span> <span class="ss">continue</span><span class="p">:</span> <span class="vg">$GOOGLE_URL</span> <span class="p">}</span>
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span> <span class="no">Email</span><span class="p">:</span> <span class="no">ARGV</span><span class="p">.</span><span class="nf">first</span><span class="p">,</span> <span class="no">Passwd</span><span class="p">:</span> <span class="no">ARGV</span><span class="p">.</span><span class="nf">last</span><span class="p">,</span> <span class="ss">service: </span><span class="s2">"reader"</span><span class="p">,</span> <span class="ss">source: </span><span class="vg">$SOURCE</span><span class="p">,</span> <span class="ss">continue: </span><span class="vg">$GOOGLE_URL</span> <span class="p">}</span>
 
 <span class="c1"># Add the user-agent string, my website (feel free to replace it) to the headers</span>
-<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;User-agent&quot;</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span> <span class="p">}</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">"User-agent"</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span> <span class="p">}</span>
 
 <span class="c1"># Encode the parameters into the url</span>
-<span class="n">uri</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="no">URI</span><span class="o">.</span><span class="n">encode_www_form</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+<span class="n">uri</span><span class="p">.</span><span class="nf">query</span> <span class="o">=</span> <span class="no">URI</span><span class="p">.</span><span class="nf">encode_www_form</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
 
 <span class="c1"># Create a new NET:HTTP object with the request URL</span>
-<span class="n">http</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">uri</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="n">uri</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+<span class="n">http</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">uri</span><span class="p">.</span><span class="nf">host</span><span class="p">,</span> <span class="n">uri</span><span class="p">.</span><span class="nf">port</span><span class="p">)</span>
 
 <span class="c1"># Require HTTPS without this net/http will not be happy with you</span>
-<span class="n">http</span><span class="o">.</span><span class="n">use_ssl</span> <span class="o">=</span> <span class="kp">true</span>
+<span class="n">http</span><span class="p">.</span><span class="nf">use_ssl</span> <span class="o">=</span> <span class="kp">true</span>
 
 <span class="c1"># Execute the request</span>
-<span class="n">request</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">::</span><span class="no">Get</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">uri</span><span class="o">.</span><span class="n">request_uri</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+<span class="n">request</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">::</span><span class="no">Get</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">uri</span><span class="p">.</span><span class="nf">request_uri</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
 
 <span class="c1"># Get the data from the request</span>
-<span class="n">response</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">http</span><span class="p">.</span><span class="nf">request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
 <span class="c1"># Check for valid response code, should ONLY be 200</span>
-<span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">code</span> <span class="o">!=</span> <span class="s1">&#39;200&#39;</span>
-    <span class="nb">puts</span> <span class="s2">&quot;Google returned </span><span class="si">#{</span> <span class="n">response</span><span class="o">.</span><span class="n">code</span> <span class="si">}</span><span class="s2">, check your username and password&quot;</span><span class="o">.</span><span class="n">red</span>
-    <span class="nb">exit</span>
+<span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="nf">code</span> <span class="o">!=</span> <span class="s1">'200'</span>
+	<span class="nb">puts</span> <span class="s2">"Google returned </span><span class="si">#{</span> <span class="n">response</span><span class="p">.</span><span class="nf">code</span> <span class="si">}</span><span class="s2">, check your username and password"</span><span class="p">.</span><span class="nf">red</span>
+	<span class="nb">exit</span>
 <span class="k">end</span>
 
 <span class="c1"># split each token into a different item then load them each into a hash with the key as the token key</span>
-<span class="n">auth_hash</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">.</span><span class="n">new</span>
-<span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sr">/\n/</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">token</span><span class="o">|</span>
-    <span class="n">split_array</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
-    <span class="n">auth_hash</span><span class="o">[</span><span class="n">split_array</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">downcase</span><span class="o">]</span> <span class="o">=</span> <span class="n">split_array</span><span class="o">.</span><span class="n">last</span>
+<span class="n">auth_hash</span> <span class="o">=</span> <span class="no">Hash</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">response</span><span class="p">.</span><span class="nf">body</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sr">/\n/</span><span class="p">).</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">token</span><span class="o">|</span>
+	<span class="n">split_array</span> <span class="o">=</span> <span class="n">token</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="s1">'='</span><span class="p">)</span>
+	<span class="n">auth_hash</span><span class="p">[</span><span class="n">split_array</span><span class="p">.</span><span class="nf">first</span><span class="p">.</span><span class="nf">downcase</span><span class="p">]</span> <span class="o">=</span> <span class="n">split_array</span><span class="p">.</span><span class="nf">last</span>
 <span class="k">end</span>
 
 <span class="c1"># Create a header hash for the request of the XML file</span>
-<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;user-agent&quot;</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span><span class="p">,</span> <span class="s2">&quot;cookie&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;Name=SID;SID=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="o">[</span><span class="s1">&#39;sid&#39;</span><span class="o">]</span> <span class="si">}</span><span class="s2">;Domain=.google.com;Path=/;Expires=160000000000&quot;</span><span class="p">,</span> <span class="s2">&quot;authorization&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;GoogleLogin auth=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="o">[</span><span class="s1">&#39;auth&#39;</span><span class="o">]</span> <span class="si">}</span><span class="s2">&quot;</span> <span class="p">}</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">"user-agent"</span> <span class="o">=&gt;</span> <span class="vg">$SOURCE</span><span class="p">,</span> <span class="s2">"cookie"</span> <span class="o">=&gt;</span> <span class="s2">"Name=SID;SID=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="p">[</span><span class="s1">'sid'</span><span class="p">]</span> <span class="si">}</span><span class="s2">;Domain=.google.com;Path=/;Expires=160000000000"</span><span class="p">,</span> <span class="s2">"authorization"</span> <span class="o">=&gt;</span> <span class="s2">"GoogleLogin auth=</span><span class="si">#{</span> <span class="n">auth_hash</span><span class="p">[</span><span class="s1">'auth'</span><span class="p">]</span> <span class="si">}</span><span class="s2">"</span> <span class="p">}</span>
 
 <span class="c1"># Open the URL for the Google Reader export with the setup headers</span>
 <span class="n">request</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="vg">$READER_URL</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
 
 <span class="c1"># Open the received XML feeds file</span>
-<span class="n">google_reader_file</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">google_reader_file</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span>
 
-<span class="c1"># Read the entire feeds file into &#39;subscriptions&#39;</span>
-<span class="n">subscriptions</span> <span class="o">=</span> <span class="n">google_reader_file</span><span class="o">.</span><span class="n">read</span>
+<span class="c1"># Read the entire feeds file into 'subscriptions'</span>
+<span class="n">subscriptions</span> <span class="o">=</span> <span class="n">google_reader_file</span><span class="p">.</span><span class="nf">read</span>
 
 <span class="c1"># Close the downloaded file</span>
-<span class="n">google_reader_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">google_reader_file</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
 
 <span class="c1"># Open a new file with the global filename to write to, overwrite it if it exists</span>
-<span class="n">subscriptions_file</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="vg">$FILE_NAME</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+<span class="n">subscriptions_file</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="vg">$FILE_NAME</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span>
 
 <span class="c1"># Verify the file was created</span>
-<span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="n">subscriptions_file</span><span class="p">)</span>
-    <span class="c1"># Write the subscriptions to the file and close it</span>
-    <span class="n">subscriptions_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">)</span>
-    <span class="n">subscriptions_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="k">if</span> <span class="no">File</span><span class="p">.</span><span class="nf">exists?</span><span class="p">(</span><span class="n">subscriptions_file</span><span class="p">)</span>
+	<span class="c1"># Write the subscriptions to the file and close it</span>
+	<span class="n">subscriptions_file</span><span class="p">.</span><span class="nf">write</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">)</span>
+	<span class="n">subscriptions_file</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
 
-    <span class="c1"># Display a success message</span>
-    <span class="nb">puts</span> <span class="s2">&quot;Wrote Google Reader subscriptions to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">green</span>
+	<span class="c1"># Display a success message</span>
+	<span class="nb">puts</span> <span class="s2">"Wrote Google Reader subscriptions to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2">"</span><span class="p">.</span><span class="nf">green</span>
 <span class="k">else</span>
-    <span class="c1"># If the file wasn&#39;t created print an error</span>
-    <span class="nb">puts</span> <span class="s2">&quot;Couldn&#39;t write to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2"> (the process running this script may not have sufficient privileges&quot;</span><span class="o">.</span><span class="n">red</span>
-<span class="k">end</span></code></pre></div>
-
-
+	<span class="c1"># If the file wasn't created print an error</span>
+	<span class="nb">puts</span> <span class="s2">"Couldn't write to </span><span class="si">#{</span> <span class="vg">$FILE_NAME</span> <span class="si">}</span><span class="s2"> (the process running this script may not have sufficient privileges"</span><span class="p">.</span><span class="nf">red</span>
+<span class="k">end</span></code></pre></figure>
 
 
   </div>
