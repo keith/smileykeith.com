@@ -1,7 +1,7 @@
 #!/usr/bin/env rake
 
-# sass --watch _sass:css --style=compressed
-# jekyll server --watch
+# bundle exec sass --watch _sass:css --style=compressed
+# bundle exec jekyll server --watch
 task :default => :build
 
 desc "Build the site"
