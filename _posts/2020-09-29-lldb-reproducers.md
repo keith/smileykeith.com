@@ -86,6 +86,8 @@ workflow for this please [let me know](https://twitter.com/SmileyKeith).
   more breakpoint examples.
 - Try out `lldb --replay /path/to/your/reproducer` to see what Apple
   will see.
+- You can attach to XCTest processes by using `xctest` as your
+  `--attach-name` argument.
 
 [radar]: https://feedbackassistant.apple.com
 [reproducers]: https://lldb.llvm.org/resources/reproducers.html
