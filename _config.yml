@@ -11,3 +11,5 @@ markdown: kramdown
 plugins: [jekyll-paginate]
 
 paginate: 5
+kramdown:
+  smart_quotes: 39,39,quot,quot
