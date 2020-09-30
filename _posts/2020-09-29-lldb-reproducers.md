@@ -5,7 +5,7 @@ date: 2020-09-29 19:39
 ---
 
 Swift developers love to complain about LLDB. While there are many
-reasaonable complaints, the important question is what can we do to make
+reasonable complaints, the important question is what can we do to make
 it better.
 
 Enter [reproducers][reproducers]. Reproducers provide a way to run LLDB
@@ -31,16 +31,17 @@ with Apple before you [send it][radar].
 
 If you're debugging a program on your Mac, there are a few steps:
 
-1. Run the app in Xcode and stop it (so you know it's up to date).
+1. Run the app in Xcode and stop it. This way you know the binary is up
+   to date.
 2. In Terminal.app navigate to your DerivedData directory (you can find
    this by right clicking on your app in the "Products" section of
    Xcode's project navigator, and clicking "Show in Finder").
 3. Run `lldb --capture /path/to/Your.app`.
 4. In the LLDB session run `process launch --stop-at-entry`.
-5. Now you're in a paused LLDB session. Here you can set whatever
-   breakpoints you need to reproduce your issue. Often for me this means
-   breaking at a specific place, and running some version of `po foo`
-   that causes an issue.
+5. Now you're in a paused LLDB session. Here you can [set the
+   breakpoints][breakpoints] you need to reproduce your issue. Often for
+   me this means breaking at a specific place, and running some version
+   of `po foo` that causes an issue.
 6. Once you're done reproducing the issue, run `reproducer generate` in
    LLDB. This will print the path the information was written to.
 7. Verify the contents of the output directory doesn't include anything
@@ -57,10 +58,10 @@ the same way as running a macOS app. Because of this the steps differ.
    on the iOS simulator.
 2. Run `lldb --capture --wait-for --attach-name YOUR_APP_NAME`.
 3. Manually launch your app in the Simulator.
-4. Now you're in a paused LLDB session. Here you can set whatever
-   breakpoints you need to reproduce your issue. Often for me this means
-   breaking at a specific place, and running some version of `po foo`
-   that causes an issue.
+4. Now you're in a paused LLDB session. Here you can [set the
+   breakpoints][breakpoints] you need to reproduce your issue. Often for
+   me this means breaking at a specific place, and running some version
+   of `po foo` that causes an issue.
 5. Once you're done reproducing the issue, run `reproducer generate` in
    LLDB. This will print the path the information was written to.
 6. Verify the contents of the output directory doesn't include anything
@@ -83,12 +84,12 @@ workflow for this please [let me know](https://twitter.com/SmileyKeith).
   you're running.
 - Run `help b` to see examples of how to set breakpoints from the
   command line interface.
-- See the [LLDB tutorial](https://lldb.llvm.org/use/tutorial.html) for
-  more breakpoint examples.
+- See the [LLDB tutorial][breakpoints] for more breakpoint examples.
 - Try out `lldb --replay /path/to/your/reproducer` to see what Apple
   will see.
 - You can attach to XCTest processes by using `xctest` as your
   `--attach-name` argument.
 
+[breakpoints]: https://lldb.llvm.org/use/tutorial.html#setting-breakpoints
 [radar]: https://feedbackassistant.apple.com
 [reproducers]: https://lldb.llvm.org/resources/reproducers.html
