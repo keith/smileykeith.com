@@ -54,35 +54,38 @@ with a reliable reproduction case.</p>
 
 <p>Although the steps to use reproducers are mostly straightforward,
 launching LLDB from Xcode does not enable <code class="highlighter-rouge">--capture</code> mode (FB7878562).
-This means if you want to provide a reproducer for an issue you’ve
+This means if you want to provide a reproducer for an issue you've
 experienced in a Xcode debugging session, you need to reproduce it
 outside of Xcode instead.</p>
 
 <p>Note: to provide enough information to reproduce your issue, LLDB
 bundles all files the debugging session touched. This includes binaries
-with debug info that you may consider sensitive. Be sure to verify what
-you’re sharing with Apple before you <a href="https://feedbackassistant.apple.com">send it</a>.</p>
+with debug info that you may consider sensitive. As <a href="https://twitter.com/johannesweiss/status/1311350073767362565">pointed out on
+Twitter</a>
+this will also contain anything in memory at the time of capture. Be
+sure to verify what you're sharing with Apple before you <a href="https://feedbackassistant.apple.com">send
+it</a>.</p>
 
 <h2 id="cli--macos-app">CLI / macOS app</h2>
 
-<p>If you’re debugging a program on your Mac, there are a few steps:</p>
+<p>If you're debugging a program on your Mac, there are a few steps:</p>
 
 <ol>
   <li>Run the app in Xcode and stop it. This way you know the binary is up
 to date.</li>
   <li>In Terminal.app navigate to your DerivedData directory (you can find
-this by right clicking on your app in the “Products” section of
-Xcode’s project navigator, and clicking “Show in Finder”).</li>
+this by right clicking on your app in the "Products" section of
+Xcode's project navigator, and clicking "Show in Finder").</li>
   <li>Run <code class="highlighter-rouge">lldb --capture /path/to/Your.app</code>.</li>
   <li>In the LLDB session run <code class="highlighter-rouge">process launch --stop-at-entry</code>.</li>
-  <li>Now you’re in a paused LLDB session. Here you can <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">set the
+  <li>Now you're in a paused LLDB session. Here you can <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">set the
 breakpoints</a> you need to reproduce your issue. Often for
 me this means breaking at a specific place, and running some version
 of <code class="highlighter-rouge">po foo</code> that causes an issue.</li>
-  <li>Once you’re done reproducing the issue, run <code class="highlighter-rouge">reproducer generate</code> in
+  <li>Once you're done reproducing the issue, run <code class="highlighter-rouge">reproducer generate</code> in
 LLDB. This will print the path the information was written to.</li>
-  <li>Verify the contents of the output directory doesn’t include anything
-you’re not comfortable sharing with Apple, zip it, and <a href="https://feedbackassistant.apple.com">submit a
+  <li>Verify the contents of the output directory doesn't include anything
+you're not comfortable sharing with Apple, zip it, and <a href="https://feedbackassistant.apple.com">submit a
 radar</a>!</li>
 </ol>
 
@@ -93,24 +96,24 @@ work</a>
 the same way as running a macOS app. Because of this, the steps differ.</p>
 
 <ol>
-  <li>Run the app in Xcode and stop it. This way it’s updated and installed
+  <li>Run the app in Xcode and stop it. This way it's updated and installed
 on the iOS simulator.</li>
   <li>Run <code class="highlighter-rouge">lldb --capture --wait-for --attach-name YOUR_APP_NAME</code>.</li>
   <li>Manually launch your app in the Simulator.</li>
-  <li>Now you’re in a paused LLDB session. Here you can <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">set the
+  <li>Now you're in a paused LLDB session. Here you can <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">set the
 breakpoints</a> you need to reproduce your issue. Often for
 me this means breaking at a specific place, and running some version
 of <code class="highlighter-rouge">po foo</code> that causes an issue.</li>
-  <li>Once you’re done reproducing the issue, run <code class="highlighter-rouge">reproducer generate</code> in
+  <li>Once you're done reproducing the issue, run <code class="highlighter-rouge">reproducer generate</code> in
 LLDB. This will print the path the information was written to.</li>
-  <li>Verify the contents of the output directory doesn’t include anything
-you’re not comfortable sharing with Apple, zip it, and <a href="https://feedbackassistant.apple.com">submit a
+  <li>Verify the contents of the output directory doesn't include anything
+you're not comfortable sharing with Apple, zip it, and <a href="https://feedbackassistant.apple.com">submit a
 radar</a>!</li>
 </ol>
 
 <h2 id="ios-app-on-device">iOS app on device</h2>
 
-<p>Unfortunately, I haven’t yet figured out the right incantation to launch
+<p>Unfortunately, I haven't yet figured out the right incantation to launch
 LLDB directly and attach to an on-device process. If anyone has a good
 workflow for this please <a href="https://twitter.com/SmileyKeith">let me know</a>.</p>
 
@@ -120,9 +123,9 @@ workflow for this please <a href="https://twitter.com/SmileyKeith">let me know</
   <li>Checkout the <a href="https://lldb.llvm.org/resources/reproducers.html">reproducers</a> page for more details.</li>
   <li><code class="highlighter-rouge">man lldb</code> has more usage info.</li>
   <li>Passing <code class="highlighter-rouge">--capture-path</code> to LLDB might be helpful.</li>
-  <li>Run <code class="highlighter-rouge">reproducer status</code> to verify you’re in capture mode.</li>
+  <li>Run <code class="highlighter-rouge">reproducer status</code> to verify you're in capture mode.</li>
   <li>Run <code class="highlighter-rouge">help COMMAND [SUBCOMMAND]</code> in LLDB to get info on the commands
-you’re running.</li>
+you're running.</li>
   <li>Run <code class="highlighter-rouge">help b</code> to see examples of how to set breakpoints from the
 command line interface.</li>
   <li>See the <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">LLDB tutorial</a> for more breakpoint examples.</li>
