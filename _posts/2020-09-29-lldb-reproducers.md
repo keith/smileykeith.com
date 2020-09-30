@@ -49,23 +49,21 @@ If you're debugging a program on your Mac, there are a few steps:
 
 ## iOS app on the simulator
 
-Unfortunately running apps in LLDB directly on the iOS simulator is [a bit more
-difficult](https://forums.swift.org/t/using-lldb-with-ios-simulator-from-cli/33990/6)
-than running a macOS app.
+Running apps directly from LLDB on the iOS simulator does [not
+work](https://forums.swift.org/t/using-lldb-with-ios-simulator-from-cli/33990/6)
+the same way as running a macOS app. Because of this the steps differ.
 
 1. Run the app in Xcode and stop it. This way it's updated and installed
    on the iOS simulator.
-2. Run `lldb --capture`.
-3. In the LLDB session run `process attach --name YOUR_APP_NAME
-   --waitfor`.
-4. Manually launch your app in the Simulator.
-5. Now you're in a paused LLDB session. Here you can set whatever
+2. Run `lldb --capture --wait-for --attach-name YOUR_APP_NAME`.
+3. Manually launch your app in the Simulator.
+4. Now you're in a paused LLDB session. Here you can set whatever
    breakpoints you need to reproduce your issue. Often for me this means
    breaking at a specific place, and running some version of `po foo`
    that causes an issue.
-6. Once you're done reproducing the issue, run `reproducer generate` in
+5. Once you're done reproducing the issue, run `reproducer generate` in
    LLDB. This will print the path the information was written to.
-7. Verify the contents of the output directory doesn't include anything
+6. Verify the contents of the output directory doesn't include anything
    you're not comfortable sharing with Apple, zip it, and [submit a
    radar][radar]!
 
