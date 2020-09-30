@@ -23,8 +23,11 @@ outside of Xcode instead.
 
 Note: to provide enough information to reproduce your issue, LLDB
 bundles all files the debugging session touched. This includes binaries
-with debug info that you may consider sensitive. Be sure to verify what
-you're sharing with Apple before you [send it][radar].
+with debug info that you may consider sensitive. As [pointed out on
+Twitter](https://twitter.com/johannesweiss/status/1311350073767362565)
+this will also contain anything in memory at the time of capture. Be
+sure to verify what you're sharing with Apple before you [send
+it][radar].
 
 ## CLI / macOS app
 
