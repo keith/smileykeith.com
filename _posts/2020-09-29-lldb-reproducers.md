@@ -9,23 +9,22 @@ reasonable complaints, the important question is what can we do to make
 it better.
 
 Enter [reproducers][reproducers]. Reproducers provide a way to run LLDB
-while also capturing information about your debugging session. Then you
-can [submit][radar] the session to Apple to reproduce the bug you've
-experienced.
+while also capturing information about your debugging session. With this
+information you can [submit][radar] a more useful bug report to Apple
+with a reliable reproduction case.
 
 # How?
 
-While the steps to use reproducers are mostly straight forward, the
-problem is launching LLDB from Xcode does not enable `--capture` mode
-(FB7878562). This means if you want to provide a reproducer for an issue
-you've experienced in a Xcode debugging session you need to reproduce
-it outside of Xcode instead.
+Although the steps to use reproducers are mostly straightforward,
+launching LLDB from Xcode does not enable `--capture` mode (FB7878562).
+This means if you want to provide a reproducer for an issue you've
+experienced in a Xcode debugging session, you need to reproduce it
+outside of Xcode instead.
 
-Note: to provide a useful reproducer, LLDB bundles all files the
-debugging session touched. This will include binaries with debug info
-that you may consider sensitive. Be sure to verify what you're sharing
-with Apple before you [send it][radar].
-
+Note: to provide enough information to reproduce your issue, LLDB
+bundles all files the debugging session touched. This includes binaries
+with debug info that you may consider sensitive. Be sure to verify what
+you're sharing with Apple before you [send it][radar].
 
 ## CLI / macOS app
 
@@ -52,7 +51,7 @@ If you're debugging a program on your Mac, there are a few steps:
 
 Running apps directly from LLDB on the iOS simulator does [not
 work](https://forums.swift.org/t/using-lldb-with-ios-simulator-from-cli/33990/6)
-the same way as running a macOS app. Because of this the steps differ.
+the same way as running a macOS app. Because of this, the steps differ.
 
 1. Run the app in Xcode and stop it. This way it's updated and installed
    on the iOS simulator.
@@ -71,7 +70,7 @@ the same way as running a macOS app. Because of this the steps differ.
 ## iOS app on device
 
 Unfortunately, I haven't yet figured out the right incantation to launch
-LLDB directly and attach to a process on device. If anyone has a good
+LLDB directly and attach to an on-device process. If anyone has a good
 workflow for this please [let me know](https://twitter.com/SmileyKeith).
 
 # Tips
