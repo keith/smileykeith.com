@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2020-09-29T21:26:58-07:00</updated>
+  <updated>2020-09-30T09:54:47-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -12,6 +12,112 @@
   <rights>Copyright (c) 2020 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
+  
+    <entry>
+      <title type="html"><![CDATA[LLDB Reproducers]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2020/09/29/lldb-reproducers/" />
+      <id>http://smileykeith.com/2020/09/29/lldb-reproducers</id>
+      <updated>2020-09-29T19:39:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>Swift developers love to complain about LLDB. While there are many
+reasonable complaints, the important question is what can we do to make
+it better.</p>
+
+<p>Enter <a href="https://lldb.llvm.org/resources/reproducers.html">reproducers</a>. Reproducers provide a way to run LLDB
+while also capturing information about your debugging session. With this
+information you can <a href="https://feedbackassistant.apple.com">submit</a> a more useful bug report to Apple
+with a reliable reproduction case.</p>
+
+<h1 id="how">How?</h1>
+
+<p>Although the steps to use reproducers are mostly straightforward,
+launching LLDB from Xcode does not enable <code class="highlighter-rouge">--capture</code> mode (FB7878562).
+This means if you want to provide a reproducer for an issue you’ve
+experienced in a Xcode debugging session, you need to reproduce it
+outside of Xcode instead.</p>
+
+<p>Note: to provide enough information to reproduce your issue, LLDB
+bundles all files the debugging session touched. This includes binaries
+with debug info that you may consider sensitive. Be sure to verify what
+you’re sharing with Apple before you <a href="https://feedbackassistant.apple.com">send it</a>.</p>
+
+<h2 id="cli--macos-app">CLI / macOS app</h2>
+
+<p>If you’re debugging a program on your Mac, there are a few steps:</p>
+
+<ol>
+  <li>Run the app in Xcode and stop it. This way you know the binary is up
+to date.</li>
+  <li>In Terminal.app navigate to your DerivedData directory (you can find
+this by right clicking on your app in the “Products” section of
+Xcode’s project navigator, and clicking “Show in Finder”).</li>
+  <li>Run <code class="highlighter-rouge">lldb --capture /path/to/Your.app</code>.</li>
+  <li>In the LLDB session run <code class="highlighter-rouge">process launch --stop-at-entry</code>.</li>
+  <li>Now you’re in a paused LLDB session. Here you can <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">set the
+breakpoints</a> you need to reproduce your issue. Often for
+me this means breaking at a specific place, and running some version
+of <code class="highlighter-rouge">po foo</code> that causes an issue.</li>
+  <li>Once you’re done reproducing the issue, run <code class="highlighter-rouge">reproducer generate</code> in
+LLDB. This will print the path the information was written to.</li>
+  <li>Verify the contents of the output directory doesn’t include anything
+you’re not comfortable sharing with Apple, zip it, and <a href="https://feedbackassistant.apple.com">submit a
+radar</a>!</li>
+</ol>
+
+<h2 id="ios-app-on-the-simulator">iOS app on the simulator</h2>
+
+<p>Running apps directly from LLDB on the iOS simulator does <a href="https://forums.swift.org/t/using-lldb-with-ios-simulator-from-cli/33990/6">not
+work</a>
+the same way as running a macOS app. Because of this, the steps differ.</p>
+
+<ol>
+  <li>Run the app in Xcode and stop it. This way it’s updated and installed
+on the iOS simulator.</li>
+  <li>Run <code class="highlighter-rouge">lldb --capture --wait-for --attach-name YOUR_APP_NAME</code>.</li>
+  <li>Manually launch your app in the Simulator.</li>
+  <li>Now you’re in a paused LLDB session. Here you can <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">set the
+breakpoints</a> you need to reproduce your issue. Often for
+me this means breaking at a specific place, and running some version
+of <code class="highlighter-rouge">po foo</code> that causes an issue.</li>
+  <li>Once you’re done reproducing the issue, run <code class="highlighter-rouge">reproducer generate</code> in
+LLDB. This will print the path the information was written to.</li>
+  <li>Verify the contents of the output directory doesn’t include anything
+you’re not comfortable sharing with Apple, zip it, and <a href="https://feedbackassistant.apple.com">submit a
+radar</a>!</li>
+</ol>
+
+<h2 id="ios-app-on-device">iOS app on device</h2>
+
+<p>Unfortunately, I haven’t yet figured out the right incantation to launch
+LLDB directly and attach to an on-device process. If anyone has a good
+workflow for this please <a href="https://twitter.com/SmileyKeith">let me know</a>.</p>
+
+<h1 id="tips">Tips</h1>
+
+<ul>
+  <li>Checkout the <a href="https://lldb.llvm.org/resources/reproducers.html">reproducers</a> page for more details.</li>
+  <li><code class="highlighter-rouge">man lldb</code> has more usage info.</li>
+  <li>Passing <code class="highlighter-rouge">--capture-path</code> to LLDB might be helpful.</li>
+  <li>Run <code class="highlighter-rouge">reproducer status</code> to verify you’re in capture mode.</li>
+  <li>Run <code class="highlighter-rouge">help COMMAND [SUBCOMMAND]</code> in LLDB to get info on the commands
+you’re running.</li>
+  <li>Run <code class="highlighter-rouge">help b</code> to see examples of how to set breakpoints from the
+command line interface.</li>
+  <li>See the <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">LLDB tutorial</a> for more breakpoint examples.</li>
+  <li>Try out <code class="highlighter-rouge">lldb --replay /path/to/your/reproducer</code> to see what Apple
+will see.</li>
+  <li>You can attach to XCTest processes by using <code class="highlighter-rouge">xctest</code> as your
+<code class="highlighter-rouge">--attach-name</code> argument.</li>
+</ul>
+
+]]>
+      </content>
+    </entry>
   
     <entry>
       <title type="html"><![CDATA[NSProgress with Asynchronous Tasks]]></title>

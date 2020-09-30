@@ -30,6 +30,94 @@
 <article>
   <header class="seven columns">
     
+      <h2><a href="/2014/02/14/vim-tagbar-with-objective-c/">Vim TagBar with Objective-C</a></h2>
+    
+    <p>
+      <time datetime="2014-02-14 13:53:00 -0800" pubdate="pubdate">
+        14 Feb 2014
+      </time>
+      <a class="permalink" title="Permalink" href="/2014/02/14/vim-tagbar-with-objective-c/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>When working with large files in Vim,
+<a href="http://majutsushi.github.io/tagbar/">Tagbar</a> has become an invaluable
+part of my workflow. It provides a succinct list of methods, modules,
+variables and other language specific constructs. When I started trying
+to spend more time in Vim writing Objective-C I was disappointed to see
+that, out of the box, it was not supported.</p>
+
+<p>Hopefully in the future it won't be difficult to set this up in Vim.
+Currently ctags <a href="https://svn.code.sf.net/p/ctags/code/trunk/objc.c">already
+has</a> built in support
+for Objective-C. Unfortunately there hasn't been a release of ctags
+since 2009. As recommended in the <a href="http://bastibe.de/2011-12-04-how-to-make-tagbar-work-with-objective-c.html">canonical how to
+article</a>
+you can attempt to use the trunk version of ctags and just define the
+Tagbar settings. For me, this ended up producing a ton of
+mis-categorized duplicates. I also opened and closed <a href="https://github.com/majutsushi/tagbar/issues/193">an
+issue</a> on the Tagbar
+Github repo hoping that Objective-C support will be added by default in
+the future.</p>
+
+<p>The only other resource I could find about this issue was <a href="https://gist.github.com/yamaya/5598909">this
+gist</a>. It uses regex to define
+Objective-C to ctags and then match it with Tagbar. I improved it a
+little bit and came up with this. Put this file anywhere you want, you
+will define its path in your vimrc.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--langdef=objc
+--langmap=objc:.m..mm..h
+--regex-objc=/\@interface[[:space:]]+([[:alnum:]_]+)/\1/i,interface/
+--regex-objc=/\@implementation[[:space:]]+([[:alnum:]_]+)/\1/I,implementation/
+--regex-objc=/\@protocol[[:space:]]+([[:alnum:]_]+)/\1/P,protocol/
+--regex-objc=/\@property[[:space:]]+\([[:alnum:],[:space:]]+\)[[:space:]]+[[:alnum:]_]+[[:space:]]+\*?([[:alnum:]_]+)/\1/p,property/
+--regex-objc=/([-+])[[:space:]]*\([[:alpha:]_][^)]*\)[[:space:]]*([[:alpha:]_][^:;{]+).*/\1\2/M,method definition/
+--regex-objc=/^[^#@[:space:]][^=]*[[:space:]]([[:alpha:]_][[:alnum:]_]*)[[:space:]]*=/\1/c,constant/
+--regex-objc=/^[[:space:]]*typedef[[:space:]][^;]+[[:space:]]([[:alpha:]_][[:alnum:]]*)[[:space:]]*;/\1/t,typedef/
+--regex-objc=/^[[:space:]]*NS_ENUM\([[:alnum:]]+[[:space:]]*,[[:space:]]([[:alnum:]]+)\)/\1/e,enum/
+--regex-objc=/^#pragma[[:space:]]+mark[[:space:]]+-?[[:space:]]+([[:alnum:][:space:]]+)/\1/g,pragma/
+</code></pre></div></div>
+
+<p>Then in your vimrc:</p>
+
+<figure class="highlight"><pre><code class="language-vim" data-lang="vim"><span class="k">let</span> <span class="nv">g:tagbar_type_objc</span> <span class="p">=</span> <span class="p">{</span>
+<span class="se">  \</span> <span class="s1">'ctagstype'</span><span class="p">:</span> <span class="s1">'objc'</span><span class="p">,</span>
+<span class="se">  \</span> <span class="s1">'ctagsargs'</span><span class="p">:</span> <span class="p">[</span>
+<span class="se">    \</span> <span class="s1">'-f'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'-'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'--excmd=pattern'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'--extra='</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'--format=2'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'--fields=nksaSmt'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'--options='</span> <span class="p">.</span> expand<span class="p">(</span><span class="s1">'~/.vim/objctags'</span><span class="p">),</span>
+<span class="se">    \</span> <span class="s1">'--objc-kinds=-N'</span><span class="p">,</span>
+<span class="se">  \</span> <span class="p">],</span>
+<span class="se">  \</span> <span class="s1">'sro'</span><span class="p">:</span> <span class="s1">' '</span><span class="p">,</span>
+<span class="se">  \</span> <span class="s1">'kinds'</span><span class="p">:</span> <span class="p">[</span>
+<span class="se">    \</span> <span class="s1">'c:constant'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'e:enum'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'t:typedef'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'i:interface'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'P:protocol'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'p:property'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'I:implementation'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'M:method'</span><span class="p">,</span>
+<span class="se">    \</span> <span class="s1">'g:pragma'</span><span class="p">,</span>
+<span class="se">  \</span> <span class="p">],</span>
+<span class="se">\</span> <span class="p">}</span></code></pre></figure>
+
+<p>Replace the <code class="highlighter-rouge">~/.vim/objctags</code> with the path where you chose to put the
+first file. Please let me know if you see any way that this could be
+improved.</p>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
       <h2><a href="/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux/">IPSEC/L2TP VPN on a Raspberry Pi running Arch Linux</a></h2>
     
     <p>
@@ -641,32 +729,6 @@ looked like.</p>
 <p>Symbolicating crash reports is definitely vital to tracking down bugs your users
 are experiencing when you can't reproduce them yourself. Once you figure out how
 it's obviously worth it.</p>
-
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2013/05/22/the-best-text-editor/">The 'Best' Text Editor</a></h2>
-    
-    <p>
-      <time datetime="2013-05-22 00:59:00 -0700" pubdate="pubdate">
-        22 May 2013
-      </time>
-      <a class="permalink" title="Permalink" href="/2013/05/22/the-best-text-editor/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>I'm tired of people asking about the 'best' IDE for xyz purpose. The answer to this question is there is no best. The answer is always 'it depends.' Not only does it depend on what you're doing but more importantly it depends on you. It depends on your work flow. It depends tons of other indiscernible factors.</p>
-
-<p>It seems like people think they work in exactly the same way as enough other people. That asking this question will yield a useful result. The truth is that there are far fewer text editors than people who need text editors so it's impossible not to overlap with someone. We misconstrue this overlap in thinking that now this person knows exactly what we want. In reality they just happen to share some arbitrary subset of the way we  work and therefore ended up with the same text editor.</p>
-
-<p>So how can you decide which editor is best for you? Try them. This sounds obvious to you? Good, this article is not for you and you can safely leave now. These days text editors are either free, cheap or have trials. So download them all try them out and see if they make sense to you. Weed out the ones you really hate or the ones that crash and spend a little more time with the remaining editors. Some, like Vim, you may have to spend a little more time with to grasp but this still doesn't seem like a high order.</p>
-
-<p>But please stop asking questions on StackOverflow and similar sites where you expect people to throw their vote into the hat for the 'best' editor and make a decision for yourself.</p>
 
 
   </div>
