@@ -4,7 +4,7 @@ set -e
 
 git_dir="gh-pages"
 
-bundle check && bundle install
+bundle check || bundle install
 rake
 
 git clone --branch gh-pages https://github.com/keith/smileykeith.com.git $git_dir || true
