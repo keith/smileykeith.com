@@ -75,8 +75,9 @@ workflow for this please [let me know](https://twitter.com/SmileyKeith).
 
 # Tips
 
-- Checkout the [reproducers][reproducers] info for more details.
-- `man lldb` is very helpful.
+- Checkout the [reproducers][reproducers] page for more details.
+- `man lldb` has more usage info.
+- Passing `--capture-path` to LLDB might be helpful.
 - Run `reproducer status` to verify you're in capture mode.
 - Run `help COMMAND [SUBCOMMAND]` in LLDB to get info on the commands
   you're running.
