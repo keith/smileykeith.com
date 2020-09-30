@@ -19,7 +19,11 @@ While the steps to use reproducers are mostly straight forward, the
 problem is launching lldb from Xcode does not enable `--capture` mode
 (FB7878562). This means if you want to provide a reproducer for an issue
 you've experienced in a Xcode debugging session, you need to reproduce
-it outside of Xcode instead. Here's how you can do that.
+it outside of Xcode instead. Note to provide a useful reproducer, lldb
+bundles all files the debugging session touched, which will likely
+include binaries with debug info that you may consider sensitive, be
+sure to verify what you're sharing with Apple before you [send
+it][radar]. Here's how you can do that.
 
 ## CLI / macOS app
 
@@ -69,7 +73,6 @@ directly and attach to a process on device (without jailbreaking) yet.
 If anyone has a good workflow for this please [let me
 know](https://twitter.com/SmileyKeith).
 
-
 ## Tips
 
 - Checkout the [reproducers][reproducers] info for more details
@@ -81,6 +84,8 @@ know](https://twitter.com/SmileyKeith).
   command line interface
 - See the [lldb tutorial](https://lldb.llvm.org/use/tutorial.html) for
   more breakpoint examples
+- Try out `lldb --replay /path/to/your/reproducer` to see what Apple
+  will see
 
 [radar]: https://feedbackassistant.apple.com
 [reproducers]: https://lldb.llvm.org/resources/reproducers.html
