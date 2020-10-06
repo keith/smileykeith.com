@@ -21,6 +21,15 @@ This means if you want to provide a reproducer for an issue you've
 experienced in a Xcode debugging session, you need to reproduce it
 outside of Xcode instead.
 
+**Update**: the folks from PSPDFKit [pointed
+out](https://pspdfkit.com/blog/2020/an-introduction-to-lldb-reproducers) as
+of Xcode 12 there is a private default for enabling capture mode for
+debugging sessions launched from Xcode:
+
+```
+defaults write com.apple.dt.Xcode IDEDebuggerEnableReproducerCapture -bool YES
+```
+
 Note: to provide enough information to reproduce your issue, LLDB
 bundles all files the debugging session touched. This includes binaries
 with debug info that you may consider sensitive. As [pointed out on
