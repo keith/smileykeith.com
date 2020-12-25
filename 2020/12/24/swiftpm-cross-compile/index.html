@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+  
+    <title>Cross compiling for Apple Silicon with Swift Package Manager - Keith Smiley</title>
+  
+
+    <meta name="author" content="Keith Smiley">
+    <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/atom.xml">
+
+    <link rel="icon" href="/images/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon">
+
+    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
+  </head>
+  <body>
+    <section class="container">
+      <div id="masthead">
+        <h1>
+          <a href="/">Keith Smiley</a>
+          - <a href="http://keith.so" title="Who is this guy?">Who?</a>
+        </h1>
+      </div>
+
+      <section class="content">
+        
+<article>
+
+  <header class="seven columns">
+    
+      <h2>Cross compiling for Apple Silicon with Swift Package Manager</h2>
+    
+    <p>
+      <time datetime="2020-12-24 14:32:00 -0800" pubdate="pubdate">
+        24 Dec 2020
+      </time>
+      <a class="permalink" title="Permalink" href="/2020/12/24/swiftpm-cross-compile/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>If you distribute binaries for command line tools built with <a href="https://swift.org/package-manager">Swift
+Package Manager</a>, you might have
+previously built your distribution binary with:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release
+</code></pre></div></div>
+
+<p>If you inspect the binary, you can see it was built for the current
+machine's architecture by default:</p>
+
+<pre><code class="language-none">% file .build/release/package
+.build/release/package: Mach-O 64-bit executable x86_64
+</code></pre>
+
+<p>Previously, this was sufficient since macOS only supported one
+architecture. Now, in order to fully utilize the native performance of
+Apple Silicon chips, we need to produce a <a href="https://en.wikipedia.org/wiki/Fat_binary">fat
+binary</a> that contains a slice
+for both <code class="highlighter-rouge">x86_64</code> and <code class="highlighter-rouge">arm64</code>.</p>
+
+<p>Swift Package Manager has a few different ways to achieve this. The
+easiest way, as far as I can tell, is to pass the hidden <code class="highlighter-rouge">--arch</code> flag
+once for each architecture:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release <span class="nt">--arch</span> arm64 <span class="nt">--arch</span> x86_64
+</code></pre></div></div>
+
+<p>This goes through a <a href="https://github.com/apple/swift-package-manager/blob/ec407ac14738bf132b23441aa9435a919124eda6/Sources/XCBuildSupport/XcodeBuildSystem.swift">different code
+path</a>
+in Swift Package Manager, and utilizes Xcode's underlying XCBuild tool.
+This results in the built binary being in a different path than usual.
+Inspecting the new artifact, we can see we have a binary containing both
+requested architectures:</p>
+
+<pre><code class="language-none">% file .build/apple/Products/Release/package
+.build/apple/Products/Release/package: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]
+.build/apple/Products/Release/package (for architecture x86_64):        Mach-O 64-bit executable x86_64
+.build/apple/Products/Release/package (for architecture arm64): Mach-O 64-bit executable arm64
+</code></pre>
+
+<p>Another option is to build once for each architecture, and then combine
+the binaries using
+<a href="https://keith.github.io/xcode-man-pages/lipo.1.html"><code class="highlighter-rouge">lipo</code></a>. Unlike
+the <code class="highlighter-rouge">--arch</code> option, this approach also works on Linux. Here's an
+example:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release <span class="nt">--triple</span> arm64-apple-macosx
+% swift build <span class="nt">--configuration</span> release <span class="nt">--triple</span> x86_64-apple-macosx
+% lipo <span class="nt">-create</span> <span class="nt">-output</span> package .build/arm64-apple-macosx/release/package .build/x86_64-apple-macosx/release/package
+</code></pre></div></div>
+
+<p>Inspecting our final binary we can see it correctly has both
+architectures:</p>
+
+<pre><code class="language-none">% file package
+package: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]
+package (for architecture x86_64):      Mach-O 64-bit executable x86_64
+package (for architecture arm64):       Mach-O 64-bit executable arm64
+</code></pre>
+
+  </div>
+</article>
+
+<div class="ten columns blogarchive">
+  <a href="/archives/">Blog Archive</a>
+</div>
+
+      </section>
+    </section>
+  </body>
+</html>

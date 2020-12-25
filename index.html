@@ -30,6 +30,83 @@
 <article>
   <header class="seven columns">
     
+      <h2><a href="/2020/12/24/swiftpm-cross-compile/">Cross compiling for Apple Silicon with Swift Package Manager</a></h2>
+    
+    <p>
+      <time datetime="2020-12-24 14:32:00 -0800" pubdate="pubdate">
+        24 Dec 2020
+      </time>
+      <a class="permalink" title="Permalink" href="/2020/12/24/swiftpm-cross-compile/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>If you distribute binaries for command line tools built with <a href="https://swift.org/package-manager">Swift
+Package Manager</a>, you might have
+previously built your distribution binary with:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release
+</code></pre></div></div>
+
+<p>If you inspect the binary, you can see it was built for the current
+machine's architecture by default:</p>
+
+<pre><code class="language-none">% file .build/release/package
+.build/release/package: Mach-O 64-bit executable x86_64
+</code></pre>
+
+<p>Previously, this was sufficient since macOS only supported one
+architecture. Now, in order to fully utilize the native performance of
+Apple Silicon chips, we need to produce a <a href="https://en.wikipedia.org/wiki/Fat_binary">fat
+binary</a> that contains a slice
+for both <code class="highlighter-rouge">x86_64</code> and <code class="highlighter-rouge">arm64</code>.</p>
+
+<p>Swift Package Manager has a few different ways to achieve this. The
+easiest way, as far as I can tell, is to pass the hidden <code class="highlighter-rouge">--arch</code> flag
+once for each architecture:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release <span class="nt">--arch</span> arm64 <span class="nt">--arch</span> x86_64
+</code></pre></div></div>
+
+<p>This goes through a <a href="https://github.com/apple/swift-package-manager/blob/ec407ac14738bf132b23441aa9435a919124eda6/Sources/XCBuildSupport/XcodeBuildSystem.swift">different code
+path</a>
+in Swift Package Manager, and utilizes Xcode's underlying XCBuild tool.
+This results in the built binary being in a different path than usual.
+Inspecting the new artifact, we can see we have a binary containing both
+requested architectures:</p>
+
+<pre><code class="language-none">% file .build/apple/Products/Release/package
+.build/apple/Products/Release/package: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]
+.build/apple/Products/Release/package (for architecture x86_64):        Mach-O 64-bit executable x86_64
+.build/apple/Products/Release/package (for architecture arm64): Mach-O 64-bit executable arm64
+</code></pre>
+
+<p>Another option is to build once for each architecture, and then combine
+the binaries using
+<a href="https://keith.github.io/xcode-man-pages/lipo.1.html"><code class="highlighter-rouge">lipo</code></a>. Unlike
+the <code class="highlighter-rouge">--arch</code> option, this approach also works on Linux. Here's an
+example:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release <span class="nt">--triple</span> arm64-apple-macosx
+% swift build <span class="nt">--configuration</span> release <span class="nt">--triple</span> x86_64-apple-macosx
+% lipo <span class="nt">-create</span> <span class="nt">-output</span> package .build/arm64-apple-macosx/release/package .build/x86_64-apple-macosx/release/package
+</code></pre></div></div>
+
+<p>Inspecting our final binary we can see it correctly has both
+architectures:</p>
+
+<pre><code class="language-none">% file package
+package: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]
+package (for architecture x86_64):      Mach-O 64-bit executable x86_64
+package (for architecture arm64):       Mach-O 64-bit executable arm64
+</code></pre>
+
+  </div>
+</article>
+
+<article>
+  <header class="seven columns">
+    
       <h2><a href="/2020/09/29/lldb-reproducers/">LLDB Reproducers</a></h2>
     
     <p>
@@ -211,39 +288,6 @@ integration on the thoughtbot blog
 Clojure</a> I wrote about
 writing Vim syntax plugins. Check it out
 <a href="https://robots.thoughtbot.com/writing-vim-syntax-plugins">here</a>.</p>
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2015/03/14/clojure/">Clojure</a></h2>
-    
-    <p>
-      <time datetime="2015-03-14 18:27:00 -0700" pubdate="pubdate">
-        14 Mar 2015
-      </time>
-      <a class="permalink" title="Permalink" href="/2015/03/14/clojure/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>I haven't had anything to write in a while. Mainly because, as I've been
-working at <a href="https://thoughtbot.com">thoughtbot</a>, I've been writing
-everything I can on <a href="https://robots.thoughtbot.com">the thoughtbot
-blog</a>. I spent a little while writing
-<a href="http://clojure.org">Clojure</a>, and out of that came a few posts.</p>
-
-<p>Overall I wasn't a big fan of Clojure. I definitely lean more towards
-functional languages <a href="https://www.haskell.org">with types</a> but I wanted
-to link these articles here regardless.</p>
-
-<ul>
-  <li><a href="https://robots.thoughtbot.com/getting-started-with-liberator">Getting Started with Liberator</a></li>
-  <li><a href="https://robots.thoughtbot.com/using-yesql-in-clojure">Using Yesql in Clojure</a></li>
-  <li><a href="https://robots.thoughtbot.com/writing-clojure-in-vim">Writing Clojure in Vim</a></li>
-</ul>
 
   </div>
 </article>

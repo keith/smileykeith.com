@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2020-11-09T17:48:04-08:00</updated>
+  <updated>2020-12-24T16:37:45-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -12,6 +12,80 @@
   <rights>Copyright (c) 2020 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
+  
+    <entry>
+      <title type="html"><![CDATA[Cross compiling for Apple Silicon with Swift Package Manager]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2020/12/24/swiftpm-cross-compile/" />
+      <id>http://smileykeith.com/2020/12/24/swiftpm-cross-compile</id>
+      <updated>2020-12-24T14:32:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>If you distribute binaries for command line tools built with <a href="https://swift.org/package-manager">Swift
+Package Manager</a>, you might have
+previously built your distribution binary with:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release
+</code></pre></div></div>
+
+<p>If you inspect the binary, you can see it was built for the current
+machine's architecture by default:</p>
+
+<pre><code class="language-none">% file .build/release/package
+.build/release/package: Mach-O 64-bit executable x86_64
+</code></pre>
+
+<p>Previously, this was sufficient since macOS only supported one
+architecture. Now, in order to fully utilize the native performance of
+Apple Silicon chips, we need to produce a <a href="https://en.wikipedia.org/wiki/Fat_binary">fat
+binary</a> that contains a slice
+for both <code class="highlighter-rouge">x86_64</code> and <code class="highlighter-rouge">arm64</code>.</p>
+
+<p>Swift Package Manager has a few different ways to achieve this. The
+easiest way, as far as I can tell, is to pass the hidden <code class="highlighter-rouge">--arch</code> flag
+once for each architecture:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release <span class="nt">--arch</span> arm64 <span class="nt">--arch</span> x86_64
+</code></pre></div></div>
+
+<p>This goes through a <a href="https://github.com/apple/swift-package-manager/blob/ec407ac14738bf132b23441aa9435a919124eda6/Sources/XCBuildSupport/XcodeBuildSystem.swift">different code
+path</a>
+in Swift Package Manager, and utilizes Xcode's underlying XCBuild tool.
+This results in the built binary being in a different path than usual.
+Inspecting the new artifact, we can see we have a binary containing both
+requested architectures:</p>
+
+<pre><code class="language-none">% file .build/apple/Products/Release/package
+.build/apple/Products/Release/package: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]
+.build/apple/Products/Release/package (for architecture x86_64):        Mach-O 64-bit executable x86_64
+.build/apple/Products/Release/package (for architecture arm64): Mach-O 64-bit executable arm64
+</code></pre>
+
+<p>Another option is to build once for each architecture, and then combine
+the binaries using
+<a href="https://keith.github.io/xcode-man-pages/lipo.1.html"><code class="highlighter-rouge">lipo</code></a>. Unlike
+the <code class="highlighter-rouge">--arch</code> option, this approach also works on Linux. Here's an
+example:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release <span class="nt">--triple</span> arm64-apple-macosx
+% swift build <span class="nt">--configuration</span> release <span class="nt">--triple</span> x86_64-apple-macosx
+% lipo <span class="nt">-create</span> <span class="nt">-output</span> package .build/arm64-apple-macosx/release/package .build/x86_64-apple-macosx/release/package
+</code></pre></div></div>
+
+<p>Inspecting our final binary we can see it correctly has both
+architectures:</p>
+
+<pre><code class="language-none">% file package
+package: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]
+package (for architecture x86_64):      Mach-O 64-bit executable x86_64
+package (for architecture arm64):       Mach-O 64-bit executable arm64
+</code></pre>
+]]>
+      </content>
+    </entry>
   
     <entry>
       <title type="html"><![CDATA[LLDB Reproducers]]></title>
