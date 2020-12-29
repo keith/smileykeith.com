@@ -21,7 +21,7 @@
       <div id="masthead">
         <h1>
           <a href="/">Keith Smiley</a>
-          - <a href="http://keith.so" title="Who is this guy?">Who?</a>
+          | <a href="https://www.keith.so">About</a>
         </h1>
       </div>
 
@@ -31,9 +31,9 @@
 
   <header class="seven columns">
     
-      <h2>Vim TagBar with Objective-C</h2>
+      <h1 class="title">Vim TagBar with Objective-C</h1>
     
-    <p>
+    <p class="date">
       <time datetime="2014-02-14 13:53:00 -0800" pubdate="pubdate">
         14 Feb 2014
       </time>
@@ -83,7 +83,7 @@ will define its path in your vimrc.</p>
 
 <p>Then in your vimrc:</p>
 
-<figure class="highlight"><pre><code class="language-vim" data-lang="vim"><span class="k">let</span> <span class="nv">g:tagbar_type_objc</span> <span class="p">=</span> <span class="p">{</span>
+<div class="language-vim highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="nv">g:tagbar_type_objc</span> <span class="p">=</span> <span class="p">{</span>
 <span class="se">  \</span> <span class="s1">'ctagstype'</span><span class="p">:</span> <span class="s1">'objc'</span><span class="p">,</span>
 <span class="se">  \</span> <span class="s1">'ctagsargs'</span><span class="p">:</span> <span class="p">[</span>
 <span class="se">    \</span> <span class="s1">'-f'</span><span class="p">,</span>
@@ -107,7 +107,8 @@ will define its path in your vimrc.</p>
 <span class="se">    \</span> <span class="s1">'M:method'</span><span class="p">,</span>
 <span class="se">    \</span> <span class="s1">'g:pragma'</span><span class="p">,</span>
 <span class="se">  \</span> <span class="p">],</span>
-<span class="se">\</span> <span class="p">}</span></code></pre></figure>
+<span class="se">\</span> <span class="p">}</span>
+</code></pre></div></div>
 
 <p>Replace the <code class="highlighter-rouge">~/.vim/objctags</code> with the path where you chose to put the
 first file. Please let me know if you see any way that this could be
@@ -115,10 +116,6 @@ improved.</p>
 
   </div>
 </article>
-
-<div class="ten columns blogarchive">
-  <a href="/archives/">Blog Archive</a>
-</div>
 
       </section>
     </section>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2020-12-24T16:37:45-08:00</updated>
+  <updated>2020-12-29T14:24:19-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -345,7 +345,7 @@ will define its path in your vimrc.</p>
 
 <p>Then in your vimrc:</p>
 
-<figure class="highlight"><pre><code class="language-vim" data-lang="vim"><span class="k">let</span> <span class="nv">g:tagbar_type_objc</span> <span class="p">=</span> <span class="p">{</span>
+<div class="language-vim highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="nv">g:tagbar_type_objc</span> <span class="p">=</span> <span class="p">{</span>
 <span class="se">  \</span> <span class="s1">'ctagstype'</span><span class="p">:</span> <span class="s1">'objc'</span><span class="p">,</span>
 <span class="se">  \</span> <span class="s1">'ctagsargs'</span><span class="p">:</span> <span class="p">[</span>
 <span class="se">    \</span> <span class="s1">'-f'</span><span class="p">,</span>
@@ -369,7 +369,8 @@ will define its path in your vimrc.</p>
 <span class="se">    \</span> <span class="s1">'M:method'</span><span class="p">,</span>
 <span class="se">    \</span> <span class="s1">'g:pragma'</span><span class="p">,</span>
 <span class="se">  \</span> <span class="p">],</span>
-<span class="se">\</span> <span class="p">}</span></code></pre></figure>
+<span class="se">\</span> <span class="p">}</span>
+</code></pre></div></div>
 
 <p>Replace the <code class="highlighter-rouge">~/.vim/objctags</code> with the path where you chose to put the
 first file. Please let me know if you see any way that this could be

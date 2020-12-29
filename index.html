@@ -21,295 +21,189 @@
       <div id="masthead">
         <h1>
           <a href="/">Keith Smiley</a>
-          - <a href="http://keith.so" title="Who is this guy?">Who?</a>
+          | <a href="https://www.keith.so">About</a>
         </h1>
       </div>
 
       <section class="content">
-        
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2020/12/24/swiftpm-cross-compile/">Cross compiling for Apple Silicon with Swift Package Manager</a></h2>
-    
-    <p>
+        <ul class="archive">
+  
+    <li class="archivelink">
+      <a href="/2020/12/24/swiftpm-cross-compile/">Cross compiling for Apple Silicon with Swift Package Manager</a>
       <time datetime="2020-12-24 14:32:00 -0800" pubdate="pubdate">
         24 Dec 2020
       </time>
-      <a class="permalink" title="Permalink" href="/2020/12/24/swiftpm-cross-compile/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>If you distribute binaries for command line tools built with <a href="https://swift.org/package-manager">Swift
-Package Manager</a>, you might have
-previously built your distribution binary with:</p>
-
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release
-</code></pre></div></div>
-
-<p>If you inspect the binary, you can see it was built for the current
-machine's architecture by default:</p>
-
-<pre><code class="language-none">% file .build/release/package
-.build/release/package: Mach-O 64-bit executable x86_64
-</code></pre>
-
-<p>Previously, this was sufficient since macOS only supported one
-architecture. Now, in order to fully utilize the native performance of
-Apple Silicon chips, we need to produce a <a href="https://en.wikipedia.org/wiki/Fat_binary">fat
-binary</a> that contains a slice
-for both <code class="highlighter-rouge">x86_64</code> and <code class="highlighter-rouge">arm64</code>.</p>
-
-<p>Swift Package Manager has a few different ways to achieve this. The
-easiest way, as far as I can tell, is to pass the hidden <code class="highlighter-rouge">--arch</code> flag
-once for each architecture:</p>
-
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release <span class="nt">--arch</span> arm64 <span class="nt">--arch</span> x86_64
-</code></pre></div></div>
-
-<p>This goes through a <a href="https://github.com/apple/swift-package-manager/blob/ec407ac14738bf132b23441aa9435a919124eda6/Sources/XCBuildSupport/XcodeBuildSystem.swift">different code
-path</a>
-in Swift Package Manager, and utilizes Xcode's underlying XCBuild tool.
-This results in the built binary being in a different path than usual.
-Inspecting the new artifact, we can see we have a binary containing both
-requested architectures:</p>
-
-<pre><code class="language-none">% file .build/apple/Products/Release/package
-.build/apple/Products/Release/package: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]
-.build/apple/Products/Release/package (for architecture x86_64):        Mach-O 64-bit executable x86_64
-.build/apple/Products/Release/package (for architecture arm64): Mach-O 64-bit executable arm64
-</code></pre>
-
-<p>Another option is to build once for each architecture, and then combine
-the binaries using
-<a href="https://keith.github.io/xcode-man-pages/lipo.1.html"><code class="highlighter-rouge">lipo</code></a>. Unlike
-the <code class="highlighter-rouge">--arch</code> option, this approach also works on Linux. Here's an
-example:</p>
-
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release <span class="nt">--triple</span> arm64-apple-macosx
-% swift build <span class="nt">--configuration</span> release <span class="nt">--triple</span> x86_64-apple-macosx
-% lipo <span class="nt">-create</span> <span class="nt">-output</span> package .build/arm64-apple-macosx/release/package .build/x86_64-apple-macosx/release/package
-</code></pre></div></div>
-
-<p>Inspecting our final binary we can see it correctly has both
-architectures:</p>
-
-<pre><code class="language-none">% file package
-package: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64:Mach-O 64-bit executable arm64]
-package (for architecture x86_64):      Mach-O 64-bit executable x86_64
-package (for architecture arm64):       Mach-O 64-bit executable arm64
-</code></pre>
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2020/09/29/lldb-reproducers/">LLDB Reproducers</a></h2>
-    
-    <p>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2020/09/29/lldb-reproducers/">LLDB Reproducers</a>
       <time datetime="2020-09-29 19:39:00 -0700" pubdate="pubdate">
         29 Sep 2020
       </time>
-      <a class="permalink" title="Permalink" href="/2020/09/29/lldb-reproducers/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>Swift developers love to complain about LLDB. While there are many
-reasonable complaints, the important question is what can we do to make
-it better.</p>
-
-<p>Enter <a href="https://lldb.llvm.org/resources/reproducers.html">reproducers</a>. Reproducers provide a way to run LLDB
-while also capturing information about your debugging session. With this
-information you can <a href="https://feedbackassistant.apple.com">submit</a> a more useful bug report to Apple
-with a reliable reproduction case.</p>
-
-<h1 id="how">How?</h1>
-
-<p>Although the steps to use reproducers are mostly straightforward,
-launching LLDB from Xcode does not enable <code class="highlighter-rouge">--capture</code> mode (FB7878562).
-This means if you want to provide a reproducer for an issue you've
-experienced in a Xcode debugging session, you need to reproduce it
-outside of Xcode instead.</p>
-
-<p><strong>Update</strong>: the folks from PSPDFKit <a href="https://pspdfkit.com/blog/2020/an-introduction-to-lldb-reproducers">pointed
-out</a> as
-of Xcode 12 there is a private default for enabling capture mode for
-debugging sessions launched from Xcode:</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>defaults write com.apple.dt.Xcode IDEDebuggerEnableReproducerCapture -bool YES
-</code></pre></div></div>
-
-<p>Note: to provide enough information to reproduce your issue, LLDB
-bundles all files the debugging session touched. This includes binaries
-with debug info that you may consider sensitive. As <a href="https://twitter.com/johannesweiss/status/1311350073767362565">pointed out on
-Twitter</a>
-this will also contain anything in memory at the time of capture. Be
-sure to verify what you're sharing with Apple before you <a href="https://feedbackassistant.apple.com">send
-it</a>.</p>
-
-<h2 id="cli--macos-app">CLI / macOS app</h2>
-
-<p>If you're debugging a program on your Mac, there are a few steps:</p>
-
-<ol>
-  <li>Run the app in Xcode and stop it. This way you know the binary is up
-to date.</li>
-  <li>In Terminal.app navigate to your DerivedData directory (you can find
-this by right clicking on your app in the "Products" section of
-Xcode's project navigator, and clicking "Show in Finder").</li>
-  <li>Run <code class="highlighter-rouge">lldb --capture /path/to/Your.app</code>.</li>
-  <li>In the LLDB session run <code class="highlighter-rouge">process launch --stop-at-entry</code>.</li>
-  <li>Now you're in a paused LLDB session. Here you can <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">set the
-breakpoints</a> you need to reproduce your issue. Often for
-me this means breaking at a specific place, and running some version
-of <code class="highlighter-rouge">po foo</code> that causes an issue.</li>
-  <li>Once you're done reproducing the issue, run <code class="highlighter-rouge">reproducer generate</code> in
-LLDB. This will print the path the information was written to.</li>
-  <li>Verify the contents of the output directory doesn't include anything
-you're not comfortable sharing with Apple, zip it, and <a href="https://feedbackassistant.apple.com">submit a
-radar</a>!</li>
-</ol>
-
-<h2 id="ios-app-on-the-simulator">iOS app on the simulator</h2>
-
-<p>Running apps directly from LLDB on the iOS simulator does <a href="https://forums.swift.org/t/using-lldb-with-ios-simulator-from-cli/33990/6">not
-work</a>
-the same way as running a macOS app. Because of this, the steps differ.</p>
-
-<ol>
-  <li>Run the app in Xcode and stop it. This way it's updated and installed
-on the iOS simulator.</li>
-  <li>Run <code class="highlighter-rouge">lldb --capture --wait-for --attach-name YOUR_APP_NAME</code>.</li>
-  <li>Manually launch your app in the Simulator.</li>
-  <li>Now you're in a paused LLDB session. Here you can <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">set the
-breakpoints</a> you need to reproduce your issue. Often for
-me this means breaking at a specific place, and running some version
-of <code class="highlighter-rouge">po foo</code> that causes an issue.</li>
-  <li>Once you're done reproducing the issue, run <code class="highlighter-rouge">reproducer generate</code> in
-LLDB. This will print the path the information was written to.</li>
-  <li>Verify the contents of the output directory doesn't include anything
-you're not comfortable sharing with Apple, zip it, and <a href="https://feedbackassistant.apple.com">submit a
-radar</a>!</li>
-</ol>
-
-<h2 id="ios-app-on-device">iOS app on device</h2>
-
-<p>Unfortunately, I haven't yet figured out the right incantation to launch
-LLDB directly and attach to an on-device process. If anyone has a good
-workflow for this please <a href="https://twitter.com/SmileyKeith">let me know</a>.</p>
-
-<h1 id="tips">Tips</h1>
-
-<ul>
-  <li>Checkout the <a href="https://lldb.llvm.org/resources/reproducers.html">reproducers</a> page for more details.</li>
-  <li><code class="highlighter-rouge">man lldb</code> has more usage info.</li>
-  <li>Passing <code class="highlighter-rouge">--capture-path</code> to LLDB might be helpful.</li>
-  <li>Run <code class="highlighter-rouge">reproducer status</code> to verify you're in capture mode.</li>
-  <li>Run <code class="highlighter-rouge">help COMMAND [SUBCOMMAND]</code> in LLDB to get info on the commands
-you're running.</li>
-  <li>Run <code class="highlighter-rouge">help b</code> to see examples of how to set breakpoints from the
-command line interface.</li>
-  <li>See the <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">LLDB tutorial</a> for more breakpoint examples.</li>
-  <li>Try out <code class="highlighter-rouge">lldb --replay /path/to/your/reproducer</code> to see what Apple
-will see.</li>
-  <li>You can attach to XCTest processes by using <code class="highlighter-rouge">xctest</code> as your
-<code class="highlighter-rouge">--attach-name</code> argument.</li>
-</ul>
-
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2015/03/14/nsprogress-with-asynchronous-tasks/">NSProgress with Asynchronous Tasks</a></h2>
-    
-    <p>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2015/03/14/nsprogress-with-asynchronous-tasks/">NSProgress with Asynchronous Tasks</a>
       <time datetime="2015-03-14 18:57:00 -0700" pubdate="pubdate">
         14 Mar 2015
       </time>
-      <a class="permalink" title="Permalink" href="/2015/03/14/nsprogress-with-asynchronous-tasks/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>After having a use for <code class="highlighter-rouge">NSProgress</code> I finally got a chance to dive in to
-its API. I found it to be less than understandable. So I wrote about it
-on the thoughtbot blog. You can find my post, <a href="https://robots.thoughtbot.com/asynchronous-nsprogress">NSProgress with
-Asynchronous Tasks,
-here</a>.</p>
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2015/03/14/reactive-cocoa-and-core-data/">ReactiveCocoa and Core Data</a></h2>
-    
-    <p>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2015/03/14/reactive-cocoa-and-core-data/">ReactiveCocoa and Core Data</a>
       <time datetime="2015-03-14 18:53:00 -0700" pubdate="pubdate">
         14 Mar 2015
       </time>
-      <a class="permalink" title="Permalink" href="/2015/03/14/reactive-cocoa-and-core-data/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>After finally starting to use
-<a href="https://github.com/ReactiveCocoa/ReactiveCocoa">ReactiveCocoa</a> I found
-integrating with Core Data to be a sore spot. I wrote about improving this
-integration on the thoughtbot blog
-<a href="https://robots.thoughtbot.com/reactive-core-data">here</a>.</p>
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2015/03/14/writing-vim-syntax-plugins/">Writing Vim Syntax Plugins</a></h2>
-    
-    <p>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2015/03/14/writing-vim-syntax-plugins/">Writing Vim Syntax Plugins</a>
       <time datetime="2015-03-14 18:48:00 -0700" pubdate="pubdate">
         14 Mar 2015
       </time>
-      <a class="permalink" title="Permalink" href="/2015/03/14/writing-vim-syntax-plugins/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>After <a href="http://www.smileykeith.com/2015/03/14/clojure/">writing about
-Clojure</a> I wrote about
-writing Vim syntax plugins. Check it out
-<a href="https://robots.thoughtbot.com/writing-vim-syntax-plugins">here</a>.</p>
-
-  </div>
-</article>
-
-
-<!-- Pagination links -->
-<div class="pagination ten columns">
+    </li>
   
-    <div class="older">
-      <span class="pagearrow">&larr;</span>
-      <a href="/page2">Older</a>
-    </div>
+    <li class="archivelink">
+      <a href="/2015/03/14/clojure/">Clojure</a>
+      <time datetime="2015-03-14 18:27:00 -0700" pubdate="pubdate">
+        14 Mar 2015
+      </time>
+    </li>
   
-
-  <div class="pagearchive">
-    <a href="/archives/">Blog Archive</a>
-  </div>
-
+    <li class="archivelink">
+      <a href="/2014/02/14/vim-tagbar-with-objective-c/">Vim TagBar with Objective-C</a>
+      <time datetime="2014-02-14 13:53:00 -0800" pubdate="pubdate">
+        14 Feb 2014
+      </time>
+    </li>
   
-    <div class="newer">&nbsp;</div>
+    <li class="archivelink">
+      <a href="/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux/">IPSEC/L2TP VPN on a Raspberry Pi running Arch Linux</a>
+      <time datetime="2014-01-27 20:49:00 -0800" pubdate="pubdate">
+        27 Jan 2014
+      </time>
+    </li>
   
-</div>
+    <li class="archivelink">
+      <a href="/2013/09/03/iterm-theme-based-on-the-time-of-day/">iTerm theme based on the time of day</a>
+      <time datetime="2013-09-03 10:56:00 -0700" pubdate="pubdate">
+        03 Sep 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/08/14/global-htaccess/">Global htaccess</a>
+      <time datetime="2013-08-14 13:12:00 -0700" pubdate="pubdate">
+        14 Aug 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/08/09/os-x-crash-symbolication/">OS X Crash Report Symbolication</a>
+      <time datetime="2013-08-09 13:26:00 -0700" pubdate="pubdate">
+        09 Aug 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/05/22/the-best-text-editor/">The 'Best' Text Editor</a>
+      <time datetime="2013-05-22 00:59:00 -0700" pubdate="pubdate">
+        22 May 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/04/11/objective-c-on-travis-ci/">Objective-C on Travis-CI</a>
+      <time datetime="2013-04-11 15:58:00 -0700" pubdate="pubdate">
+        11 Apr 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/02/21/os-x-plus-zfs/">OS X + ZFS</a>
+      <time datetime="2013-02-21 11:28:00 -0800" pubdate="pubdate">
+        21 Feb 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/02/08/terminal-shortcut-in-os-x/">Terminal Shortcut in OS X</a>
+      <time datetime="2013-02-08 09:59:00 -0800" pubdate="pubdate">
+        08 Feb 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/02/01/automated-google-reader-backups/">Automated Google Reader Backups</a>
+      <time datetime="2013-02-01 12:30:00 -0800" pubdate="pubdate">
+        01 Feb 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/02/01/boredom/">Boredom</a>
+      <time datetime="2013-02-01 11:03:00 -0800" pubdate="pubdate">
+        01 Feb 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/01/27/learning-c/">Learning C</a>
+      <time datetime="2013-01-27 22:59:00 -0800" pubdate="pubdate">
+        27 Jan 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/01/08/nstableview-vim-keys/">NSTableView vim keys</a>
+      <time datetime="2013-01-08 16:19:00 -0800" pubdate="pubdate">
+        08 Jan 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/01/05/backing-up-with-capistrano/">Backing up with Capistrano</a>
+      <time datetime="2013-01-05 12:12:00 -0800" pubdate="pubdate">
+        05 Jan 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/01/04/raking-podspecs/">Raking Podspecs</a>
+      <time datetime="2013-01-04 11:09:00 -0800" pubdate="pubdate">
+        04 Jan 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/01/03/spawn-iterm/">Spawning iTerm Windows</a>
+      <time datetime="2013-01-03 12:34:00 -0800" pubdate="pubdate">
+        03 Jan 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/01/03/nswindow-global-hotkey/">NSWindow Global Hotkey</a>
+      <time datetime="2013-01-03 10:44:00 -0800" pubdate="pubdate">
+        03 Jan 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/01/02/linode-setup/">Linode Setup</a>
+      <time datetime="2013-01-02 15:19:00 -0800" pubdate="pubdate">
+        02 Jan 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2012/12/12/the-fear-of-shipping/">The fear of shipping</a>
+      <time datetime="2012-12-12 17:42:00 -0800" pubdate="pubdate">
+        12 Dec 2012
+      </time>
+    </li>
+  
+</ul>
 
       </section>
     </section>

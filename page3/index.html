@@ -21,380 +21,189 @@
       <div id="masthead">
         <h1>
           <a href="/">Keith Smiley</a>
-          - <a href="http://keith.so" title="Who is this guy?">Who?</a>
+          | <a href="https://www.keith.so">About</a>
         </h1>
       </div>
 
       <section class="content">
-        
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2013/08/09/os-x-crash-symbolication/">OS X Crash Report Symbolication</a></h2>
-    
-    <p>
+        <ul class="archive">
+  
+    <li class="archivelink">
+      <a href="/2020/12/24/swiftpm-cross-compile/">Cross compiling for Apple Silicon with Swift Package Manager</a>
+      <time datetime="2020-12-24 14:32:00 -0800" pubdate="pubdate">
+        24 Dec 2020
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2020/09/29/lldb-reproducers/">LLDB Reproducers</a>
+      <time datetime="2020-09-29 19:39:00 -0700" pubdate="pubdate">
+        29 Sep 2020
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2015/03/14/nsprogress-with-asynchronous-tasks/">NSProgress with Asynchronous Tasks</a>
+      <time datetime="2015-03-14 18:57:00 -0700" pubdate="pubdate">
+        14 Mar 2015
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2015/03/14/reactive-cocoa-and-core-data/">ReactiveCocoa and Core Data</a>
+      <time datetime="2015-03-14 18:53:00 -0700" pubdate="pubdate">
+        14 Mar 2015
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2015/03/14/writing-vim-syntax-plugins/">Writing Vim Syntax Plugins</a>
+      <time datetime="2015-03-14 18:48:00 -0700" pubdate="pubdate">
+        14 Mar 2015
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2015/03/14/clojure/">Clojure</a>
+      <time datetime="2015-03-14 18:27:00 -0700" pubdate="pubdate">
+        14 Mar 2015
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2014/02/14/vim-tagbar-with-objective-c/">Vim TagBar with Objective-C</a>
+      <time datetime="2014-02-14 13:53:00 -0800" pubdate="pubdate">
+        14 Feb 2014
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux/">IPSEC/L2TP VPN on a Raspberry Pi running Arch Linux</a>
+      <time datetime="2014-01-27 20:49:00 -0800" pubdate="pubdate">
+        27 Jan 2014
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/09/03/iterm-theme-based-on-the-time-of-day/">iTerm theme based on the time of day</a>
+      <time datetime="2013-09-03 10:56:00 -0700" pubdate="pubdate">
+        03 Sep 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/08/14/global-htaccess/">Global htaccess</a>
+      <time datetime="2013-08-14 13:12:00 -0700" pubdate="pubdate">
+        14 Aug 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/08/09/os-x-crash-symbolication/">OS X Crash Report Symbolication</a>
       <time datetime="2013-08-09 13:26:00 -0700" pubdate="pubdate">
         09 Aug 2013
       </time>
-      <a class="permalink" title="Permalink" href="/2013/08/09/os-x-crash-symbolication/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>As you may know I write a small OS X called <a href="http://sailforapp.net/">Sail</a>. Over
-the past few months that it has been available I've received a few crash reports
-about an issue I wasn't able to reproduce. Today I decided I wanted to dive into
-them and see if I could at least figure out the root of the issue and fix it
-with my next release.</p>
-
-<p>This lead me down the rabbit hole of
-<a href="http://lldb.llvm.org/symbolication.html">symbolication</a>, something I personally
-hadn't dealt with myself before (since Crashlytics does it for you). I was
-hoping I would be able to find something around the internet about this,
-unfortunately what I mostly came up with was a lot of iOS related answers that
-didn't seem to work the same way and
-<a href="http://developer.apple.com/tools/xcode/symbolizingcrashdumps.html">two</a>
-<a href="http://developer.apple.com/library/mac/technotes/tn2004/tn2123.html">links</a> to
-Apple documentation that have been removed. Other than the process for
-symbolicating reports for OS X apps seems to be different than iOS apps which
-there is plenty of documentation for (I'm not bitter). Daniel Jalkut has <a href="http://www.red-sweater.com/blog/439/crappy-crash-logs">a
-post</a> about these but his
-exact method didn't seem to work for me.</p>
-
-<p>Here is what did work for me. For my first abridged crash report I had this</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Process:         Sail [35072]
-Path:            /Applications/Sail.app/Contents/MacOS/Sail
-Load Address:    0x106823000
-Identifier:      com.keithsmiley.SailOSX
-Version:         4 (1.2.0)
-Code Type:       x86_64 (Native)
-Parent Process:  launchd [207]
-
-Date/Time:       2013-07-19 16:09:24.097 +0200
-OS Version:      Mac OS X 10.8.4 (12E55)
-Report Version:  8
-
-Thread 0:
-13  Accounts                        0x00007fff839fd1b1 -[ACAccountStore accountTypeWithAccountTypeIdentifier:] + 230
-14  Sail                            0x00000001068308f7
-15  Sail                            0x0000000106830798
-16  Sail                            0x0000000106825249
-17  CoreFoundation                  0x00007fff82465eda _CFXNotificationPost + 2554
-18  Foundation                      0x00007fff8611b7b6 -[NSNotificationCenter postNotificationName:object:userInfo:] + 64
-31  AppKit                          0x00007fff812cc1a3 -[NSApplication run] + 517
-32  AppKit                          0x00007fff81270bd6 NSApplicationMain + 869
-33  libdyld.dylib                   0x00007fff869d07e1 start + 0
-
-Binary Images:
-  0x106823000 - 0x106896fff  com.keithsmiley.SailOSX (1.2.0 - 4) &lt;D1F313B6-21F6-341B-8627-5480C5D1DB20&gt; /Applications/Sail.app/Contents/MacOS/Sail
-</code></pre></div></div>
-
-<p>Just glancing at this crash report it's not too difficult to understand a bit
-about what was going on. A notification was sent, some methods were called in my
-application and then <code class="highlighter-rouge">accountTypeWithAccountTypeIdentifier</code> was called. Based on
-the small number of times I call that method I was quickly able to assume where
-the issue was but I still wanted to see exactly what methods of mine were being
-called first.</p>
-
-<p>This brings me to <code class="highlighter-rouge">atos</code> the command line tool Apple provides to symbolicate
-these reports. This is where my experience differs with most of what I found
-online. My usage looked like this:</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x106823000
-</code></pre></div></div>
-
-<p>This uses my dSYM file that was generated with the archive build I submitted to
-the app store along with the knowledge that it was running on an x86_64
-architecture and the most important part, for me, the load address.</p>
-
-<p>To find my dSYM file that was generated when I did my archive build I simply
-noted the version and build number from the crash report, went to the Archives
-tab in the Xcode organizer, found the build with the same number, right clicked
-and clicked "Show in Finder." This takes you directly to the <code class="highlighter-rouge">.xcarchive</code> file
-on disk which you can right click and click "Show Package Contents." From there
-I copied my dSYM to the desktop so I didn't overwrite anything unintentionally.</p>
-
-<p>The load address is the starting memory address of your application. The tool
-uses this address as an offset to find the correct methods in your symbols. In
-the above crash report <code class="highlighter-rouge">Load Address</code> is a provided field. This was the only
-report I saw that had that, typically I needed to look under the <code class="highlighter-rouge">Binary Images</code>
-section for the address range of my application. In this example it was
-<code class="highlighter-rouge">0x106823000 - 0x106896fff</code>.</p>
-
-<p>The <code class="highlighter-rouge">atos</code> command then provides an interactive prompt where you can paste
-addresses into the stdin and it will tell you the corresponding methods. Mine
-looked like this:</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x00000001068308f7
--[KSAccountsPreferences dealloc] (in Sail) (KSAccountsPreferences.m:77)
-0x0000000106830798
--[KSAccountsPreferences viewDidLoad] (in Sail) (KSAccountsPreferences.m:73)
-0x0000000106825249
--[KSAppDelegate openAboutWindow:] (in Sail) (KSAppDelegate.m:59)
-</code></pre></div></div>
-
-<p>Here I can see that the notification that was being posted was probably an
-<code class="highlighter-rouge">NSApplicationDidFinishLaunchingNotification</code> starting off some methods in my
-app delegate. I then load the accounts preferences, which would make sense to
-call the <code class="highlighter-rouge">ACAccountStore</code> method, but then <code class="highlighter-rouge">dealloc</code> is called. Seeing this was
-an immediate red flag since <code class="highlighter-rouge">KSAccountsPreferences</code> should be retained since it
-provides information about available accounts to the rest of the application.</p>
-
-<p>I had another crash report from a different issue that was a little bit harder
-to parse without symbolicating the methods.</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Process:         Sail [47027]
-Identifier:      com.keithsmiley.SailOSX
-Version:         1.2.0 (4)
-Code Type:       X86-64 (Native)
-Parent Process:  launchd [45696]
-User ID:         502
-
-Application Specific Information:
-*** Terminating app due to uncaught exception 'NSRangeException', reason: '*** -[__NSArrayM objectAtIndex:]: index 0 beyond bounds for empty array'
-abort() called
-terminate called throwing an exception
-
-Application Specific Backtrace 1:
-2   CoreFoundation                      0x000000010c5008ec -[__NSArrayM objectAtIndex:] + 252
-3   Sail                                0x000000010b838eed Sail + 61165
-4   Sail                                0x000000010b838f36 Sail + 61238
-5   Sail                                0x000000010b838b19 Sail + 60185
-6   Sail                                0x000000010b83785d Sail + 55389
-7   libdispatch.dylib                   0x000000010fa07f01 _dispatch_call_block_and_release + 15
-
-Binary Images:
-  0x10b82a000 - 0x10b89dff7 +com.keithsmiley.SailOSX (1.2.0 - 4) &lt;47EC2733-B543-31EA-A6AA-9D998FB65803&gt;
-</code></pre></div></div>
-
-<p>Obviously this was caused by an invalid access to an array but that's a little harder to track down. So I again used <code class="highlighter-rouge">atos</code> with the dSYM and new memory location.</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x10b82a000
-</code></pre></div></div>
-
-<p>I got this output for my memory addresses</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x000000010b838eed
--[KSAccountsPreferences selectedADNUser] (in Sail) (KSAccountsPreferences.m:238)
-0x000000010b838f36
--[KSAccountsPreferences selectTwitterUsername] (in Sail) (KSAccountsPreferences.m:243)
-0x000000010b838b19
--[KSAccountsPreferences populateTwitterAccounts] (in Sail) (KSAccountsPreferences.m:211)
-0x000000010b83785d
-__36-[KSAccountsPreferences viewDidLoad]_block_invoke (in Sail) (KSAccountsPreferences.m:70)
-</code></pre></div></div>
-
-<p>This ended up giving me the exact line where out of bounds issue was happening
-depending on a certain number of accounts. I noticed that this issue had been
-fixed since my last release so I did a <code class="highlighter-rouge">diff</code> on the tag I created for that
-specific release with</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git difftool HEAD..1.2.0\(3\)
-</code></pre></div></div>
-
-<p>Then in <a href="http://www.kaleidoscopeapp.com/">Kaleidoscope</a> I was able to figure out
-what changed had fixed the issue. Just because it's so pretty here is what it
-looked like.</p>
-
-<p><img src="/images/symbolication/diff.png" alt="Diff" /></p>
-
-<p>Symbolicating crash reports is definitely vital to tracking down bugs your users
-are experiencing when you can't reproduce them yourself. Once you figure out how
-it's obviously worth it.</p>
-
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2013/05/22/the-best-text-editor/">The 'Best' Text Editor</a></h2>
-    
-    <p>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/05/22/the-best-text-editor/">The 'Best' Text Editor</a>
       <time datetime="2013-05-22 00:59:00 -0700" pubdate="pubdate">
         22 May 2013
       </time>
-      <a class="permalink" title="Permalink" href="/2013/05/22/the-best-text-editor/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>I'm tired of people asking about the 'best' IDE for xyz purpose. The answer to this question is there is no best. The answer is always 'it depends.' Not only does it depend on what you're doing but more importantly it depends on you. It depends on your work flow. It depends tons of other indiscernible factors.</p>
-
-<p>It seems like people think they work in exactly the same way as enough other people. That asking this question will yield a useful result. The truth is that there are far fewer text editors than people who need text editors so it's impossible not to overlap with someone. We misconstrue this overlap in thinking that now this person knows exactly what we want. In reality they just happen to share some arbitrary subset of the way we  work and therefore ended up with the same text editor.</p>
-
-<p>So how can you decide which editor is best for you? Try them. This sounds obvious to you? Good, this article is not for you and you can safely leave now. These days text editors are either free, cheap or have trials. So download them all try them out and see if they make sense to you. Weed out the ones you really hate or the ones that crash and spend a little more time with the remaining editors. Some, like Vim, you may have to spend a little more time with to grasp but this still doesn't seem like a high order.</p>
-
-<p>But please stop asking questions on StackOverflow and similar sites where you expect people to throw their vote into the hat for the 'best' editor and make a decision for yourself.</p>
-
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2013/04/11/objective-c-on-travis-ci/">Objective-C on Travis-CI</a></h2>
-    
-    <p>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/04/11/objective-c-on-travis-ci/">Objective-C on Travis-CI</a>
       <time datetime="2013-04-11 15:58:00 -0700" pubdate="pubdate">
         11 Apr 2013
       </time>
-      <a class="permalink" title="Permalink" href="/2013/04/11/objective-c-on-travis-ci/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>Recently <a href="https://travis-ci.org/">Travis</a> added support for Objective-C and there for OS X and iOS projects for continuous integration testing. I gather that people have previously done this with self-hosted dedicated <a href="http://jenkins-ci.org/">Jenkins</a> machines but since Apple is so aggressive about dropping support for previous versions of the OS it seems like a pain to have to replace your build server every few years. Enter Travis, a great hosted <a href="http://en.wikipedia.org/wiki/Continuous_integration">continuous integration</a> server that hosts a huge amount of open source projects. I figured with this new support I could host some of my <a href="https://github.com/keith/KSADNTwitterFormatter">smaller</a> libraries just to set how well it worked. The initial setup process was a bit tedious but I eventually got it to work.</p>
-
-<h3 id="assumtions">Assumtions:</h3>
-
-<ul>
-  <li>You have a test framework already integrated with your project (I like <a href="https://github.com/petejkim/specta">Specta</a>/<a href="https://github.com/petejkim/expecta">Expecta</a>)</li>
-  <li>You have your project on Github in a public repository. Travis offers a <a href="http://about.travis-ci.org/docs/user/travis-pro/">pro</a> account if you'd rather</li>
-</ul>
-
-<h3 id="steps">Steps</h3>
-
-<ul>
-  <li>Create a <code class="highlighter-rouge">.travis.yml</code> file in the root of your repository (leading dot is intentional). For many projects a file may just look like:</li>
-</ul>
-
-<figure class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="na">language</span><span class="pi">:</span> <span class="s">objective-c</span></code></pre></figure>
-
-<p><del>By default Travis runs <a href="https://gist.github.com/henrikhodne/73151fccea7af3201f63">this script</a> for Objective-C projects</del> I was informed <a href="https://twitter.com/henrikhodne/status/322665896806060032">on Twitter</a> that the current script that runs Objective-C projects is actually located <a href="https://github.com/travis-ci/travis-cookbooks/blob/osx/ci_environment/travis_build_environment/files/default/ci_user/travis-utils/osx-cibuild.sh">here</a>. It was originally created by <a href="https://github.com/jspahrsummers">Justin Spahr-Summers</a> <a href="https://github.com/jspahrsummers/objc-build-scripts">here</a>. This script seems to run my projects without any issue, they just occasionally require more initial setup (we'll get to that).</p>
-
-<ul>
-  <li>
-    <p>Enable your repository in Travis' settings. From your <a href="https://travis-ci.org/profile">Travis profile page</a> (after signing in with Github) you should see a list of your repositories, you may have to press 'Sync now', where you can switch on the repository you're planning on adding.</p>
-  </li>
-  <li>
-    <p>Configure your project within Xcode. As I assumed above you already have a test target setup. You do have to do a few things in Xcode to make everything work correctly.</p>
-
-    <ol>
-      <li>Go to 'Manage Schemes' in Xcode. <img src="/images/travis/manageschemes.png" alt="Manage Schemes" /></li>
-      <li>Check the 'Shared' box for the scheme that needs to be run. <img src="/images/travis/shareschemes.png" alt="Shared Scheme" /></li>
-      <li>Click 'Edit…' in the bottom left and go to your build action. <img src="/images/travis/editscheme.png" alt="Edit Scheme" /></li>
-      <li>On the row of your Tests target check the box in the 'Run' column. <img src="/images/travis/runtest.png" alt="Run Test" /></li>
-    </ol>
-  </li>
-  <li>
-    <p>At this point for a simple project or a project using <a href="http://cocoapods.org/">CocoaPods</a> you should be good to go. If Travis finds a <code class="highlighter-rouge">Podfile</code> in the root of your repository it automatically runs <code class="highlighter-rouge">pod install</code> to get your dependencies (from their <a href="http://about.travis-ci.org/docs/user/languages/objective-c/">docs</a>). Otherwise there are a ton of <a href="http://about.travis-ci.org/docs/user/build-configuration/">configuration options</a> for your <code class="highlighter-rouge">.travis.yml</code> depending on how your repo is setup.</p>
-  </li>
-</ul>
-
-<p>For one of my projects I created a <code class="highlighter-rouge">setup.sh</code> file at the root of my repo that looks like this:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/usr/bin/env bash</span>
-
-git submodule update <span class="nt">--init</span> <span class="nt">--recursive</span>
-<span class="nb">echo</span> <span class="s2">"Setting up test frameworks..."</span>
-<span class="nb">cd </span>Example/Vendor/Specta<span class="p">;</span> rake <span class="o">&gt;</span> /dev/null
-<span class="nb">cd</span> ../Expecta<span class="p">;</span> rake <span class="o">&gt;</span> /dev/null
-<span class="nb">echo</span> <span class="s2">"Done"</span>
-<span class="nb">cd</span> ../../../</code></pre></figure>
-
-<p>This script which I run using the <code class="highlighter-rouge">before_install: ./setup.sh</code> option in my <code class="highlighter-rouge">.travis.yml</code> gets all my submodules, sets up Specta and Expecta and then goes back to the root directory for running. If you just have a few simple steps you can also have multiple <code class="highlighter-rouge">before_install</code> actions like:</p>
-
-<figure class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="na">before_install</span><span class="pi">:</span>
-  <span class="pi">-</span> <span class="s">cd Example</span>
-  <span class="pi">-</span> <span class="s">make</span></code></pre></figure>
-
-<p>You can read more about other Travis configuration options in their <a href="http://about.travis-ci.org/docs/user/build-configuration/">documentation</a>.</p>
-
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2013/02/21/os-x-plus-zfs/">OS X + ZFS</a></h2>
-    
-    <p>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/02/21/os-x-plus-zfs/">OS X + ZFS</a>
       <time datetime="2013-02-21 11:28:00 -0800" pubdate="pubdate">
         21 Feb 2013
       </time>
-      <a class="permalink" title="Permalink" href="/2013/02/21/os-x-plus-zfs/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>For a long time people have talked about how horrible <a href="http://en.wikipedia.org/wiki/HFS_Plus">HFS+</a> is. Most notably, in my opinion, <a href="http://en.wikipedia.org/wiki/Linus_Torvalds">Linus Torvalds</a> (the creator of Linux and Git) who <a href="http://www.smh.com.au/news/technology/torvalds-pans-apples-os-x/2008/02/05/1202090393959.html">said</a> "Their file system is complete and utter crap, which is scary." <a href="https://twitter.com/siracusa">John Siracusa</a> also wrote about the problems with HFS+ in his <a href="http://arstechnica.com/apple/2011/07/mac-os-x-10-7/12/#hfs-problems">10.7 review</a> along with talking about it on his podcast, <a href="http://5by5.tv/hypercritical/">Hypercritical</a> in episodes <a href="http://5by5.tv/hypercritical/56">56</a> and <a href="http://5by5.tv/hypercritical/57">57</a>.</p>
-
-<p>The gist of all this really is that Apple needs a new filesystem. It has been a while since Apple had <a href="http://en.wikipedia.org/wiki/ZFS">ZFS</a> support <a href="http://gizmodo.com/5018512/mac-os-x-snow-leopard-for-servers-getting-zfs">on their website</a> for release in Snow Leopard. After which Apple dropped ZFS support because of <a href="http://arstechnica.com/apple/2009/10/apple-abandons-zfs-on-mac-os-x-project-over-licensing-issues/">licensing issues</a>. There had been talks of Apple developing their own file system, although I think that's the wrong way to go. I think Apple needs to approach file systems the way they approached Safari with <a href="http://www.webkit.org/">Webkit</a>. I think they would be best served by picking up a liberally open source file system, such as <a href="http://en.wikipedia.org/wiki/Btrfs">BTRFS</a>, or grabbing up one of the ZFS <a href="http://code.google.com/p/maczfs/">ports</a> and continuing development while leaving it open for anyone to use. One of the great things about this approach is exactly what happened with Webkit and Google Chrome. Google decided to use the Webkit engine to make a product that competes with the main developers of the Webkit project. By doing this with a file system other vendors could use the same implementation and therefore increase development and in turn stability of whichever system was chosen (not to mention compatibility).</p>
-
-<p>One thing is for sure. People who understand how integral a file system is <a href="http://arstechnica.com/apple/2013/02/zfs-loving-mac-users-demand-support-in-os-x-10-9/">want</a> something <a href="https://www.change.org/petitions/apple-os-x-10-9-support-opengl-4-3-and-zfs">modern</a>.</p>
-
-  </div>
-</article>
-
-<article>
-  <header class="seven columns">
-    
-      <h2><a href="/2013/02/08/terminal-shortcut-in-os-x/">Terminal Shortcut in OS X</a></h2>
-    
-    <p>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/02/08/terminal-shortcut-in-os-x/">Terminal Shortcut in OS X</a>
       <time datetime="2013-02-08 09:59:00 -0800" pubdate="pubdate">
         08 Feb 2013
       </time>
-      <a class="permalink" title="Permalink" href="/2013/02/08/terminal-shortcut-in-os-x/">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    <p>One of my favorite defaults in some Linux distros is the ability to use CTRL+ALT+T to open a new terminal window. I wanted to enable this same functionality in OS X using <a href="http://qsapp.com/">Quicksilver</a>. I did this using <a href="http://www.iterm2.com/">iTerm 2</a> but you can do it with the default Terminal if that's what you want.</p>
-
-<ol>
-  <li>
-    <p>Enable the <code class="highlighter-rouge">Terminal</code> and <code class="highlighter-rouge">iTerm2</code> Quicksilver plugins.
-<img src="/images/qs-terminal/qs-plugins.png" alt="Quicksilver plugins" /></p>
-  </li>
-  <li>
-    <p>Create a new custom hotkey trigger. Using the <code class="highlighter-rouge">Home</code> directory with the action <code class="highlighter-rouge">Open Directory in Terminal</code>
-<img src="/images/qs-terminal/qs-triggers.png" alt="Quicksilver trigger" /></p>
-  </li>
-  <li>
-    <p>Set it's hotkey using the drawer to whatever you want.
-<img src="/images/qs-terminal/qs-hotkey.png" alt="Quicksilver hotkey" /></p>
-  </li>
-  <li>
-    <p>Set your default <code class="highlighter-rouge">Command Line Interface</code> <code class="highlighter-rouge">Trigger</code> to <code class="highlighter-rouge">iTerm</code> (if that's what you want)
-<img src="/images/qs-terminal/qs-cli.png" alt="Quicksilver CLI" /></p>
-  </li>
-</ol>
-
-<p>You're done! Now you can easily press your hotkey and pull up a new iTerm/Terminal window whenever and wherever.</p>
-
-
-  </div>
-</article>
-
-
-<!-- Pagination links -->
-<div class="pagination ten columns">
+    </li>
   
-    <div class="older">
-      <span class="pagearrow">&larr;</span>
-      <a href="/page4">Older</a>
-    </div>
+    <li class="archivelink">
+      <a href="/2013/02/01/automated-google-reader-backups/">Automated Google Reader Backups</a>
+      <time datetime="2013-02-01 12:30:00 -0800" pubdate="pubdate">
+        01 Feb 2013
+      </time>
+    </li>
   
-
-  <div class="pagearchive">
-    <a href="/archives/">Blog Archive</a>
-  </div>
-
+    <li class="archivelink">
+      <a href="/2013/02/01/boredom/">Boredom</a>
+      <time datetime="2013-02-01 11:03:00 -0800" pubdate="pubdate">
+        01 Feb 2013
+      </time>
+    </li>
   
-    
-      <div class="newer">
-        <a href="/page2">Newer</a>
-        <span class="pagearrow">&rarr;</span>
-      </div>
-    
+    <li class="archivelink">
+      <a href="/2013/01/27/learning-c/">Learning C</a>
+      <time datetime="2013-01-27 22:59:00 -0800" pubdate="pubdate">
+        27 Jan 2013
+      </time>
+    </li>
   
-</div>
+    <li class="archivelink">
+      <a href="/2013/01/08/nstableview-vim-keys/">NSTableView vim keys</a>
+      <time datetime="2013-01-08 16:19:00 -0800" pubdate="pubdate">
+        08 Jan 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/01/05/backing-up-with-capistrano/">Backing up with Capistrano</a>
+      <time datetime="2013-01-05 12:12:00 -0800" pubdate="pubdate">
+        05 Jan 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/01/04/raking-podspecs/">Raking Podspecs</a>
+      <time datetime="2013-01-04 11:09:00 -0800" pubdate="pubdate">
+        04 Jan 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/01/03/spawn-iterm/">Spawning iTerm Windows</a>
+      <time datetime="2013-01-03 12:34:00 -0800" pubdate="pubdate">
+        03 Jan 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/01/03/nswindow-global-hotkey/">NSWindow Global Hotkey</a>
+      <time datetime="2013-01-03 10:44:00 -0800" pubdate="pubdate">
+        03 Jan 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2013/01/02/linode-setup/">Linode Setup</a>
+      <time datetime="2013-01-02 15:19:00 -0800" pubdate="pubdate">
+        02 Jan 2013
+      </time>
+    </li>
+  
+    <li class="archivelink">
+      <a href="/2012/12/12/the-fear-of-shipping/">The fear of shipping</a>
+      <time datetime="2012-12-12 17:42:00 -0800" pubdate="pubdate">
+        12 Dec 2012
+      </time>
+    </li>
+  
+</ul>
 
       </section>
     </section>
