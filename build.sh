@@ -1,11 +1,12 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-set -e
+set -euo pipefail
 
 git_dir="gh-pages"
 
 bundle check || bundle install
-rake
+# For development: bundle exec jekyll server --watch
+bundle exec jekyll build
 
 git clone --branch gh-pages https://github.com/keith/smileykeith.com.git $git_dir || true
 rm -rf $git_dir/*
