@@ -46,7 +46,7 @@ will define its path in your vimrc.
 
 Then in your vimrc:
 
-{% highlight vim %}
+```vim
 let g:tagbar_type_objc = {
   \ 'ctagstype': 'objc',
   \ 'ctagsargs': [
@@ -72,7 +72,7 @@ let g:tagbar_type_objc = {
     \ 'g:pragma',
   \ ],
 \ }
-{% endhighlight %}
+```
 
 Replace the `~/.vim/objctags` with the path where you chose to put the
 first file. Please let me know if you see any way that this could be

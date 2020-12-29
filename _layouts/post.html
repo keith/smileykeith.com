@@ -9,14 +9,14 @@ layout: default
 {% endif %}
   <header class="seven columns">
     {% if page.link %}
-      <h2>
-        <a href="{{ page.link }}">{{ page.title }}</a>
+      <h1>
+        <a class="title" href="{{ page.link }}">{{ page.title }}</a>
         <span class="linkarrow">&rarr;</span>
-      </h2>
+      </h1>
     {% else %}
-      <h2>{{ page.title }}</h2>
+      <h1 class="title">{{ page.title }}</h1>
     {% endif %}
-    <p>
+    <p class="date">
       <time datetime="{{ page.date }}" pubdate="pubdate">
         {{ page.date | date_to_string }}
       </time>
@@ -28,7 +28,3 @@ layout: default
     {{ content }}
   </div>
 </article>
-
-<div class="ten columns blogarchive">
-  <a href="/archives/">Blog Archive</a>
-</div>

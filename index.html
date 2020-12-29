@@ -2,59 +2,13 @@
 layout: default
 ---
 
-{% for post in paginator.posts %}
-<article>
-  <header class="seven columns">
-    {% if post.link %}
-      <h2 class="link">
-        <a href="{{ post.link }}">{{ post.title }}</a>
-        <span class="linkarrow">&rarr;</span>
-      </h2>
-    {% else %}
-      <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
-    {% endif %}
-    <p>
+<ul class="archive">
+  {% for post in site.posts %}
+    <li class="archivelink">
+      <a href="{{ post.url }}">{{ post.title }}</a>
       <time datetime="{{ post.date }}" pubdate="pubdate">
         {{ post.date | date_to_string }}
       </time>
-      <a class="permalink" title="Permalink" href="{{ post.url }}">&infin;</a>
-    </p>
-  </header>
-
-  <div class="post ten columns">
-    {{ post.content }}
-  </div>
-</article>
-{% endfor %}
-
-<!-- Pagination links -->
-<div class="pagination ten columns">
-  {% if paginator.next_page %}
-    <div class="older">
-      <span class="pagearrow">&larr;</span>
-      <a href="/page{{ paginator.next_page }}">Older</a>
-    </div>
-  {% else %}
-    <div class="older">&nbsp;</div>
-  {% endif %}
-
-  <div class="pagearchive">
-    <a href="/archives/">Blog Archive</a>
-  </div>
-
-  {% if paginator.previous_page %}
-    {% if paginator.previous_page == 1 %}
-      <div class="newer">
-        <a href="/">Newer</a>
-        <span class="pagearrow">&rarr;</span>
-      </div>
-    {% else %}
-      <div class="newer">
-        <a href="/page{{ paginator.previous_page }}">Newer</a>
-        <span class="pagearrow">&rarr;</span>
-      </div>
-    {% endif %}
-  {% else %}
-    <div class="newer">&nbsp;</div>
-  {% endif %}
-</div>
+    </li>
+  {% endfor %}
+</ul>
