@@ -1,4 +1,6 @@
 body {
+  /* https://stackoverflow.com/questions/3226001/some-font-sizes-rendered-larger-on-safari-iphone */
+  -webkit-text-size-adjust: 100%;
   font-family: "Georgia", serif;
   line-height: 1.5;
   font-size: 1.15em;
