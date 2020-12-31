@@ -63,6 +63,7 @@ blockquote {
   margin: 1em;
   padding: 0;
   padding-left: 1em;
+  word-break: break-all;
 }
 
 img {
