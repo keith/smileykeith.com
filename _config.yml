@@ -2,7 +2,6 @@ name: Keith Smiley
 author: Keith Smiley
 url: http://smileykeith.com
 feed: /atom.xml
-pygments: true
 permalink: /:year/:month/:day/:title/
 include: ['.htaccess']
 exclude: ['Gemfile*', 'build.sh', '*.map', 'gh-pages']
