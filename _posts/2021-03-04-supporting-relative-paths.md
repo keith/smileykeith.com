@@ -142,4 +142,4 @@ final class UnitTestMain: NSObject {
 ```
 
 Disclaimer: this relies on a lot of implementation details in Xcode
-12.4's `XCTest` framework and should definitely be avoided if possible.
+which might break in the future. You should avoid this if possible.
