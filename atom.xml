@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2021-03-05T11:10:13-08:00</updated>
+  <updated>2021-03-05T11:12:19-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -157,7 +157,7 @@ starts to run. We can define a small class to call this:</p>
 </code></pre></div></div>
 
 <p>Disclaimer: this relies on a lot of implementation details in Xcode
-12.4's <code class="highlighter-rouge">XCTest</code> framework and should definitely be avoided if possible.</p>
+which might break in the future. You should avoid this if possible.</p>
 ]]>
       </content>
     </entry>
