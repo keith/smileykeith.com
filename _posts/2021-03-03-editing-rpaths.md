@@ -46,7 +46,8 @@ Here you can see many libraries are directly referenced with their
 absolute paths while `lib_InternalSwiftSyntaxParser.dylib`, the library
 we're specifically interested in, is referenced via a
 [`rpath`](https://en.wikipedia.org/wiki/Rpath). You can run this command
-to see your binary's `rpaths`:
+to see your binary's `rpaths` (yours may differ depending on your
+absolute path to Xcode):
 
 ```
 % otool -l ./.build/debug/drstring-cli \
@@ -62,7 +63,7 @@ directory specified by `@loader_path`, which in our case is likely
 irrelevant since it is the directory that contains our executable. Then,
 it looks inside a directory within my absolute path to Xcode (which
 isn't very portable), which we can see this includes the library we
-expect:
+expect (you'll have to change this path to your local Xcode path):
 
 ```
 % ls /Applications/Xcode-12.4.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx
@@ -98,7 +99,8 @@ cp "$(xcode-select -p)"/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx
 Then, using
 [`install_name_tool`](https://keith.github.io/xcode-man-pages/install_name_tool.1.html),
 we can edit the `rpaths` in our binary. In this case, since we only have
-2 `rpaths`, and neither of them are what we want, lets delete them both:
+2 `rpaths`, and neither of them are what we want, lets delete them both
+(you'll have to change the Xcode path for your local installation):
 
 ```
 % install_name_tool \
