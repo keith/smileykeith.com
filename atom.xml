@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2021-03-04T18:33:34-08:00</updated>
+  <updated>2021-03-04T20:50:20-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -12,6 +12,155 @@
   <rights>Copyright (c) 2021 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
+  
+    <entry>
+      <title type="html"><![CDATA[Supporting relative paths: XCTest failures in Xcode]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2021/03/04/supporting-relative-paths/" />
+      <id>http://smileykeith.com/2021/03/04/supporting-relative-paths</id>
+      <updated>2021-03-04T20:48:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>If you build your iOS app with an alternate build system such as
+<a href="https://www.bazel.build">bazel</a>, it's likely that you use relative
+paths, instead of absolute paths, for compilation.</p>
+
+<p>Specifically, when building swift code, Xcode calls the compiler with
+something like:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>swiftc [ARGS] /path/to/srcroot/path/to/file1.swift /path/to/srcroot/path/to/file2.swift
+</code></pre></div></div>
+
+<p>Where bazel will call the compiler with something like:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>swiftc [ARGS] path/to/file1.swift path/to/file2.swift
+</code></pre></div></div>
+
+<p>Normally, this difference is inconsequential, both compilations will
+result in a similar enough output. So, the question is: Why would you
+pick one over the other? For bazel, the answer lies in its core feature
+of "hermeticity". In bazel's case, being hermetic means that given the
+same inputs you always produce the same outputs. This means that
+regardless of what machine you're building on, or what directory your
+source is cloned in, the results should be the same. Because, those
+details aren't considered important inputs in the build.</p>
+
+<p>Unfortunately, in a few places, Xcode relies on paths being absolute.
+Today, we'll look at how Xcode reports test failures in the UI.
+Specifically the underlying
+<a href="https://developer.apple.com/documentation/xctest/xctissue"><code class="highlighter-rouge">XCTIssue</code></a>
+that <code class="highlighter-rouge">XCTest</code> creates is expected to be instantiated with an absolute
+path. This absolute path is populated from the <code class="highlighter-rouge">#filePath</code> (previously
+<code class="highlighter-rouge">#file</code>) keyword which is <em>supposed</em> to reference the absolute path of
+the current source file.</p>
+
+<p>The first question is: How does the Swift compiler know what the
+absolute path of the current file is? It's easy when Xcode passes an
+absolute path to the compiler. But, what if you pass a relative path? In
+this case, the Swift compiler uses the directory passed with the
+<code class="highlighter-rouge">-working-directory</code> argument to make the path absolute. It turns out if
+you don't pass this argument, the compiler has no choice but to use the
+relative path. This means the <code class="highlighter-rouge">#filePath</code> keyword ends up translating to
+a relative path, which means the <code class="highlighter-rouge">XCTIssue</code> is created with a relative
+path.</p>
+
+<p>With relative paths when you run your tests in Xcode and they
+fail, clicking the failure in the issue navigator doesn't do anything.
+But, it's supposed to jump you to the test case that failed (FB8451256,
+FB8454623).</p>
+
+<p>So, how do we fix this? Luckily, we know the core issue is <code class="highlighter-rouge">XCTIssue</code> is
+created with a relative path. Since <code class="highlighter-rouge">XCTIssue</code> instances are created as
+part of our process, we can
+<a href="https://nshipster.com/method-swizzling">swizzle</a> it to fix this.</p>
+
+<p>Looking at the underlying <a href="https://developer.apple.com/documentation/xctest/xctsourcecodelocation"><code class="highlighter-rouge">XCTSourceCodeLocation</code>
+docs</a>,
+we can see there are 2 initializers we're potentially interested in.
+Setting some quick breakpoints we can see that <code class="highlighter-rouge">XCTIssue</code> goes through
+the <code class="highlighter-rouge">init(fileURL:lineNumber:)</code> initializer. When we inspect the
+argument it receives in the debugger, we can see it's the relative path
+we passed to the compiler. Knowing this, we can surmise that by
+swizzling the initializer, and make the argument an absolute path, we
+can satisfy Xcode's requirement. So, what path do we use? Using Xcode's
+scheme environment variables, we can pass Xcode's <code class="highlighter-rouge">SRCROOT</code> through an
+environment variable named the same thing:</p>
+
+<p><img src="/images/srcroot.png" alt="" /></p>
+
+<p>Make sure to have the "Expand Variables Based On" dropdown set to some
+target (FB8454879) or the <code class="highlighter-rouge">$(SRCROOT)</code> string will be passed through
+literally.</p>
+
+<p>Now, for the swizzling:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">import</span> <span class="kt">Foundation</span>
+<span class="kd">import</span> <span class="kt">XCTest</span>
+
+<span class="c1">// NOTE: This path has to start with a / for fileURLWithPath to resolve it correctly as an absolute path</span>
+<span class="kd">public</span> <span class="k">let</span> <span class="nv">kSourceRoot</span> <span class="o">=</span> <span class="kt">ProcessInfo</span><span class="o">.</span><span class="n">processInfo</span><span class="o">.</span><span class="n">environment</span><span class="p">[</span><span class="s">"SRCROOT"</span><span class="p">]</span><span class="o">!</span>
+
+<span class="kd">private</span> <span class="kd">func</span> <span class="nf">remapFileURL</span><span class="p">(</span><span class="n">_</span> <span class="nv">fileURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">URL</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="n">fileURL</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="nf">hasPrefix</span><span class="p">(</span><span class="n">kSourceRoot</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">fileURL</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">fileURLWithPath</span><span class="p">:</span> <span class="s">"</span><span class="se">\(</span><span class="n">kSourceRoot</span><span class="se">)</span><span class="s">/</span><span class="se">\(</span><span class="n">fileURL</span><span class="o">.</span><span class="n">relativePath</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">private</span> <span class="kd">extension</span> <span class="kt">XCTSourceCodeLocation</span> <span class="p">{</span>
+    <span class="kd">@objc</span>
+    <span class="kd">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="n">initWithRelativeFileURL</span> <span class="nv">relativeURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">lineNumber</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// NOTE: This call is not recursive because of swizzling</span>
+        <span class="k">self</span><span class="o">.</span><span class="nf">init</span><span class="p">(</span><span class="nv">initWithRelativeFileURL</span><span class="p">:</span> <span class="nf">remapFileURL</span><span class="p">(</span><span class="n">relativeURL</span><span class="p">),</span> <span class="nv">lineNumber</span><span class="p">:</span> <span class="n">lineNumber</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">swizzleXCTSourceCodeLocationIfNeeded</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// NOTE: Make sure our "Expand Variables Based On" is set correctly</span>
+    <span class="k">if</span> <span class="n">kSourceRoot</span> <span class="o">==</span> <span class="s">"$(SRCROOT)"</span> <span class="p">{</span>
+        <span class="nf">fatalError</span><span class="p">(</span><span class="s">"Got unsubstituted SRCROOT"</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">let</span> <span class="nv">originalSelector</span> <span class="o">=</span> <span class="kd">#selector(</span><span class="nf">XCTSourceCodeLocation.init(fileURL:lineNumber:)</span><span class="kd">)</span>
+    <span class="k">let</span> <span class="nv">swizzledSelector</span> <span class="o">=</span> <span class="kd">#selector(</span><span class="nf">XCTSourceCodeLocation.init(initWithRelativeFileURL:lineNumber:)</span><span class="kd">)</span>
+
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">originalMethod</span> <span class="o">=</span> <span class="nf">class_getInstanceMethod</span><span class="p">(</span><span class="kt">XCTSourceCodeLocation</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="n">originalSelector</span><span class="p">),</span>
+        <span class="k">let</span> <span class="nv">swizzledMethod</span> <span class="o">=</span> <span class="nf">class_getInstanceMethod</span><span class="p">(</span><span class="kt">XCTSourceCodeLocation</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="n">swizzledSelector</span><span class="p">)</span> <span class="k">else</span>
+    <span class="p">{</span>
+        <span class="nf">fatalError</span><span class="p">(</span><span class="s">"Failed to swizzle XCTSourceCodeLocation"</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nf">method_exchangeImplementations</span><span class="p">(</span><span class="n">originalMethod</span><span class="p">,</span> <span class="n">swizzledMethod</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>With this implementation, you need to call
+<code class="highlighter-rouge">swizzleXCTSourceCodeLocationIfNeeded()</code> somewhere. Using the
+<a href="https://developer.apple.com/documentation/bundleresources/information_property_list/nsprincipalclass"><code class="highlighter-rouge">NSPrincipalClass</code> plist
+key</a>,
+we can define a class that is initialized as soon as your test bundle
+starts to run. We can define a small class to call this:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">import</span> <span class="kt">ObjectiveC</span>
+
+<span class="kd">final</span> <span class="kd">class</span> <span class="kt">UnitTestMain</span><span class="p">:</span> <span class="kt">NSObject</span> <span class="p">{</span>
+    <span class="k">override</span> <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">super</span><span class="o">.</span><span class="nf">init</span><span class="p">()</span>
+
+        <span class="nf">swizzleXCTSourceCodeLocationIfNeeded</span><span class="p">()</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Disclaimer: this relies on a lot of implementation details in Xcode
+12.4's <code class="highlighter-rouge">XCTest</code> framework and should definitely be avoided if possible.</p>
+]]>
+      </content>
+    </entry>
   
     <entry>
       <title type="html"><![CDATA[Editing rpaths for _InternalSwiftSyntaxParser]]></title>
