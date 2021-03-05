@@ -81,7 +81,8 @@ For example:</p>
 absolute paths while <code class="highlighter-rouge">lib_InternalSwiftSyntaxParser.dylib</code>, the library
 we're specifically interested in, is referenced via a
 <a href="https://en.wikipedia.org/wiki/Rpath"><code class="highlighter-rouge">rpath</code></a>. You can run this command
-to see your binary's <code class="highlighter-rouge">rpaths</code>:</p>
+to see your binary's <code class="highlighter-rouge">rpaths</code> (yours may differ depending on your
+absolute path to Xcode):</p>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% otool -l ./.build/debug/drstring-cli \
   | grep -A2 LC_RPATH \
@@ -96,7 +97,7 @@ directory specified by <code class="highlighter-rouge">@loader_path</code>, whic
 irrelevant since it is the directory that contains our executable. Then,
 it looks inside a directory within my absolute path to Xcode (which
 isn't very portable), which we can see this includes the library we
-expect:</p>
+expect (you'll have to change this path to your local Xcode path):</p>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% ls /Applications/Xcode-12.4.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx
 layouts-x86_64.yaml                  libswiftCompatibilityDynamicReplacements.a
@@ -128,7 +129,8 @@ from Xcode using (this might change with future Xcode releases):</p>
 <p>Then, using
 <a href="https://keith.github.io/xcode-man-pages/install_name_tool.1.html"><code class="highlighter-rouge">install_name_tool</code></a>,
 we can edit the <code class="highlighter-rouge">rpaths</code> in our binary. In this case, since we only have
-2 <code class="highlighter-rouge">rpaths</code>, and neither of them are what we want, lets delete them both:</p>
+2 <code class="highlighter-rouge">rpaths</code>, and neither of them are what we want, lets delete them both
+(you'll have to change the Xcode path for your local installation):</p>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% install_name_tool \
   -delete_rpath @loader_path \
