@@ -11,6 +11,7 @@ body {
 
 header h1 {
   margin: 0;
+  word-break: break-word;
   font-size: 1.7em;
 }
 
