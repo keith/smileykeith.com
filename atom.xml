@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2021-03-08T08:41:26-08:00</updated>
+  <updated>2021-03-08T09:02:09-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -69,6 +69,11 @@ have installed. The result looks something like this:<sup id="fnref:2" role="doc
     <span class="n">versions</span> <span class="o">=</span> <span class="p">[</span><span class="s">":version12_4_0_12D4e"</span><span class="p">,</span> <span class="s">":version12_2_0_12B45b"</span><span class="p">],</span>
     <span class="n">default</span> <span class="o">=</span> <span class="s">":version12_4_0_12D4e"</span><span class="p">,</span>
 <span class="p">)</span>
+</code></pre></div></div>
+
+<p>To fetch the contents of this file on your machine you can run:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cat </span>bazel-<span class="si">$(</span><span class="nb">basename</span> <span class="nv">$PWD</span><span class="si">)</span>/external/local_config_xcode/BUILD
 </code></pre></div></div>
 
 <p>In order to enforce developers use the same version, you can short

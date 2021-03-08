@@ -88,6 +88,11 @@ have installed. The result looks something like this:<sup id="fnref:2" role="doc
 <span class="p">)</span>
 </code></pre></div></div>
 
+<p>To fetch the contents of this file on your machine you can run:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cat </span>bazel-<span class="si">$(</span><span class="nb">basename</span> <span class="nv">$PWD</span><span class="si">)</span>/external/local_config_xcode/BUILD
+</code></pre></div></div>
+
 <p>In order to enforce developers use the same version, you can short
 circuit bazel's Xcode discovery and instead reference a local
 <a href="https://docs.bazel.build/versions/master/build-ref.html#targets">target</a>
