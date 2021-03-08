@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2021-03-05T11:12:19-08:00</updated>
+  <updated>2021-03-07T16:19:10-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -319,6 +319,13 @@ directory. Again, we use <code class="highlighter-rouge">install_name_tool</code
 current path, to find our library. Now, as long as we ship the library
 alongside our binary, we can run it without setting any environment
 variables.</p>
+
+<p>To check that this worked as expected you can launch your executable
+with <code class="highlighter-rouge">DYLD_PRINT_LIBRARIES</code> set and <code class="highlighter-rouge">grep</code> for the library:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DYLD_PRINT_LIBRARIES=yesplz bin/drstring-cli 2&gt;&amp;1 | grep _Internal
+dyld: loaded: &lt;A1954DF6-6F32-3A7C-A50E-0B7942D95F99&gt; /Users/ksmiley/dev/DrString/bin/../lib/lib_InternalSwiftSyntaxParser.dylib
+</code></pre></div></div>
 
 <p>To use this method with Swift Package Manager you'll have to run a
 post-processing script that alters your <code class="highlighter-rouge">rpaths</code> using what we've
