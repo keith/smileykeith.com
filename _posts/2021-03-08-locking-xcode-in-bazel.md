@@ -52,6 +52,12 @@ xcode_config(
 )
 ```
 
+To fetch the contents of this file on your machine you can run:
+
+```sh
+cat bazel-$(basename $PWD)/external/local_config_xcode/BUILD
+```
+
 In order to enforce developers use the same version, you can short
 circuit bazel's Xcode discovery and instead reference a local
 [target](https://docs.bazel.build/versions/master/build-ref.html#targets)
