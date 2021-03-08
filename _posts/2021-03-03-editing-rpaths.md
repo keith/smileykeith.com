@@ -163,6 +163,14 @@ current path, to find our library. Now, as long as we ship the library
 alongside our binary, we can run it without setting any environment
 variables.
 
+To check that this worked as expected you can launch your executable
+with `DYLD_PRINT_LIBRARIES` set and `grep` for the library:
+
+```
+% DYLD_PRINT_LIBRARIES=yesplz bin/drstring-cli 2>&1 | grep _Internal
+dyld: loaded: <A1954DF6-6F32-3A7C-A50E-0B7942D95F99> /Users/ksmiley/dev/DrString/bin/../lib/lib_InternalSwiftSyntaxParser.dylib
+```
+
 To use this method with Swift Package Manager you'll have to run a
 post-processing script that alters your `rpaths` using what we've
 learned.
