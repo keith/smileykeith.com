@@ -67,7 +67,7 @@ Objective-C to ctags and then match it with Tagbar. I improved it a
 little bit and came up with this. Put this file anywhere you want, you
 will define its path in your vimrc.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--langdef=objc
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--langdef=objc
 --langmap=objc:.m..mm..h
 --regex-objc=/\@interface[[:space:]]+([[:alnum:]_]+)/\1/i,interface/
 --regex-objc=/\@implementation[[:space:]]+([[:alnum:]_]+)/\1/I,implementation/
@@ -91,7 +91,7 @@ will define its path in your vimrc.</p>
 <span class="se">    \</span> <span class="s1">'--extra='</span><span class="p">,</span>
 <span class="se">    \</span> <span class="s1">'--format=2'</span><span class="p">,</span>
 <span class="se">    \</span> <span class="s1">'--fields=nksaSmt'</span><span class="p">,</span>
-<span class="se">    \</span> <span class="s1">'--options='</span> <span class="p">.</span> expand<span class="p">(</span><span class="s1">'~/.vim/objctags'</span><span class="p">),</span>
+<span class="se">    \</span> <span class="s1">'--options='</span> <span class="p">.</span> <span class="nb">expand</span><span class="p">(</span><span class="s1">'~/.vim/objctags'</span><span class="p">),</span>
 <span class="se">    \</span> <span class="s1">'--objc-kinds=-N'</span><span class="p">,</span>
 <span class="se">  \</span> <span class="p">],</span>
 <span class="se">  \</span> <span class="s1">'sro'</span><span class="p">:</span> <span class="s1">' '</span><span class="p">,</span>
@@ -109,7 +109,7 @@ will define its path in your vimrc.</p>
 <span class="se">\</span> <span class="p">}</span>
 </code></pre></div></div>
 
-<p>Replace the <code class="highlighter-rouge">~/.vim/objctags</code> with the path where you chose to put the
+<p>Replace the <code class="language-plaintext highlighter-rouge">~/.vim/objctags</code> with the path where you chose to put the
 first file. Please let me know if you see any way that this could be
 improved.</p>
 

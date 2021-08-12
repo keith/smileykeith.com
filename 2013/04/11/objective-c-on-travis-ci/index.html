@@ -53,7 +53,7 @@
 <h3 id="steps">Steps</h3>
 
 <ul>
-  <li>Create a <code class="highlighter-rouge">.travis.yml</code> file in the root of your repository (leading dot is intentional). For many projects a file may just look like:</li>
+  <li>Create a <code class="language-plaintext highlighter-rouge">.travis.yml</code> file in the root of your repository (leading dot is intentional). For many projects a file may just look like:</li>
 </ul>
 
 <figure class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="na">language</span><span class="pi">:</span> <span class="s">objective-c</span></code></pre></figure>
@@ -75,11 +75,11 @@
     </ol>
   </li>
   <li>
-    <p>At this point for a simple project or a project using <a href="http://cocoapods.org/">CocoaPods</a> you should be good to go. If Travis finds a <code class="highlighter-rouge">Podfile</code> in the root of your repository it automatically runs <code class="highlighter-rouge">pod install</code> to get your dependencies (from their <a href="http://about.travis-ci.org/docs/user/languages/objective-c/">docs</a>). Otherwise there are a ton of <a href="http://about.travis-ci.org/docs/user/build-configuration/">configuration options</a> for your <code class="highlighter-rouge">.travis.yml</code> depending on how your repo is setup.</p>
+    <p>At this point for a simple project or a project using <a href="http://cocoapods.org/">CocoaPods</a> you should be good to go. If Travis finds a <code class="language-plaintext highlighter-rouge">Podfile</code> in the root of your repository it automatically runs <code class="language-plaintext highlighter-rouge">pod install</code> to get your dependencies (from their <a href="http://about.travis-ci.org/docs/user/languages/objective-c/">docs</a>). Otherwise there are a ton of <a href="http://about.travis-ci.org/docs/user/build-configuration/">configuration options</a> for your <code class="language-plaintext highlighter-rouge">.travis.yml</code> depending on how your repo is setup.</p>
   </li>
 </ul>
 
-<p>For one of my projects I created a <code class="highlighter-rouge">setup.sh</code> file at the root of my repo that looks like this:</p>
+<p>For one of my projects I created a <code class="language-plaintext highlighter-rouge">setup.sh</code> file at the root of my repo that looks like this:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/usr/bin/env bash</span>
 
@@ -90,7 +90,7 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
 <span class="nb">echo</span> <span class="s2">"Done"</span>
 <span class="nb">cd</span> ../../../</code></pre></figure>
 
-<p>This script which I run using the <code class="highlighter-rouge">before_install: ./setup.sh</code> option in my <code class="highlighter-rouge">.travis.yml</code> gets all my submodules, sets up Specta and Expecta and then goes back to the root directory for running. If you just have a few simple steps you can also have multiple <code class="highlighter-rouge">before_install</code> actions like:</p>
+<p>This script which I run using the <code class="language-plaintext highlighter-rouge">before_install: ./setup.sh</code> option in my <code class="language-plaintext highlighter-rouge">.travis.yml</code> gets all my submodules, sets up Specta and Expecta and then goes back to the root directory for running. If you just have a few simple steps you can also have multiple <code class="language-plaintext highlighter-rouge">before_install</code> actions like:</p>
 
 <figure class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="na">before_install</span><span class="pi">:</span>
   <span class="pi">-</span> <span class="s">cd Example</span>

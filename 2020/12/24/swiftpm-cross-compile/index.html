@@ -59,10 +59,10 @@ machine's architecture by default:</p>
 architecture. Now, in order to fully utilize the native performance of
 Apple Silicon chips, we need to produce a <a href="https://en.wikipedia.org/wiki/Fat_binary">fat
 binary</a> that contains a slice
-for both <code class="highlighter-rouge">x86_64</code> and <code class="highlighter-rouge">arm64</code>.</p>
+for both <code class="language-plaintext highlighter-rouge">x86_64</code> and <code class="language-plaintext highlighter-rouge">arm64</code>.</p>
 
 <p>Swift Package Manager has a few different ways to achieve this. The
-easiest way, as far as I can tell, is to pass the hidden <code class="highlighter-rouge">--arch</code> flag
+easiest way, as far as I can tell, is to pass the hidden <code class="language-plaintext highlighter-rouge">--arch</code> flag
 once for each architecture:</p>
 
 <div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release <span class="nt">--arch</span> arm64 <span class="nt">--arch</span> x86_64
@@ -83,8 +83,8 @@ requested architectures:</p>
 
 <p>Another option is to build once for each architecture, and then combine
 the binaries using
-<a href="https://keith.github.io/xcode-man-pages/lipo.1.html"><code class="highlighter-rouge">lipo</code></a>. Unlike
-the <code class="highlighter-rouge">--arch</code> option, this approach also works on Linux. Here's an
+<a href="https://keith.github.io/xcode-man-pages/lipo.1.html"><code class="language-plaintext highlighter-rouge">lipo</code></a>. Unlike
+the <code class="language-plaintext highlighter-rouge">--arch</code> option, this approach also works on Linux. Here's an
 example:</p>
 
 <div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release <span class="nt">--triple</span> arm64-apple-macosx

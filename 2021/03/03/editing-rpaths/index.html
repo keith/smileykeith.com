@@ -44,12 +44,12 @@
     <p>One of the issues with shipping a tool that depends on
 <a href="https://github.com/apple/swift-syntax">SwiftSyntax</a> is that it depends
 on a dynamic library that is provided with Xcode called
-<code class="highlighter-rouge">_InternalSwiftSyntaxParser</code>. This library provides some of Swift's
+<code class="language-plaintext highlighter-rouge">_InternalSwiftSyntaxParser</code>. This library provides some of Swift's
 logic for how to parse Swift code. When you run a command line tool that
 was built with a different version of Xcode than what you have installed
 locally, you hit this issue:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;unknown&gt;:0:0: error: The loaded '_InternalSwiftSyntaxParser' library is from a toolchain that is not compatible with this version of SwiftSyntax
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;unknown&gt;:0:0: error: The loaded '_InternalSwiftSyntaxParser' library is from a toolchain that is not compatible with this version of SwiftSyntax
 </code></pre></div></div>
 
 <p>Ideally, this library would be statically linked to your executable (and
@@ -62,14 +62,14 @@ your distribution archive's size, but make it easier to support multiple
 versions of Xcode at once.</p>
 
 <p>The key to this workaround relies on how
-<a href="https://keith.github.io/xcode-man-pages/dyld.1.html"><code class="highlighter-rouge">dyld</code></a> works.
-<code class="highlighter-rouge">dyld</code> is responsible for loading the dynamic libraries your binary
+<a href="https://keith.github.io/xcode-man-pages/dyld.1.html"><code class="language-plaintext highlighter-rouge">dyld</code></a> works.
+<code class="language-plaintext highlighter-rouge">dyld</code> is responsible for loading the dynamic libraries your binary
 depends on. First, it's useful for you to see what libraries you depend
 on with
-<a href="https://keith.github.io/xcode-man-pages/llvm-otool.1.html"><code class="highlighter-rouge">otool</code></a>.
+<a href="https://keith.github.io/xcode-man-pages/llvm-otool.1.html"><code class="language-plaintext highlighter-rouge">otool</code></a>.
 For example:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% otool -L ./.build/debug/drstring-cli
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% otool -L ./.build/debug/drstring-cli
 ./.build/debug/drstring-cli:
   ...
   /usr/lib/swift/libswiftObjectiveC.dylib (compatibility version 1.0.0, current version 1.0.0, weak)
@@ -78,28 +78,28 @@ For example:</p>
 </code></pre></div></div>
 
 <p>Here you can see many libraries are directly referenced with their
-absolute paths while <code class="highlighter-rouge">lib_InternalSwiftSyntaxParser.dylib</code>, the library
+absolute paths while <code class="language-plaintext highlighter-rouge">lib_InternalSwiftSyntaxParser.dylib</code>, the library
 we're specifically interested in, is referenced via a
-<a href="https://en.wikipedia.org/wiki/Rpath"><code class="highlighter-rouge">rpath</code></a>. You can run this command
-to see your binary's <code class="highlighter-rouge">rpaths</code> (yours may differ depending on your
+<a href="https://en.wikipedia.org/wiki/Rpath"><code class="language-plaintext highlighter-rouge">rpath</code></a>. You can run this command
+to see your binary's <code class="language-plaintext highlighter-rouge">rpaths</code> (yours may differ depending on your
 absolute path to Xcode):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% otool -l ./.build/debug/drstring-cli \
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% otool -l ./.build/debug/drstring-cli \
   | grep -A2 LC_RPATH \
   | grep "^\s*path" | cut -d " " -f 11
 @loader_path
 /Applications/Xcode-12.4.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx
 </code></pre></div></div>
 
-<p>Here we can see that <code class="highlighter-rouge">dyld</code> is instructed to look in 2 directories to
-find <code class="highlighter-rouge">lib_InternalSwiftSyntaxParser.dylib</code>. First, it looks in the
-directory specified by <code class="highlighter-rouge">@loader_path</code>, which in our case is likely
+<p>Here we can see that <code class="language-plaintext highlighter-rouge">dyld</code> is instructed to look in 2 directories to
+find <code class="language-plaintext highlighter-rouge">lib_InternalSwiftSyntaxParser.dylib</code>. First, it looks in the
+directory specified by <code class="language-plaintext highlighter-rouge">@loader_path</code>, which in our case is likely
 irrelevant since it is the directory that contains our executable. Then,
 it looks inside a directory within my absolute path to Xcode (which
 isn't very portable), which we can see this includes the library we
 expect (you'll have to change this path to your local Xcode path):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% ls /Applications/Xcode-12.4.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% ls /Applications/Xcode-12.4.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx
 layouts-x86_64.yaml                  libswiftCompatibilityDynamicReplacements.a
 lib_InternalSwiftSyntaxParser.dylib  libswiftRemoteMirror42.dylib
 libswiftCompatibility50.a            libswiftRemoteMirrorLegacy.dylib
@@ -107,13 +107,13 @@ libswiftCompatibility51.a            prebuilt-modules
 </code></pre></div></div>
 
 <p>Given this information, our goal is to replace the default locations
-<code class="highlighter-rouge">dyld</code> searches, and replace those with the directory we want. There are
+<code class="language-plaintext highlighter-rouge">dyld</code> searches, and replace those with the directory we want. There are
 a few ways we can do this, but first we need to decide what directory we
 will ship the library in. Typically, the directory structure for a
 command line tool that includes a dynamic library looks something
 like this:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;prefix&gt;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;prefix&gt;
 ├── bin
 │   └── drstring-cli
 └── lib
@@ -123,16 +123,16 @@ like this:</p>
 <p>We can use this for our example. First, we need to copy the library
 from Xcode using (this might change with future Xcode releases):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cp "$(xcode-select -p)"/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/lib_InternalSwiftSyntaxParser.dylib .
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cp "$(xcode-select -p)"/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/lib_InternalSwiftSyntaxParser.dylib .
 </code></pre></div></div>
 
 <p>Then, using
-<a href="https://keith.github.io/xcode-man-pages/install_name_tool.1.html"><code class="highlighter-rouge">install_name_tool</code></a>,
-we can edit the <code class="highlighter-rouge">rpaths</code> in our binary. In this case, since we only have
-2 <code class="highlighter-rouge">rpaths</code>, and neither of them are what we want, lets delete them both
+<a href="https://keith.github.io/xcode-man-pages/install_name_tool.1.html"><code class="language-plaintext highlighter-rouge">install_name_tool</code></a>,
+we can edit the <code class="language-plaintext highlighter-rouge">rpaths</code> in our binary. In this case, since we only have
+2 <code class="language-plaintext highlighter-rouge">rpaths</code>, and neither of them are what we want, lets delete them both
 (you'll have to change the Xcode path for your local installation):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% install_name_tool \
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% install_name_tool \
   -delete_rpath @loader_path \
   -delete_rpath /Applications/Xcode-12.4.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx \
   bin/drstring-cli
@@ -141,46 +141,46 @@ we can edit the <code class="highlighter-rouge">rpaths</code> in our binary. In 
 <p>Now, when we run our binary, we see it crashes immediately because it
 cannot find  the libraries it needs:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% bin/drstring-cli
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% bin/drstring-cli
 dyld: Library not loaded: @rpath/lib_InternalSwiftSyntaxParser.dylib
   Referenced from: /Users/ksmiley/dev/DrString/bin/drstring-cli
   Reason: image not found
 </code></pre></div></div>
 
 <p>At this point we have 2 options. We can either launch our binary with
-some special environment variables that <code class="highlighter-rouge">dyld</code> reads, or encode the
-<code class="highlighter-rouge">rpath</code> we want into the binary. Since adding the <code class="highlighter-rouge">rpath</code> to the binary
+some special environment variables that <code class="language-plaintext highlighter-rouge">dyld</code> reads, or encode the
+<code class="language-plaintext highlighter-rouge">rpath</code> we want into the binary. Since adding the <code class="language-plaintext highlighter-rouge">rpath</code> to the binary
 is destructive, lets try the environment variable approach first as an
-example. Using <code class="highlighter-rouge">DYLD_LIBRARY_PATH</code> we can instruct <code class="highlighter-rouge">dyld</code> to discover
+example. Using <code class="language-plaintext highlighter-rouge">DYLD_LIBRARY_PATH</code> we can instruct <code class="language-plaintext highlighter-rouge">dyld</code> to discover
 the libraries we want:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DYLD_LIBRARY_PATH=lib bin/drstring-cli
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DYLD_LIBRARY_PATH=lib bin/drstring-cli
 OVERVIEW: A Swift docstring linter, formatter, nitpicky assistant...
 ...
 </code></pre></div></div>
 
-<p>There is also <code class="highlighter-rouge">DYLD_FALLBACK_LIBRARY_PATH</code>, which unlike
-<code class="highlighter-rouge">DYLD_LIBRARY_PATH</code>, has a default of <code class="highlighter-rouge">/usr/local/lib:/usr/lib</code>. This
-means if your library doesn't exist in the binary's <code class="highlighter-rouge">rpaths</code>, but then
-happens to be in <code class="highlighter-rouge">/usr/local/lib</code>, it will still run as expected. This
+<p>There is also <code class="language-plaintext highlighter-rouge">DYLD_FALLBACK_LIBRARY_PATH</code>, which unlike
+<code class="language-plaintext highlighter-rouge">DYLD_LIBRARY_PATH</code>, has a default of <code class="language-plaintext highlighter-rouge">/usr/local/lib:/usr/lib</code>. This
+means if your library doesn't exist in the binary's <code class="language-plaintext highlighter-rouge">rpaths</code>, but then
+happens to be in <code class="language-plaintext highlighter-rouge">/usr/local/lib</code>, it will still run as expected. This
 is useful to know, because <a href="https://brew.sh/">homebrew</a> installs
-libraries to <code class="highlighter-rouge">/usr/local/lib</code> on Intel based Macs. This can be
+libraries to <code class="language-plaintext highlighter-rouge">/usr/local/lib</code> on Intel based Macs. This can be
 surprising if you install an unrelated tool that depends on the same
 library and then your binary discovers this unrelated installation when
 you don't want it to. If you want to disable this fallback, you can set
-the value to <code class="highlighter-rouge">/dev/null</code>. In our example, using
-<code class="highlighter-rouge">DYLD_FALLBACK_LIBRARY_PATH</code> results in same behavior:</p>
+the value to <code class="language-plaintext highlighter-rouge">/dev/null</code>. In our example, using
+<code class="language-plaintext highlighter-rouge">DYLD_FALLBACK_LIBRARY_PATH</code> results in same behavior:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DYLD_FALLBACK_LIBRARY_PATH=lib bin/drstring-cli
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DYLD_FALLBACK_LIBRARY_PATH=lib bin/drstring-cli
 OVERVIEW: A Swift docstring linter, formatter, nitpicky assistant...
 ...
 </code></pre></div></div>
 
 <p>Instead of setting environment variables every time we run the binary,
-we can edit our binary to instruct <code class="highlighter-rouge">dyld</code> to search the correct
-directory. Again, we use <code class="highlighter-rouge">install_name_tool</code> for this:</p>
+we can edit our binary to instruct <code class="language-plaintext highlighter-rouge">dyld</code> to search the correct
+directory. Again, we use <code class="language-plaintext highlighter-rouge">install_name_tool</code> for this:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% install_name_tool -add_rpath @executable_path/../lib bin/drstring-cli
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% install_name_tool -add_rpath @executable_path/../lib bin/drstring-cli
 </code></pre></div></div>
 
 <p>In this case we rely on a relative path, based on the executable's
@@ -189,14 +189,14 @@ alongside our binary, we can run it without setting any environment
 variables.</p>
 
 <p>To check that this worked as expected you can launch your executable
-with <code class="highlighter-rouge">DYLD_PRINT_LIBRARIES</code> set and <code class="highlighter-rouge">grep</code> for the library:</p>
+with <code class="language-plaintext highlighter-rouge">DYLD_PRINT_LIBRARIES</code> set and <code class="language-plaintext highlighter-rouge">grep</code> for the library:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DYLD_PRINT_LIBRARIES=yesplz bin/drstring-cli 2&gt;&amp;1 | grep _Internal
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DYLD_PRINT_LIBRARIES=yesplz bin/drstring-cli 2&gt;&amp;1 | grep _Internal
 dyld: loaded: &lt;A1954DF6-6F32-3A7C-A50E-0B7942D95F99&gt; /Users/ksmiley/dev/DrString/bin/../lib/lib_InternalSwiftSyntaxParser.dylib
 </code></pre></div></div>
 
 <p>To use this method with Swift Package Manager you'll have to run a
-post-processing script that alters your <code class="highlighter-rouge">rpaths</code> using what we've
+post-processing script that alters your <code class="language-plaintext highlighter-rouge">rpaths</code> using what we've
 learned.</p>
 
 <p>Overall this is more work than if we could produce a statically linked

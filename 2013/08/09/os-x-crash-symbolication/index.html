@@ -63,7 +63,7 @@ exact method didn't seem to work for me.</p>
 
 <p>Here is what did work for me. For my first abridged crash report I had this</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Process:         Sail [35072]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Process:         Sail [35072]
 Path:            /Applications/Sail.app/Contents/MacOS/Sail
 Load Address:    0x106823000
 Identifier:      com.keithsmiley.SailOSX
@@ -92,16 +92,16 @@ Binary Images:
 
 <p>Just glancing at this crash report it's not too difficult to understand a bit
 about what was going on. A notification was sent, some methods were called in my
-application and then <code class="highlighter-rouge">accountTypeWithAccountTypeIdentifier</code> was called. Based on
+application and then <code class="language-plaintext highlighter-rouge">accountTypeWithAccountTypeIdentifier</code> was called. Based on
 the small number of times I call that method I was quickly able to assume where
 the issue was but I still wanted to see exactly what methods of mine were being
 called first.</p>
 
-<p>This brings me to <code class="highlighter-rouge">atos</code> the command line tool Apple provides to symbolicate
+<p>This brings me to <code class="language-plaintext highlighter-rouge">atos</code> the command line tool Apple provides to symbolicate
 these reports. This is where my experience differs with most of what I found
 online. My usage looked like this:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x106823000
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x106823000
 </code></pre></div></div>
 
 <p>This uses my dSYM file that was generated with the archive build I submitted to
@@ -111,22 +111,22 @@ architecture and the most important part, for me, the load address.</p>
 <p>To find my dSYM file that was generated when I did my archive build I simply
 noted the version and build number from the crash report, went to the Archives
 tab in the Xcode organizer, found the build with the same number, right clicked
-and clicked "Show in Finder." This takes you directly to the <code class="highlighter-rouge">.xcarchive</code> file
+and clicked "Show in Finder." This takes you directly to the <code class="language-plaintext highlighter-rouge">.xcarchive</code> file
 on disk which you can right click and click "Show Package Contents." From there
 I copied my dSYM to the desktop so I didn't overwrite anything unintentionally.</p>
 
 <p>The load address is the starting memory address of your application. The tool
 uses this address as an offset to find the correct methods in your symbols. In
-the above crash report <code class="highlighter-rouge">Load Address</code> is a provided field. This was the only
-report I saw that had that, typically I needed to look under the <code class="highlighter-rouge">Binary Images</code>
+the above crash report <code class="language-plaintext highlighter-rouge">Load Address</code> is a provided field. This was the only
+report I saw that had that, typically I needed to look under the <code class="language-plaintext highlighter-rouge">Binary Images</code>
 section for the address range of my application. In this example it was
-<code class="highlighter-rouge">0x106823000 - 0x106896fff</code>.</p>
+<code class="language-plaintext highlighter-rouge">0x106823000 - 0x106896fff</code>.</p>
 
-<p>The <code class="highlighter-rouge">atos</code> command then provides an interactive prompt where you can paste
+<p>The <code class="language-plaintext highlighter-rouge">atos</code> command then provides an interactive prompt where you can paste
 addresses into the stdin and it will tell you the corresponding methods. Mine
 looked like this:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x00000001068308f7
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x00000001068308f7
 -[KSAccountsPreferences dealloc] (in Sail) (KSAccountsPreferences.m:77)
 0x0000000106830798
 -[KSAccountsPreferences viewDidLoad] (in Sail) (KSAccountsPreferences.m:73)
@@ -135,16 +135,16 @@ looked like this:</p>
 </code></pre></div></div>
 
 <p>Here I can see that the notification that was being posted was probably an
-<code class="highlighter-rouge">NSApplicationDidFinishLaunchingNotification</code> starting off some methods in my
+<code class="language-plaintext highlighter-rouge">NSApplicationDidFinishLaunchingNotification</code> starting off some methods in my
 app delegate. I then load the accounts preferences, which would make sense to
-call the <code class="highlighter-rouge">ACAccountStore</code> method, but then <code class="highlighter-rouge">dealloc</code> is called. Seeing this was
-an immediate red flag since <code class="highlighter-rouge">KSAccountsPreferences</code> should be retained since it
+call the <code class="language-plaintext highlighter-rouge">ACAccountStore</code> method, but then <code class="language-plaintext highlighter-rouge">dealloc</code> is called. Seeing this was
+an immediate red flag since <code class="language-plaintext highlighter-rouge">KSAccountsPreferences</code> should be retained since it
 provides information about available accounts to the rest of the application.</p>
 
 <p>I had another crash report from a different issue that was a little bit harder
 to parse without symbolicating the methods.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Process:         Sail [47027]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Process:         Sail [47027]
 Identifier:      com.keithsmiley.SailOSX
 Version:         1.2.0 (4)
 Code Type:       X86-64 (Native)
@@ -168,14 +168,14 @@ Binary Images:
   0x10b82a000 - 0x10b89dff7 +com.keithsmiley.SailOSX (1.2.0 - 4) &lt;47EC2733-B543-31EA-A6AA-9D998FB65803&gt;
 </code></pre></div></div>
 
-<p>Obviously this was caused by an invalid access to an array but that's a little harder to track down. So I again used <code class="highlighter-rouge">atos</code> with the dSYM and new memory location.</p>
+<p>Obviously this was caused by an invalid access to an array but that's a little harder to track down. So I again used <code class="language-plaintext highlighter-rouge">atos</code> with the dSYM and new memory location.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x10b82a000
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x10b82a000
 </code></pre></div></div>
 
 <p>I got this output for my memory addresses</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x000000010b838eed
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x000000010b838eed
 -[KSAccountsPreferences selectedADNUser] (in Sail) (KSAccountsPreferences.m:238)
 0x000000010b838f36
 -[KSAccountsPreferences selectTwitterUsername] (in Sail) (KSAccountsPreferences.m:243)
@@ -187,10 +187,10 @@ __36-[KSAccountsPreferences viewDidLoad]_block_invoke (in Sail) (KSAccountsPrefe
 
 <p>This ended up giving me the exact line where out of bounds issue was happening
 depending on a certain number of accounts. I noticed that this issue had been
-fixed since my last release so I did a <code class="highlighter-rouge">diff</code> on the tag I created for that
+fixed since my last release so I did a <code class="language-plaintext highlighter-rouge">diff</code> on the tag I created for that
 specific release with</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git difftool HEAD..1.2.0\(3\)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git difftool HEAD..1.2.0\(3\)
 </code></pre></div></div>
 
 <p>Then in <a href="http://www.kaleidoscopeapp.com/">Kaleidoscope</a> I was able to figure out

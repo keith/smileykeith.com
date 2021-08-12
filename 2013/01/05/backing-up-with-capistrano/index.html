@@ -45,7 +45,7 @@
 
 <p>Many people use <a href="http://en.wikipedia.org/wiki/Rsync">rsync</a> to do their server backups. In fact Linode even has a <a href="http://library.linode.com/linux-tools/utilities/rsync#sph_use-rsync-to-back-up-production-environments">guide</a> on how to set it up (there's a better one <a href="http://feross.org/how-to-setup-your-linode/">here</a>). I decided that instead of a 1 for 1 directory backup, I would prefer to have a <a href="http://en.wikipedia.org/wiki/Tar_(file_format)">tarball</a> of the contents. While I could've easily done this with a few bash commands from the server that's not particular ideal for my setup. My local machines don't run 24/7 so if I set it up on the server to automate the backup every week, it may try to initiate the backup when my machine was off (I could try to guess when it's on every week but that's not ideal either).</p>
 
-<p>The obvious solution to this is run it from my local machine instead every week. That way once a week when it's powered up it would log in to the server, create the tarball and pull it down. Insert <a href="https://github.com/capistrano/capistrano">Capistrano</a> (<code class="highlighter-rouge">[sudo] gem install capistrano</code>) a <a href="http://rubygems.org/">RubyGem</a> for 'Remote multi-server automation.' So I wrote a very basic <code class="highlighter-rouge">Capfile</code> to automate this for me (replace the path to your <code class="highlighter-rouge">www</code> folder accordingly).</p>
+<p>The obvious solution to this is run it from my local machine instead every week. That way once a week when it's powered up it would log in to the server, create the tarball and pull it down. Insert <a href="https://github.com/capistrano/capistrano">Capistrano</a> (<code class="language-plaintext highlighter-rouge">[sudo] gem install capistrano</code>) a <a href="http://rubygems.org/">RubyGem</a> for 'Remote multi-server automation.' So I wrote a very basic <code class="language-plaintext highlighter-rouge">Capfile</code> to automate this for me (replace the path to your <code class="language-plaintext highlighter-rouge">www</code> folder accordingly).</p>
 
 <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="nb">load</span> <span class="s1">'deploy'</span>
 
@@ -58,11 +58,11 @@
   <span class="n">run_locally</span> <span class="s2">"scp </span><span class="si">#{</span> <span class="vg">$SERVER_USER</span> <span class="si">}</span><span class="s2">@</span><span class="si">#{</span> <span class="vg">$SERVER_IP</span> <span class="si">}</span><span class="s2">:~/backup.tar.gz ~/Dropbox/Backups/Server"</span>
 <span class="k">end</span></code></pre></figure>
 
-<p>Then I added this to my crontab on my local machine by running <code class="highlighter-rouge">crontab -e</code> and adding the line:</p>
+<p>Then I added this to my crontab on my local machine by running <code class="language-plaintext highlighter-rouge">crontab -e</code> and adding the line:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">@weekly /Users/ksmiley/.rbenv/shims/cap <span class="nt">-f</span> ~/path/to/Capfile backup</code></pre></figure>
 
-<p>I included the path to the Capistrano executable since cron (on OS X) executes tasks with <code class="highlighter-rouge">sh</code>, which isn't setup with my <code class="highlighter-rouge">$PATH</code>.</p>
+<p>I included the path to the Capistrano executable since cron (on OS X) executes tasks with <code class="language-plaintext highlighter-rouge">sh</code>, which isn't setup with my <code class="language-plaintext highlighter-rouge">$PATH</code>.</p>
 
 
   </div>

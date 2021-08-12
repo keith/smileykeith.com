@@ -48,12 +48,12 @@ paths, instead of absolute paths, for compilation.</p>
 <p>Specifically, when building swift code, Xcode calls the compiler with
 something like:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>swiftc [ARGS] /path/to/srcroot/path/to/file1.swift /path/to/srcroot/path/to/file2.swift
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>swiftc [ARGS] /path/to/srcroot/path/to/file1.swift /path/to/srcroot/path/to/file2.swift
 </code></pre></div></div>
 
 <p>Where bazel will call the compiler with something like:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>swiftc [ARGS] path/to/file1.swift path/to/file2.swift
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>swiftc [ARGS] path/to/file1.swift path/to/file2.swift
 </code></pre></div></div>
 
 <p>Normally, this difference is inconsequential, both compilations will
@@ -68,20 +68,20 @@ details aren't considered important inputs in the build.</p>
 <p>Unfortunately, in a few places, Xcode relies on paths being absolute.
 Today, we'll look at how Xcode reports test failures in the UI.
 Specifically the underlying
-<a href="https://developer.apple.com/documentation/xctest/xctissue"><code class="highlighter-rouge">XCTIssue</code></a>
-that <code class="highlighter-rouge">XCTest</code> creates is expected to be instantiated with an absolute
-path. This absolute path is populated from the <code class="highlighter-rouge">#filePath</code> (previously
-<code class="highlighter-rouge">#file</code>) keyword which is <em>supposed</em> to reference the absolute path of
+<a href="https://developer.apple.com/documentation/xctest/xctissue"><code class="language-plaintext highlighter-rouge">XCTIssue</code></a>
+that <code class="language-plaintext highlighter-rouge">XCTest</code> creates is expected to be instantiated with an absolute
+path. This absolute path is populated from the <code class="language-plaintext highlighter-rouge">#filePath</code> (previously
+<code class="language-plaintext highlighter-rouge">#file</code>) keyword which is <em>supposed</em> to reference the absolute path of
 the current source file.</p>
 
 <p>The first question is: How does the Swift compiler know what the
 absolute path of the current file is? It's easy when Xcode passes an
 absolute path to the compiler. But, what if you pass a relative path? In
 this case, the Swift compiler uses the directory passed with the
-<code class="highlighter-rouge">-working-directory</code> argument to make the path absolute. It turns out if
+<code class="language-plaintext highlighter-rouge">-working-directory</code> argument to make the path absolute. It turns out if
 you don't pass this argument, the compiler has no choice but to use the
-relative path. This means the <code class="highlighter-rouge">#filePath</code> keyword ends up translating to
-a relative path, which means the <code class="highlighter-rouge">XCTIssue</code> is created with a relative
+relative path. This means the <code class="language-plaintext highlighter-rouge">#filePath</code> keyword ends up translating to
+a relative path, which means the <code class="language-plaintext highlighter-rouge">XCTIssue</code> is created with a relative
 path.</p>
 
 <p>With relative paths when you run your tests in Xcode and they
@@ -89,27 +89,27 @@ fail, clicking the failure in the issue navigator doesn't do anything.
 But, it's supposed to jump you to the test case that failed (FB8451256,
 FB8454623).</p>
 
-<p>So, how do we fix this? Luckily, we know the core issue is <code class="highlighter-rouge">XCTIssue</code> is
-created with a relative path. Since <code class="highlighter-rouge">XCTIssue</code> instances are created as
+<p>So, how do we fix this? Luckily, we know the core issue is <code class="language-plaintext highlighter-rouge">XCTIssue</code> is
+created with a relative path. Since <code class="language-plaintext highlighter-rouge">XCTIssue</code> instances are created as
 part of our process, we can
 <a href="https://nshipster.com/method-swizzling">swizzle</a> it to fix this.</p>
 
-<p>Looking at the underlying <a href="https://developer.apple.com/documentation/xctest/xctsourcecodelocation"><code class="highlighter-rouge">XCTSourceCodeLocation</code>
+<p>Looking at the underlying <a href="https://developer.apple.com/documentation/xctest/xctsourcecodelocation"><code class="language-plaintext highlighter-rouge">XCTSourceCodeLocation</code>
 docs</a>,
 we can see there are 2 initializers we're potentially interested in.
-Setting some quick breakpoints we can see that <code class="highlighter-rouge">XCTIssue</code> goes through
-the <code class="highlighter-rouge">init(fileURL:lineNumber:)</code> initializer. When we inspect the
+Setting some quick breakpoints we can see that <code class="language-plaintext highlighter-rouge">XCTIssue</code> goes through
+the <code class="language-plaintext highlighter-rouge">init(fileURL:lineNumber:)</code> initializer. When we inspect the
 argument it receives in the debugger, we can see it's the relative path
 we passed to the compiler. Knowing this, we can surmise that by
 swizzling the initializer, and make the argument an absolute path, we
 can satisfy Xcode's requirement. So, what path do we use? Using Xcode's
-scheme environment variables, we can pass Xcode's <code class="highlighter-rouge">SRCROOT</code> through an
+scheme environment variables, we can pass Xcode's <code class="language-plaintext highlighter-rouge">SRCROOT</code> through an
 environment variable named the same thing:</p>
 
 <p><img src="/images/srcroot.png" alt="" /></p>
 
 <p>Make sure to have the "Expand Variables Based On" dropdown set to some
-target (FB8454879) or the <code class="highlighter-rouge">$(SRCROOT)</code> string will be passed through
+target (FB8454879) or the <code class="language-plaintext highlighter-rouge">$(SRCROOT)</code> string will be passed through
 literally.</p>
 
 <p>Now, for the swizzling:</p>
@@ -156,8 +156,8 @@ literally.</p>
 </code></pre></div></div>
 
 <p>With this implementation, you need to call
-<code class="highlighter-rouge">swizzleXCTSourceCodeLocationIfNeeded()</code> somewhere. Using the
-<a href="https://developer.apple.com/documentation/bundleresources/information_property_list/nsprincipalclass"><code class="highlighter-rouge">NSPrincipalClass</code> plist
+<code class="language-plaintext highlighter-rouge">swizzleXCTSourceCodeLocationIfNeeded()</code> somewhere. Using the
+<a href="https://developer.apple.com/documentation/bundleresources/information_property_list/nsprincipalclass"><code class="language-plaintext highlighter-rouge">NSPrincipalClass</code> plist
 key</a>,
 we can define a class that is initialized as soon as your test bundle
 starts to run. We can define a small class to call this:</p>

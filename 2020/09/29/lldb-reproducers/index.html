@@ -53,7 +53,7 @@ with a reliable reproduction case.</p>
 <h1 id="how">How?</h1>
 
 <p>Although the steps to use reproducers are mostly straightforward,
-launching LLDB from Xcode does not enable <code class="highlighter-rouge">--capture</code> mode (FB7878562).
+launching LLDB from Xcode does not enable <code class="language-plaintext highlighter-rouge">--capture</code> mode (FB7878562).
 This means if you want to provide a reproducer for an issue you've
 experienced in a Xcode debugging session, you need to reproduce it
 outside of Xcode instead.</p>
@@ -63,7 +63,7 @@ out</a> as
 of Xcode 12 there is a private default for enabling capture mode for
 debugging sessions launched from Xcode:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>defaults write com.apple.dt.Xcode IDEDebuggerEnableReproducerCapture -bool YES
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>defaults write com.apple.dt.Xcode IDEDebuggerEnableReproducerCapture -bool YES
 </code></pre></div></div>
 
 <p>Note: to provide enough information to reproduce your issue, LLDB
@@ -84,13 +84,13 @@ to date.</li>
   <li>In Terminal.app navigate to your DerivedData directory (you can find
 this by right clicking on your app in the "Products" section of
 Xcode's project navigator, and clicking "Show in Finder").</li>
-  <li>Run <code class="highlighter-rouge">lldb --capture /path/to/Your.app</code>.</li>
-  <li>In the LLDB session run <code class="highlighter-rouge">process launch --stop-at-entry</code>.</li>
+  <li>Run <code class="language-plaintext highlighter-rouge">lldb --capture /path/to/Your.app</code>.</li>
+  <li>In the LLDB session run <code class="language-plaintext highlighter-rouge">process launch --stop-at-entry</code>.</li>
   <li>Now you're in a paused LLDB session. Here you can <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">set the
 breakpoints</a> you need to reproduce your issue. Often for
 me this means breaking at a specific place, and running some version
-of <code class="highlighter-rouge">po foo</code> that causes an issue.</li>
-  <li>Once you're done reproducing the issue, run <code class="highlighter-rouge">reproducer generate</code> in
+of <code class="language-plaintext highlighter-rouge">po foo</code> that causes an issue.</li>
+  <li>Once you're done reproducing the issue, run <code class="language-plaintext highlighter-rouge">reproducer generate</code> in
 LLDB. This will print the path the information was written to.</li>
   <li>Verify the contents of the output directory doesn't include anything
 you're not comfortable sharing with Apple, zip it, and <a href="https://feedbackassistant.apple.com">submit a
@@ -106,13 +106,13 @@ the same way as running a macOS app. Because of this, the steps differ.</p>
 <ol>
   <li>Run the app in Xcode and stop it. This way it's updated and installed
 on the iOS simulator.</li>
-  <li>Run <code class="highlighter-rouge">lldb --capture --wait-for --attach-name YOUR_APP_NAME</code>.</li>
+  <li>Run <code class="language-plaintext highlighter-rouge">lldb --capture --wait-for --attach-name YOUR_APP_NAME</code>.</li>
   <li>Manually launch your app in the Simulator.</li>
   <li>Now you're in a paused LLDB session. Here you can <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">set the
 breakpoints</a> you need to reproduce your issue. Often for
 me this means breaking at a specific place, and running some version
-of <code class="highlighter-rouge">po foo</code> that causes an issue.</li>
-  <li>Once you're done reproducing the issue, run <code class="highlighter-rouge">reproducer generate</code> in
+of <code class="language-plaintext highlighter-rouge">po foo</code> that causes an issue.</li>
+  <li>Once you're done reproducing the issue, run <code class="language-plaintext highlighter-rouge">reproducer generate</code> in
 LLDB. This will print the path the information was written to.</li>
   <li>Verify the contents of the output directory doesn't include anything
 you're not comfortable sharing with Apple, zip it, and <a href="https://feedbackassistant.apple.com">submit a
@@ -129,18 +129,18 @@ workflow for this please <a href="https://twitter.com/SmileyKeith">let me know</
 
 <ul>
   <li>Checkout the <a href="https://lldb.llvm.org/resources/reproducers.html">reproducers</a> page for more details.</li>
-  <li><code class="highlighter-rouge">man lldb</code> has more usage info.</li>
-  <li>Passing <code class="highlighter-rouge">--capture-path</code> to LLDB might be helpful.</li>
-  <li>Run <code class="highlighter-rouge">reproducer status</code> to verify you're in capture mode.</li>
-  <li>Run <code class="highlighter-rouge">help COMMAND [SUBCOMMAND]</code> in LLDB to get info on the commands
+  <li><code class="language-plaintext highlighter-rouge">man lldb</code> has more usage info.</li>
+  <li>Passing <code class="language-plaintext highlighter-rouge">--capture-path</code> to LLDB might be helpful.</li>
+  <li>Run <code class="language-plaintext highlighter-rouge">reproducer status</code> to verify you're in capture mode.</li>
+  <li>Run <code class="language-plaintext highlighter-rouge">help COMMAND [SUBCOMMAND]</code> in LLDB to get info on the commands
 you're running.</li>
-  <li>Run <code class="highlighter-rouge">help b</code> to see examples of how to set breakpoints from the
+  <li>Run <code class="language-plaintext highlighter-rouge">help b</code> to see examples of how to set breakpoints from the
 command line interface.</li>
   <li>See the <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">LLDB tutorial</a> for more breakpoint examples.</li>
-  <li>Try out <code class="highlighter-rouge">lldb --replay /path/to/your/reproducer</code> to see what Apple
+  <li>Try out <code class="language-plaintext highlighter-rouge">lldb --replay /path/to/your/reproducer</code> to see what Apple
 will see.</li>
-  <li>You can attach to XCTest processes by using <code class="highlighter-rouge">xctest</code> as your
-<code class="highlighter-rouge">--attach-name</code> argument.</li>
+  <li>You can attach to XCTest processes by using <code class="language-plaintext highlighter-rouge">xctest</code> as your
+<code class="language-plaintext highlighter-rouge">--attach-name</code> argument.</li>
 </ul>
 
 

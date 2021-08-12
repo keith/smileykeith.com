@@ -49,17 +49,17 @@ cycles reproducing things that have already been built by someone else.</p>
 
 <p>In order for bazel to guarantee that downloading the artifacts instead
 of building them will produce the same results, it must ensure that all
-the inputs of your build are the same as a previous build.<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote">1</a></sup> For macOS
+the inputs of your build are the same as a previous build.<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup> For macOS
 and iOS builds bazel's inputs include the version of Xcode you're using.
 This means if developers on your team use different versions of Xcode,
 they cannot share the same build cache.</p>
 
 <p>Bazel discovers your currently installed Xcode versions by running
-<a href="https://github.com/bazelbuild/bazel/blob/cd6724deb7dad05c477425fb09eff613659a5b3f/tools/osx/xcode_locator.m"><code class="highlighter-rouge">xcode_locator</code></a>,
+<a href="https://github.com/bazelbuild/bazel/blob/cd6724deb7dad05c477425fb09eff613659a5b3f/tools/osx/xcode_locator.m"><code class="language-plaintext highlighter-rouge">xcode_locator</code></a>,
 and then
 <a href="https://github.com/bazelbuild/bazel/blob/cd6724deb7dad05c477425fb09eff613659a5b3f/tools/osx/xcode_configure.bzl">generating</a>
-a <code class="highlighter-rouge">BUILD</code> file that contains an entry for every version you currently
-have installed. The result looks something like this:<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote">2</a></sup></p>
+a <code class="language-plaintext highlighter-rouge">BUILD</code> file that contains an entry for every version you currently
+have installed. The result looks something like this:<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup></p>
 
 <div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">xcode_version</span><span class="p">(</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s">"version12_4_0_12D4e"</span><span class="p">,</span>
@@ -96,9 +96,9 @@ have installed. The result looks something like this:<sup id="fnref:2" role="doc
 <p>In order to enforce developers use the same version, you can short
 circuit bazel's Xcode discovery and instead reference a local
 <a href="https://docs.bazel.build/versions/master/build-ref.html#targets">target</a>
-that you provide.<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote">3</a></sup></p>
+that you provide.<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup></p>
 
-<p>To do this, you can setup your target in the <code class="highlighter-rouge">BUILD</code> file at the root of
+<p>To do this, you can setup your target in the <code class="language-plaintext highlighter-rouge">BUILD</code> file at the root of
 your project (or somewhere else if you'd prefer). Using the contents
 from the example above, but only including the Xcode versions you want
 to support, it will contain:</p>
@@ -121,22 +121,22 @@ to support, it will contain:</p>
 </code></pre></div></div>
 
 <p>Then you can add this to your
-<a href="https://docs.bazel.build/versions/master/guide.html#bazelrc-the-bazel-configuration-file"><code class="highlighter-rouge">.bazelrc</code></a>:</p>
+<a href="https://docs.bazel.build/versions/master/guide.html#bazelrc-the-bazel-configuration-file"><code class="language-plaintext highlighter-rouge">.bazelrc</code></a>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>build --xcode_version_config=//:host_xcodes
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>build --xcode_version_config=//:host_xcodes
 </code></pre></div></div>
 
 <p>This way if a developer tries to build with a version of Xcode that is
 not explicitly supported, they see this error:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ERROR: /.../BUILD.bazel:31:11: Compiling something failed: I/O exception during sandboxed execution: Running '/.../xcode-locator 12.4.0.12D4e' failed with code 1.
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ERROR: /.../BUILD.bazel:31:11: Compiling something failed: I/O exception during sandboxed execution: Running '/.../xcode-locator 12.4.0.12D4e' failed with code 1.
 This most likely indicates that xcode version 12.4.0.12D4e is not available on the host machine.
 </code></pre></div></div>
 
 <p>This is a simple solution <em>if</em> you only want to support a single version
 of Xcode at once. Often it's useful to support multiple Xcode versions
 for testing, even if not all versions will get cache hits. In this
-case, one solution is to include multiple versions in your <code class="highlighter-rouge">BUILD</code>
+case, one solution is to include multiple versions in your <code class="language-plaintext highlighter-rouge">BUILD</code>
 file:</p>
 
 <div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">xcode_version</span><span class="p">(</span>
@@ -167,10 +167,10 @@ file:</p>
 </code></pre></div></div>
 
 <p>Which is very similar to our first example, except we replaced the
-<code class="highlighter-rouge">aliases</code> with the build numbers from each version. This is a perfect
+<code class="language-plaintext highlighter-rouge">aliases</code> with the build numbers from each version. This is a perfect
 unique value to differentiate between multiple versions during the Xcode
 beta cycle. Now we can explicitly pass the
-<a href="https://docs.bazel.build/versions/4.0.0/command-line-reference.html#flag--xcode_version"><code class="highlighter-rouge">xcode_version</code></a>
+<a href="https://docs.bazel.build/versions/4.0.0/command-line-reference.html#flag--xcode_version"><code class="language-plaintext highlighter-rouge">xcode_version</code></a>
 argument with the build number you want to use. You can retrieve the
 build number from your current Xcode version like this:</p>
 
@@ -179,7 +179,7 @@ build number from your current Xcode version like this:</p>
 </code></pre></div></div>
 
 <p>Using this method you can support multiple versions of Xcode, while
-still respecting the user's <code class="highlighter-rouge">xcode-select</code> value (or <code class="highlighter-rouge">DEVELOPER_DIR</code>
+still respecting the user's <code class="language-plaintext highlighter-rouge">xcode-select</code> value (or <code class="language-plaintext highlighter-rouge">DEVELOPER_DIR</code>
 environment variable).</p>
 
 <div class="footnotes" role="doc-endnotes">

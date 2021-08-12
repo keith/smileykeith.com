@@ -45,7 +45,7 @@
 
 <p>This functionality already exists in <a href="http://www.potionfactory.com/thehitlist/">The Hit List</a> an awesome GTD app that has a lot of baggage with me, and I'm sure it exists in other applications as well.</p>
 
-<p>In my <code class="highlighter-rouge">NSTableView</code> subclass' <code class="highlighter-rouge">keyDown:</code> method I tried a few things.</p>
+<p>In my <code class="language-plaintext highlighter-rouge">NSTableView</code> subclass' <code class="language-plaintext highlighter-rouge">keyDown:</code> method I tried a few things.</p>
 
 <p>Attempt 1: First I tried to re implement the functionality myself. In retrospect this doesn't make any sense but at first it was pretty simple. It looked something like this.</p>
 
@@ -68,7 +68,7 @@
     <span class="p">}</span>
 <span class="p">}</span></code></pre></figure>
 
-<p>The issue with this is the way <code class="highlighter-rouge">NSTableView</code> typically expands it's selection. I think of it as a pivot point where you start. Then you go up and down relative to that point. So if you start at index 2 and go down till index 4, you should have 2 rows selected. Then when you go back up you should deselect the rows and indexes 3 and 4 and select the rows and index 1 and 0. At this point I realized it was more difficult than I realized at first and went in search on another solution.</p>
+<p>The issue with this is the way <code class="language-plaintext highlighter-rouge">NSTableView</code> typically expands it's selection. I think of it as a pivot point where you start. Then you go up and down relative to that point. So if you start at index 2 and go down till index 4, you should have 2 rows selected. Then when you go back up you should deselect the rows and indexes 3 and 4 and select the rows and index 1 and 0. At this point I realized it was more difficult than I realized at first and went in search on another solution.</p>
 
 <p>Attempt 2: The next solution I discovered used the <a href="https://developer.apple.com/library/mac/#documentation/Carbon/Reference/QuartzEventServicesRef/Reference/reference.html">Quartz Event Services</a> APIs.</p>
 
@@ -84,7 +84,7 @@
 
 <p>This solution worked perfectly, at first. This mainly emulates a key press with a different key code. So as you can see I was catching j and k and spitting them out as down and up. I spent a few minutes testing this before I remembered that I had sandboxing disabled so I could more easily delete my application support folder while messing with my Core Data stack. There went that solution.</p>
 
-<p>Attempt 3: Before I used the weird <code class="highlighter-rouge">CGEventRef</code> solution I tried to create my own <code class="highlighter-rouge">NSEvent</code> passing it all the same attributes from the original event (all this code is being used in the <code class="highlighter-rouge">keyDown:</code> function of my subclass) but I couldn't figure out how to get the correct character string for the up and down arrows. I typically use <a href="http://manytricks.com/keycodes/">Key Codes</a> to get all the possible information you could want about each key you press. But for some keys, including the arrow keys, it returns garbage for the character code. Then I discovered <a href="http://stackoverflow.com/a/4434934/902968">this answer</a> on StackOverflow where there is a brief mention of <code class="highlighter-rouge">NSUpArrowFunctionKey</code>. With that I came up with this.</p>
+<p>Attempt 3: Before I used the weird <code class="language-plaintext highlighter-rouge">CGEventRef</code> solution I tried to create my own <code class="language-plaintext highlighter-rouge">NSEvent</code> passing it all the same attributes from the original event (all this code is being used in the <code class="language-plaintext highlighter-rouge">keyDown:</code> function of my subclass) but I couldn't figure out how to get the correct character string for the up and down arrows. I typically use <a href="http://manytricks.com/keycodes/">Key Codes</a> to get all the possible information you could want about each key you press. But for some keys, including the arrow keys, it returns garbage for the character code. Then I discovered <a href="http://stackoverflow.com/a/4434934/902968">this answer</a> on StackOverflow where there is a brief mention of <code class="language-plaintext highlighter-rouge">NSUpArrowFunctionKey</code>. With that I came up with this.</p>
 
 <figure class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="nf">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
     <span class="n">unichar</span> <span class="n">down</span> <span class="o">=</span> <span class="n">NSDownArrowFunctionKey</span><span class="p">;</span>
@@ -120,7 +120,7 @@
     <span class="p">[</span><span class="n">super</span> <span class="nf">keyDown</span><span class="p">:</span><span class="n">theEvent</span><span class="p">];</span>
 <span class="p">}</span></code></pre></figure>
 
-<p>Not the prettiest solution I but one that seems to work perfectly, even sandboxed, to provide the expected behavior in an <code class="highlighter-rouge">NSTableView</code> subclass.</p>
+<p>Not the prettiest solution I but one that seems to work perfectly, even sandboxed, to provide the expected behavior in an <code class="language-plaintext highlighter-rouge">NSTableView</code> subclass.</p>
 
   </div>
 </article>

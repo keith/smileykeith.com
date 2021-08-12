@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2021-03-08T09:02:09-08:00</updated>
+  <updated>2021-08-12T14:30:42-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -32,17 +32,17 @@ cycles reproducing things that have already been built by someone else.</p>
 
 <p>In order for bazel to guarantee that downloading the artifacts instead
 of building them will produce the same results, it must ensure that all
-the inputs of your build are the same as a previous build.<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote">1</a></sup> For macOS
+the inputs of your build are the same as a previous build.<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup> For macOS
 and iOS builds bazel's inputs include the version of Xcode you're using.
 This means if developers on your team use different versions of Xcode,
 they cannot share the same build cache.</p>
 
 <p>Bazel discovers your currently installed Xcode versions by running
-<a href="https://github.com/bazelbuild/bazel/blob/cd6724deb7dad05c477425fb09eff613659a5b3f/tools/osx/xcode_locator.m"><code class="highlighter-rouge">xcode_locator</code></a>,
+<a href="https://github.com/bazelbuild/bazel/blob/cd6724deb7dad05c477425fb09eff613659a5b3f/tools/osx/xcode_locator.m"><code class="language-plaintext highlighter-rouge">xcode_locator</code></a>,
 and then
 <a href="https://github.com/bazelbuild/bazel/blob/cd6724deb7dad05c477425fb09eff613659a5b3f/tools/osx/xcode_configure.bzl">generating</a>
-a <code class="highlighter-rouge">BUILD</code> file that contains an entry for every version you currently
-have installed. The result looks something like this:<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote">2</a></sup></p>
+a <code class="language-plaintext highlighter-rouge">BUILD</code> file that contains an entry for every version you currently
+have installed. The result looks something like this:<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup></p>
 
 <div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">xcode_version</span><span class="p">(</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s">"version12_4_0_12D4e"</span><span class="p">,</span>
@@ -79,9 +79,9 @@ have installed. The result looks something like this:<sup id="fnref:2" role="doc
 <p>In order to enforce developers use the same version, you can short
 circuit bazel's Xcode discovery and instead reference a local
 <a href="https://docs.bazel.build/versions/master/build-ref.html#targets">target</a>
-that you provide.<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote">3</a></sup></p>
+that you provide.<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup></p>
 
-<p>To do this, you can setup your target in the <code class="highlighter-rouge">BUILD</code> file at the root of
+<p>To do this, you can setup your target in the <code class="language-plaintext highlighter-rouge">BUILD</code> file at the root of
 your project (or somewhere else if you'd prefer). Using the contents
 from the example above, but only including the Xcode versions you want
 to support, it will contain:</p>
@@ -104,22 +104,22 @@ to support, it will contain:</p>
 </code></pre></div></div>
 
 <p>Then you can add this to your
-<a href="https://docs.bazel.build/versions/master/guide.html#bazelrc-the-bazel-configuration-file"><code class="highlighter-rouge">.bazelrc</code></a>:</p>
+<a href="https://docs.bazel.build/versions/master/guide.html#bazelrc-the-bazel-configuration-file"><code class="language-plaintext highlighter-rouge">.bazelrc</code></a>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>build --xcode_version_config=//:host_xcodes
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>build --xcode_version_config=//:host_xcodes
 </code></pre></div></div>
 
 <p>This way if a developer tries to build with a version of Xcode that is
 not explicitly supported, they see this error:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ERROR: /.../BUILD.bazel:31:11: Compiling something failed: I/O exception during sandboxed execution: Running '/.../xcode-locator 12.4.0.12D4e' failed with code 1.
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ERROR: /.../BUILD.bazel:31:11: Compiling something failed: I/O exception during sandboxed execution: Running '/.../xcode-locator 12.4.0.12D4e' failed with code 1.
 This most likely indicates that xcode version 12.4.0.12D4e is not available on the host machine.
 </code></pre></div></div>
 
 <p>This is a simple solution <em>if</em> you only want to support a single version
 of Xcode at once. Often it's useful to support multiple Xcode versions
 for testing, even if not all versions will get cache hits. In this
-case, one solution is to include multiple versions in your <code class="highlighter-rouge">BUILD</code>
+case, one solution is to include multiple versions in your <code class="language-plaintext highlighter-rouge">BUILD</code>
 file:</p>
 
 <div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">xcode_version</span><span class="p">(</span>
@@ -150,10 +150,10 @@ file:</p>
 </code></pre></div></div>
 
 <p>Which is very similar to our first example, except we replaced the
-<code class="highlighter-rouge">aliases</code> with the build numbers from each version. This is a perfect
+<code class="language-plaintext highlighter-rouge">aliases</code> with the build numbers from each version. This is a perfect
 unique value to differentiate between multiple versions during the Xcode
 beta cycle. Now we can explicitly pass the
-<a href="https://docs.bazel.build/versions/4.0.0/command-line-reference.html#flag--xcode_version"><code class="highlighter-rouge">xcode_version</code></a>
+<a href="https://docs.bazel.build/versions/4.0.0/command-line-reference.html#flag--xcode_version"><code class="language-plaintext highlighter-rouge">xcode_version</code></a>
 argument with the build number you want to use. You can retrieve the
 build number from your current Xcode version like this:</p>
 
@@ -162,7 +162,7 @@ build number from your current Xcode version like this:</p>
 </code></pre></div></div>
 
 <p>Using this method you can support multiple versions of Xcode, while
-still respecting the user's <code class="highlighter-rouge">xcode-select</code> value (or <code class="highlighter-rouge">DEVELOPER_DIR</code>
+still respecting the user's <code class="language-plaintext highlighter-rouge">xcode-select</code> value (or <code class="language-plaintext highlighter-rouge">DEVELOPER_DIR</code>
 environment variable).</p>
 
 <div class="footnotes" role="doc-endnotes">
@@ -204,12 +204,12 @@ paths, instead of absolute paths, for compilation.</p>
 <p>Specifically, when building swift code, Xcode calls the compiler with
 something like:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>swiftc [ARGS] /path/to/srcroot/path/to/file1.swift /path/to/srcroot/path/to/file2.swift
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>swiftc [ARGS] /path/to/srcroot/path/to/file1.swift /path/to/srcroot/path/to/file2.swift
 </code></pre></div></div>
 
 <p>Where bazel will call the compiler with something like:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>swiftc [ARGS] path/to/file1.swift path/to/file2.swift
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>swiftc [ARGS] path/to/file1.swift path/to/file2.swift
 </code></pre></div></div>
 
 <p>Normally, this difference is inconsequential, both compilations will
@@ -224,20 +224,20 @@ details aren't considered important inputs in the build.</p>
 <p>Unfortunately, in a few places, Xcode relies on paths being absolute.
 Today, we'll look at how Xcode reports test failures in the UI.
 Specifically the underlying
-<a href="https://developer.apple.com/documentation/xctest/xctissue"><code class="highlighter-rouge">XCTIssue</code></a>
-that <code class="highlighter-rouge">XCTest</code> creates is expected to be instantiated with an absolute
-path. This absolute path is populated from the <code class="highlighter-rouge">#filePath</code> (previously
-<code class="highlighter-rouge">#file</code>) keyword which is <em>supposed</em> to reference the absolute path of
+<a href="https://developer.apple.com/documentation/xctest/xctissue"><code class="language-plaintext highlighter-rouge">XCTIssue</code></a>
+that <code class="language-plaintext highlighter-rouge">XCTest</code> creates is expected to be instantiated with an absolute
+path. This absolute path is populated from the <code class="language-plaintext highlighter-rouge">#filePath</code> (previously
+<code class="language-plaintext highlighter-rouge">#file</code>) keyword which is <em>supposed</em> to reference the absolute path of
 the current source file.</p>
 
 <p>The first question is: How does the Swift compiler know what the
 absolute path of the current file is? It's easy when Xcode passes an
 absolute path to the compiler. But, what if you pass a relative path? In
 this case, the Swift compiler uses the directory passed with the
-<code class="highlighter-rouge">-working-directory</code> argument to make the path absolute. It turns out if
+<code class="language-plaintext highlighter-rouge">-working-directory</code> argument to make the path absolute. It turns out if
 you don't pass this argument, the compiler has no choice but to use the
-relative path. This means the <code class="highlighter-rouge">#filePath</code> keyword ends up translating to
-a relative path, which means the <code class="highlighter-rouge">XCTIssue</code> is created with a relative
+relative path. This means the <code class="language-plaintext highlighter-rouge">#filePath</code> keyword ends up translating to
+a relative path, which means the <code class="language-plaintext highlighter-rouge">XCTIssue</code> is created with a relative
 path.</p>
 
 <p>With relative paths when you run your tests in Xcode and they
@@ -245,27 +245,27 @@ fail, clicking the failure in the issue navigator doesn't do anything.
 But, it's supposed to jump you to the test case that failed (FB8451256,
 FB8454623).</p>
 
-<p>So, how do we fix this? Luckily, we know the core issue is <code class="highlighter-rouge">XCTIssue</code> is
-created with a relative path. Since <code class="highlighter-rouge">XCTIssue</code> instances are created as
+<p>So, how do we fix this? Luckily, we know the core issue is <code class="language-plaintext highlighter-rouge">XCTIssue</code> is
+created with a relative path. Since <code class="language-plaintext highlighter-rouge">XCTIssue</code> instances are created as
 part of our process, we can
 <a href="https://nshipster.com/method-swizzling">swizzle</a> it to fix this.</p>
 
-<p>Looking at the underlying <a href="https://developer.apple.com/documentation/xctest/xctsourcecodelocation"><code class="highlighter-rouge">XCTSourceCodeLocation</code>
+<p>Looking at the underlying <a href="https://developer.apple.com/documentation/xctest/xctsourcecodelocation"><code class="language-plaintext highlighter-rouge">XCTSourceCodeLocation</code>
 docs</a>,
 we can see there are 2 initializers we're potentially interested in.
-Setting some quick breakpoints we can see that <code class="highlighter-rouge">XCTIssue</code> goes through
-the <code class="highlighter-rouge">init(fileURL:lineNumber:)</code> initializer. When we inspect the
+Setting some quick breakpoints we can see that <code class="language-plaintext highlighter-rouge">XCTIssue</code> goes through
+the <code class="language-plaintext highlighter-rouge">init(fileURL:lineNumber:)</code> initializer. When we inspect the
 argument it receives in the debugger, we can see it's the relative path
 we passed to the compiler. Knowing this, we can surmise that by
 swizzling the initializer, and make the argument an absolute path, we
 can satisfy Xcode's requirement. So, what path do we use? Using Xcode's
-scheme environment variables, we can pass Xcode's <code class="highlighter-rouge">SRCROOT</code> through an
+scheme environment variables, we can pass Xcode's <code class="language-plaintext highlighter-rouge">SRCROOT</code> through an
 environment variable named the same thing:</p>
 
 <p><img src="/images/srcroot.png" alt="" /></p>
 
 <p>Make sure to have the "Expand Variables Based On" dropdown set to some
-target (FB8454879) or the <code class="highlighter-rouge">$(SRCROOT)</code> string will be passed through
+target (FB8454879) or the <code class="language-plaintext highlighter-rouge">$(SRCROOT)</code> string will be passed through
 literally.</p>
 
 <p>Now, for the swizzling:</p>
@@ -312,8 +312,8 @@ literally.</p>
 </code></pre></div></div>
 
 <p>With this implementation, you need to call
-<code class="highlighter-rouge">swizzleXCTSourceCodeLocationIfNeeded()</code> somewhere. Using the
-<a href="https://developer.apple.com/documentation/bundleresources/information_property_list/nsprincipalclass"><code class="highlighter-rouge">NSPrincipalClass</code> plist
+<code class="language-plaintext highlighter-rouge">swizzleXCTSourceCodeLocationIfNeeded()</code> somewhere. Using the
+<a href="https://developer.apple.com/documentation/bundleresources/information_property_list/nsprincipalclass"><code class="language-plaintext highlighter-rouge">NSPrincipalClass</code> plist
 key</a>,
 we can define a class that is initialized as soon as your test bundle
 starts to run. We can define a small class to call this:</p>
@@ -349,12 +349,12 @@ which might break in the future. You should avoid this if possible.</p>
         <![CDATA[<p>One of the issues with shipping a tool that depends on
 <a href="https://github.com/apple/swift-syntax">SwiftSyntax</a> is that it depends
 on a dynamic library that is provided with Xcode called
-<code class="highlighter-rouge">_InternalSwiftSyntaxParser</code>. This library provides some of Swift's
+<code class="language-plaintext highlighter-rouge">_InternalSwiftSyntaxParser</code>. This library provides some of Swift's
 logic for how to parse Swift code. When you run a command line tool that
 was built with a different version of Xcode than what you have installed
 locally, you hit this issue:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;unknown&gt;:0:0: error: The loaded '_InternalSwiftSyntaxParser' library is from a toolchain that is not compatible with this version of SwiftSyntax
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;unknown&gt;:0:0: error: The loaded '_InternalSwiftSyntaxParser' library is from a toolchain that is not compatible with this version of SwiftSyntax
 </code></pre></div></div>
 
 <p>Ideally, this library would be statically linked to your executable (and
@@ -367,14 +367,14 @@ your distribution archive's size, but make it easier to support multiple
 versions of Xcode at once.</p>
 
 <p>The key to this workaround relies on how
-<a href="https://keith.github.io/xcode-man-pages/dyld.1.html"><code class="highlighter-rouge">dyld</code></a> works.
-<code class="highlighter-rouge">dyld</code> is responsible for loading the dynamic libraries your binary
+<a href="https://keith.github.io/xcode-man-pages/dyld.1.html"><code class="language-plaintext highlighter-rouge">dyld</code></a> works.
+<code class="language-plaintext highlighter-rouge">dyld</code> is responsible for loading the dynamic libraries your binary
 depends on. First, it's useful for you to see what libraries you depend
 on with
-<a href="https://keith.github.io/xcode-man-pages/llvm-otool.1.html"><code class="highlighter-rouge">otool</code></a>.
+<a href="https://keith.github.io/xcode-man-pages/llvm-otool.1.html"><code class="language-plaintext highlighter-rouge">otool</code></a>.
 For example:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% otool -L ./.build/debug/drstring-cli
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% otool -L ./.build/debug/drstring-cli
 ./.build/debug/drstring-cli:
   ...
   /usr/lib/swift/libswiftObjectiveC.dylib (compatibility version 1.0.0, current version 1.0.0, weak)
@@ -383,28 +383,28 @@ For example:</p>
 </code></pre></div></div>
 
 <p>Here you can see many libraries are directly referenced with their
-absolute paths while <code class="highlighter-rouge">lib_InternalSwiftSyntaxParser.dylib</code>, the library
+absolute paths while <code class="language-plaintext highlighter-rouge">lib_InternalSwiftSyntaxParser.dylib</code>, the library
 we're specifically interested in, is referenced via a
-<a href="https://en.wikipedia.org/wiki/Rpath"><code class="highlighter-rouge">rpath</code></a>. You can run this command
-to see your binary's <code class="highlighter-rouge">rpaths</code> (yours may differ depending on your
+<a href="https://en.wikipedia.org/wiki/Rpath"><code class="language-plaintext highlighter-rouge">rpath</code></a>. You can run this command
+to see your binary's <code class="language-plaintext highlighter-rouge">rpaths</code> (yours may differ depending on your
 absolute path to Xcode):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% otool -l ./.build/debug/drstring-cli \
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% otool -l ./.build/debug/drstring-cli \
   | grep -A2 LC_RPATH \
   | grep "^\s*path" | cut -d " " -f 11
 @loader_path
 /Applications/Xcode-12.4.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx
 </code></pre></div></div>
 
-<p>Here we can see that <code class="highlighter-rouge">dyld</code> is instructed to look in 2 directories to
-find <code class="highlighter-rouge">lib_InternalSwiftSyntaxParser.dylib</code>. First, it looks in the
-directory specified by <code class="highlighter-rouge">@loader_path</code>, which in our case is likely
+<p>Here we can see that <code class="language-plaintext highlighter-rouge">dyld</code> is instructed to look in 2 directories to
+find <code class="language-plaintext highlighter-rouge">lib_InternalSwiftSyntaxParser.dylib</code>. First, it looks in the
+directory specified by <code class="language-plaintext highlighter-rouge">@loader_path</code>, which in our case is likely
 irrelevant since it is the directory that contains our executable. Then,
 it looks inside a directory within my absolute path to Xcode (which
 isn't very portable), which we can see this includes the library we
 expect (you'll have to change this path to your local Xcode path):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% ls /Applications/Xcode-12.4.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% ls /Applications/Xcode-12.4.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx
 layouts-x86_64.yaml                  libswiftCompatibilityDynamicReplacements.a
 lib_InternalSwiftSyntaxParser.dylib  libswiftRemoteMirror42.dylib
 libswiftCompatibility50.a            libswiftRemoteMirrorLegacy.dylib
@@ -412,13 +412,13 @@ libswiftCompatibility51.a            prebuilt-modules
 </code></pre></div></div>
 
 <p>Given this information, our goal is to replace the default locations
-<code class="highlighter-rouge">dyld</code> searches, and replace those with the directory we want. There are
+<code class="language-plaintext highlighter-rouge">dyld</code> searches, and replace those with the directory we want. There are
 a few ways we can do this, but first we need to decide what directory we
 will ship the library in. Typically, the directory structure for a
 command line tool that includes a dynamic library looks something
 like this:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;prefix&gt;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;prefix&gt;
 ├── bin
 │   └── drstring-cli
 └── lib
@@ -428,16 +428,16 @@ like this:</p>
 <p>We can use this for our example. First, we need to copy the library
 from Xcode using (this might change with future Xcode releases):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cp "$(xcode-select -p)"/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/lib_InternalSwiftSyntaxParser.dylib .
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cp "$(xcode-select -p)"/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/lib_InternalSwiftSyntaxParser.dylib .
 </code></pre></div></div>
 
 <p>Then, using
-<a href="https://keith.github.io/xcode-man-pages/install_name_tool.1.html"><code class="highlighter-rouge">install_name_tool</code></a>,
-we can edit the <code class="highlighter-rouge">rpaths</code> in our binary. In this case, since we only have
-2 <code class="highlighter-rouge">rpaths</code>, and neither of them are what we want, lets delete them both
+<a href="https://keith.github.io/xcode-man-pages/install_name_tool.1.html"><code class="language-plaintext highlighter-rouge">install_name_tool</code></a>,
+we can edit the <code class="language-plaintext highlighter-rouge">rpaths</code> in our binary. In this case, since we only have
+2 <code class="language-plaintext highlighter-rouge">rpaths</code>, and neither of them are what we want, lets delete them both
 (you'll have to change the Xcode path for your local installation):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% install_name_tool \
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% install_name_tool \
   -delete_rpath @loader_path \
   -delete_rpath /Applications/Xcode-12.4.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx \
   bin/drstring-cli
@@ -446,46 +446,46 @@ we can edit the <code class="highlighter-rouge">rpaths</code> in our binary. In 
 <p>Now, when we run our binary, we see it crashes immediately because it
 cannot find  the libraries it needs:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% bin/drstring-cli
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% bin/drstring-cli
 dyld: Library not loaded: @rpath/lib_InternalSwiftSyntaxParser.dylib
   Referenced from: /Users/ksmiley/dev/DrString/bin/drstring-cli
   Reason: image not found
 </code></pre></div></div>
 
 <p>At this point we have 2 options. We can either launch our binary with
-some special environment variables that <code class="highlighter-rouge">dyld</code> reads, or encode the
-<code class="highlighter-rouge">rpath</code> we want into the binary. Since adding the <code class="highlighter-rouge">rpath</code> to the binary
+some special environment variables that <code class="language-plaintext highlighter-rouge">dyld</code> reads, or encode the
+<code class="language-plaintext highlighter-rouge">rpath</code> we want into the binary. Since adding the <code class="language-plaintext highlighter-rouge">rpath</code> to the binary
 is destructive, lets try the environment variable approach first as an
-example. Using <code class="highlighter-rouge">DYLD_LIBRARY_PATH</code> we can instruct <code class="highlighter-rouge">dyld</code> to discover
+example. Using <code class="language-plaintext highlighter-rouge">DYLD_LIBRARY_PATH</code> we can instruct <code class="language-plaintext highlighter-rouge">dyld</code> to discover
 the libraries we want:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DYLD_LIBRARY_PATH=lib bin/drstring-cli
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DYLD_LIBRARY_PATH=lib bin/drstring-cli
 OVERVIEW: A Swift docstring linter, formatter, nitpicky assistant...
 ...
 </code></pre></div></div>
 
-<p>There is also <code class="highlighter-rouge">DYLD_FALLBACK_LIBRARY_PATH</code>, which unlike
-<code class="highlighter-rouge">DYLD_LIBRARY_PATH</code>, has a default of <code class="highlighter-rouge">/usr/local/lib:/usr/lib</code>. This
-means if your library doesn't exist in the binary's <code class="highlighter-rouge">rpaths</code>, but then
-happens to be in <code class="highlighter-rouge">/usr/local/lib</code>, it will still run as expected. This
+<p>There is also <code class="language-plaintext highlighter-rouge">DYLD_FALLBACK_LIBRARY_PATH</code>, which unlike
+<code class="language-plaintext highlighter-rouge">DYLD_LIBRARY_PATH</code>, has a default of <code class="language-plaintext highlighter-rouge">/usr/local/lib:/usr/lib</code>. This
+means if your library doesn't exist in the binary's <code class="language-plaintext highlighter-rouge">rpaths</code>, but then
+happens to be in <code class="language-plaintext highlighter-rouge">/usr/local/lib</code>, it will still run as expected. This
 is useful to know, because <a href="https://brew.sh/">homebrew</a> installs
-libraries to <code class="highlighter-rouge">/usr/local/lib</code> on Intel based Macs. This can be
+libraries to <code class="language-plaintext highlighter-rouge">/usr/local/lib</code> on Intel based Macs. This can be
 surprising if you install an unrelated tool that depends on the same
 library and then your binary discovers this unrelated installation when
 you don't want it to. If you want to disable this fallback, you can set
-the value to <code class="highlighter-rouge">/dev/null</code>. In our example, using
-<code class="highlighter-rouge">DYLD_FALLBACK_LIBRARY_PATH</code> results in same behavior:</p>
+the value to <code class="language-plaintext highlighter-rouge">/dev/null</code>. In our example, using
+<code class="language-plaintext highlighter-rouge">DYLD_FALLBACK_LIBRARY_PATH</code> results in same behavior:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DYLD_FALLBACK_LIBRARY_PATH=lib bin/drstring-cli
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DYLD_FALLBACK_LIBRARY_PATH=lib bin/drstring-cli
 OVERVIEW: A Swift docstring linter, formatter, nitpicky assistant...
 ...
 </code></pre></div></div>
 
 <p>Instead of setting environment variables every time we run the binary,
-we can edit our binary to instruct <code class="highlighter-rouge">dyld</code> to search the correct
-directory. Again, we use <code class="highlighter-rouge">install_name_tool</code> for this:</p>
+we can edit our binary to instruct <code class="language-plaintext highlighter-rouge">dyld</code> to search the correct
+directory. Again, we use <code class="language-plaintext highlighter-rouge">install_name_tool</code> for this:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% install_name_tool -add_rpath @executable_path/../lib bin/drstring-cli
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% install_name_tool -add_rpath @executable_path/../lib bin/drstring-cli
 </code></pre></div></div>
 
 <p>In this case we rely on a relative path, based on the executable's
@@ -494,14 +494,14 @@ alongside our binary, we can run it without setting any environment
 variables.</p>
 
 <p>To check that this worked as expected you can launch your executable
-with <code class="highlighter-rouge">DYLD_PRINT_LIBRARIES</code> set and <code class="highlighter-rouge">grep</code> for the library:</p>
+with <code class="language-plaintext highlighter-rouge">DYLD_PRINT_LIBRARIES</code> set and <code class="language-plaintext highlighter-rouge">grep</code> for the library:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DYLD_PRINT_LIBRARIES=yesplz bin/drstring-cli 2&gt;&amp;1 | grep _Internal
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% DYLD_PRINT_LIBRARIES=yesplz bin/drstring-cli 2&gt;&amp;1 | grep _Internal
 dyld: loaded: &lt;A1954DF6-6F32-3A7C-A50E-0B7942D95F99&gt; /Users/ksmiley/dev/DrString/bin/../lib/lib_InternalSwiftSyntaxParser.dylib
 </code></pre></div></div>
 
 <p>To use this method with Swift Package Manager you'll have to run a
-post-processing script that alters your <code class="highlighter-rouge">rpaths</code> using what we've
+post-processing script that alters your <code class="language-plaintext highlighter-rouge">rpaths</code> using what we've
 learned.</p>
 
 <p>Overall this is more work than if we could produce a statically linked
@@ -540,10 +540,10 @@ machine's architecture by default:</p>
 architecture. Now, in order to fully utilize the native performance of
 Apple Silicon chips, we need to produce a <a href="https://en.wikipedia.org/wiki/Fat_binary">fat
 binary</a> that contains a slice
-for both <code class="highlighter-rouge">x86_64</code> and <code class="highlighter-rouge">arm64</code>.</p>
+for both <code class="language-plaintext highlighter-rouge">x86_64</code> and <code class="language-plaintext highlighter-rouge">arm64</code>.</p>
 
 <p>Swift Package Manager has a few different ways to achieve this. The
-easiest way, as far as I can tell, is to pass the hidden <code class="highlighter-rouge">--arch</code> flag
+easiest way, as far as I can tell, is to pass the hidden <code class="language-plaintext highlighter-rouge">--arch</code> flag
 once for each architecture:</p>
 
 <div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release <span class="nt">--arch</span> arm64 <span class="nt">--arch</span> x86_64
@@ -564,8 +564,8 @@ requested architectures:</p>
 
 <p>Another option is to build once for each architecture, and then combine
 the binaries using
-<a href="https://keith.github.io/xcode-man-pages/lipo.1.html"><code class="highlighter-rouge">lipo</code></a>. Unlike
-the <code class="highlighter-rouge">--arch</code> option, this approach also works on Linux. Here's an
+<a href="https://keith.github.io/xcode-man-pages/lipo.1.html"><code class="language-plaintext highlighter-rouge">lipo</code></a>. Unlike
+the <code class="language-plaintext highlighter-rouge">--arch</code> option, this approach also works on Linux. Here's an
 example:</p>
 
 <div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% swift build <span class="nt">--configuration</span> release <span class="nt">--triple</span> arm64-apple-macosx
@@ -608,7 +608,7 @@ with a reliable reproduction case.</p>
 <h1 id="how">How?</h1>
 
 <p>Although the steps to use reproducers are mostly straightforward,
-launching LLDB from Xcode does not enable <code class="highlighter-rouge">--capture</code> mode (FB7878562).
+launching LLDB from Xcode does not enable <code class="language-plaintext highlighter-rouge">--capture</code> mode (FB7878562).
 This means if you want to provide a reproducer for an issue you've
 experienced in a Xcode debugging session, you need to reproduce it
 outside of Xcode instead.</p>
@@ -618,7 +618,7 @@ out</a> as
 of Xcode 12 there is a private default for enabling capture mode for
 debugging sessions launched from Xcode:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>defaults write com.apple.dt.Xcode IDEDebuggerEnableReproducerCapture -bool YES
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>defaults write com.apple.dt.Xcode IDEDebuggerEnableReproducerCapture -bool YES
 </code></pre></div></div>
 
 <p>Note: to provide enough information to reproduce your issue, LLDB
@@ -639,13 +639,13 @@ to date.</li>
   <li>In Terminal.app navigate to your DerivedData directory (you can find
 this by right clicking on your app in the "Products" section of
 Xcode's project navigator, and clicking "Show in Finder").</li>
-  <li>Run <code class="highlighter-rouge">lldb --capture /path/to/Your.app</code>.</li>
-  <li>In the LLDB session run <code class="highlighter-rouge">process launch --stop-at-entry</code>.</li>
+  <li>Run <code class="language-plaintext highlighter-rouge">lldb --capture /path/to/Your.app</code>.</li>
+  <li>In the LLDB session run <code class="language-plaintext highlighter-rouge">process launch --stop-at-entry</code>.</li>
   <li>Now you're in a paused LLDB session. Here you can <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">set the
 breakpoints</a> you need to reproduce your issue. Often for
 me this means breaking at a specific place, and running some version
-of <code class="highlighter-rouge">po foo</code> that causes an issue.</li>
-  <li>Once you're done reproducing the issue, run <code class="highlighter-rouge">reproducer generate</code> in
+of <code class="language-plaintext highlighter-rouge">po foo</code> that causes an issue.</li>
+  <li>Once you're done reproducing the issue, run <code class="language-plaintext highlighter-rouge">reproducer generate</code> in
 LLDB. This will print the path the information was written to.</li>
   <li>Verify the contents of the output directory doesn't include anything
 you're not comfortable sharing with Apple, zip it, and <a href="https://feedbackassistant.apple.com">submit a
@@ -661,13 +661,13 @@ the same way as running a macOS app. Because of this, the steps differ.</p>
 <ol>
   <li>Run the app in Xcode and stop it. This way it's updated and installed
 on the iOS simulator.</li>
-  <li>Run <code class="highlighter-rouge">lldb --capture --wait-for --attach-name YOUR_APP_NAME</code>.</li>
+  <li>Run <code class="language-plaintext highlighter-rouge">lldb --capture --wait-for --attach-name YOUR_APP_NAME</code>.</li>
   <li>Manually launch your app in the Simulator.</li>
   <li>Now you're in a paused LLDB session. Here you can <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">set the
 breakpoints</a> you need to reproduce your issue. Often for
 me this means breaking at a specific place, and running some version
-of <code class="highlighter-rouge">po foo</code> that causes an issue.</li>
-  <li>Once you're done reproducing the issue, run <code class="highlighter-rouge">reproducer generate</code> in
+of <code class="language-plaintext highlighter-rouge">po foo</code> that causes an issue.</li>
+  <li>Once you're done reproducing the issue, run <code class="language-plaintext highlighter-rouge">reproducer generate</code> in
 LLDB. This will print the path the information was written to.</li>
   <li>Verify the contents of the output directory doesn't include anything
 you're not comfortable sharing with Apple, zip it, and <a href="https://feedbackassistant.apple.com">submit a
@@ -684,18 +684,18 @@ workflow for this please <a href="https://twitter.com/SmileyKeith">let me know</
 
 <ul>
   <li>Checkout the <a href="https://lldb.llvm.org/resources/reproducers.html">reproducers</a> page for more details.</li>
-  <li><code class="highlighter-rouge">man lldb</code> has more usage info.</li>
-  <li>Passing <code class="highlighter-rouge">--capture-path</code> to LLDB might be helpful.</li>
-  <li>Run <code class="highlighter-rouge">reproducer status</code> to verify you're in capture mode.</li>
-  <li>Run <code class="highlighter-rouge">help COMMAND [SUBCOMMAND]</code> in LLDB to get info on the commands
+  <li><code class="language-plaintext highlighter-rouge">man lldb</code> has more usage info.</li>
+  <li>Passing <code class="language-plaintext highlighter-rouge">--capture-path</code> to LLDB might be helpful.</li>
+  <li>Run <code class="language-plaintext highlighter-rouge">reproducer status</code> to verify you're in capture mode.</li>
+  <li>Run <code class="language-plaintext highlighter-rouge">help COMMAND [SUBCOMMAND]</code> in LLDB to get info on the commands
 you're running.</li>
-  <li>Run <code class="highlighter-rouge">help b</code> to see examples of how to set breakpoints from the
+  <li>Run <code class="language-plaintext highlighter-rouge">help b</code> to see examples of how to set breakpoints from the
 command line interface.</li>
   <li>See the <a href="https://lldb.llvm.org/use/tutorial.html#setting-breakpoints">LLDB tutorial</a> for more breakpoint examples.</li>
-  <li>Try out <code class="highlighter-rouge">lldb --replay /path/to/your/reproducer</code> to see what Apple
+  <li>Try out <code class="language-plaintext highlighter-rouge">lldb --replay /path/to/your/reproducer</code> to see what Apple
 will see.</li>
-  <li>You can attach to XCTest processes by using <code class="highlighter-rouge">xctest</code> as your
-<code class="highlighter-rouge">--attach-name</code> argument.</li>
+  <li>You can attach to XCTest processes by using <code class="language-plaintext highlighter-rouge">xctest</code> as your
+<code class="language-plaintext highlighter-rouge">--attach-name</code> argument.</li>
 </ul>
 
 ]]>
@@ -713,7 +713,7 @@ will see.</li>
         
       </author>
       <content type="html">
-        <![CDATA[<p>After having a use for <code class="highlighter-rouge">NSProgress</code> I finally got a chance to dive in to
+        <![CDATA[<p>After having a use for <code class="language-plaintext highlighter-rouge">NSProgress</code> I finally got a chance to dive in to
 its API. I found it to be less than understandable. So I wrote about it
 on the thoughtbot blog. You can find my post, <a href="https://robots.thoughtbot.com/asynchronous-nsprogress">NSProgress with
 Asynchronous Tasks,
@@ -828,7 +828,7 @@ Objective-C to ctags and then match it with Tagbar. I improved it a
 little bit and came up with this. Put this file anywhere you want, you
 will define its path in your vimrc.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--langdef=objc
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--langdef=objc
 --langmap=objc:.m..mm..h
 --regex-objc=/\@interface[[:space:]]+([[:alnum:]_]+)/\1/i,interface/
 --regex-objc=/\@implementation[[:space:]]+([[:alnum:]_]+)/\1/I,implementation/
@@ -852,7 +852,7 @@ will define its path in your vimrc.</p>
 <span class="se">    \</span> <span class="s1">'--extra='</span><span class="p">,</span>
 <span class="se">    \</span> <span class="s1">'--format=2'</span><span class="p">,</span>
 <span class="se">    \</span> <span class="s1">'--fields=nksaSmt'</span><span class="p">,</span>
-<span class="se">    \</span> <span class="s1">'--options='</span> <span class="p">.</span> expand<span class="p">(</span><span class="s1">'~/.vim/objctags'</span><span class="p">),</span>
+<span class="se">    \</span> <span class="s1">'--options='</span> <span class="p">.</span> <span class="nb">expand</span><span class="p">(</span><span class="s1">'~/.vim/objctags'</span><span class="p">),</span>
 <span class="se">    \</span> <span class="s1">'--objc-kinds=-N'</span><span class="p">,</span>
 <span class="se">  \</span> <span class="p">],</span>
 <span class="se">  \</span> <span class="s1">'sro'</span><span class="p">:</span> <span class="s1">' '</span><span class="p">,</span>
@@ -870,7 +870,7 @@ will define its path in your vimrc.</p>
 <span class="se">\</span> <span class="p">}</span>
 </code></pre></div></div>
 
-<p>Replace the <code class="highlighter-rouge">~/.vim/objctags</code> with the path where you chose to put the
+<p>Replace the <code class="language-plaintext highlighter-rouge">~/.vim/objctags</code> with the path where you chose to put the
 first file. Please let me know if you see any way that this could be
 improved.</p>
 ]]>
@@ -925,7 +925,7 @@ up nuking the work I had done and starting over.</p>
 
 <p>Start by installing the necessary components:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pacman -Sy openswan xl2tpd ppp lsof python2
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pacman -Sy openswan xl2tpd ppp lsof python2
 </code></pre></div></div>
 
 <p>You need to do some configuration of the firewall and redirects:</p>
@@ -941,7 +941,7 @@ up nuking the work I had done and starting over.</p>
 <p>To make these settings persist we need to create a script that gets launched by
 systemd each time we restart the system. As recommended in the original
 article, and being a <a href="http://brew.sh/">Homebrew</a> user I created the script in
-<code class="highlighter-rouge">/usr/local/bin/vpn-boot.sh</code>:</p>
+<code class="language-plaintext highlighter-rouge">/usr/local/bin/vpn-boot.sh</code>:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/usr/bin/bash</span>
 
@@ -956,19 +956,19 @@ iptables <span class="nt">--table</span> nat <span class="nt">--append</span> PO
 
 <p>There are a few things that differ here to the original article. First
 the hashbang path was changed since the default $PATH on the ARM version
-of Arch didn't include <code class="highlighter-rouge">/bin</code>. I would run <code class="highlighter-rouge">which -a bash</code> on your
+of Arch didn't include <code class="language-plaintext highlighter-rouge">/bin</code>. I would run <code class="language-plaintext highlighter-rouge">which -a bash</code> on your
 install to make sure this works for you. This obviously doesn't have
 to be changed, but I think it's better in the long run. I also added
-<code class="highlighter-rouge">sysctl -p</code> since these settings didn't seemed to be applied otherwise.
+<code class="language-plaintext highlighter-rouge">sysctl -p</code> since these settings didn't seemed to be applied otherwise.
 Then you must make this script executable with something like:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">chmod</span> +x /usr/local/bin/vpn-boot.sh</code></pre></figure>
 
 <p>Since Arch uses systemd to this script has to be launched by creating a
 service to be ran through systemd. You can create this file in
-<code class="highlighter-rouge">/etc/systemd/system/vpnboot.service</code></p>
+<code class="language-plaintext highlighter-rouge">/etc/systemd/system/vpnboot.service</code></p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
 Description=VPN Settings at boot
 After=netctl@eth0.service
 Before=openswan.service xl2tpd.service
@@ -987,13 +987,13 @@ be required for systemd to do what I wanted it to but the order really seemed
 to matter for here. After you create this service enable it within systemd
 with:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl enable vpnboot.service
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl enable vpnboot.service
 </code></pre></div></div>
 
-<p>I also made some changes to <code class="highlighter-rouge">/etc/ipsec.conf</code> (note the comments in the
+<p>I also made some changes to <code class="language-plaintext highlighter-rouge">/etc/ipsec.conf</code> (note the comments in the
 default file for some more info on these settings):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>config setup
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>config setup
   dumpdir=/var/run/pluto/
   nat_traversal=yes
   virtual_private=%v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v4:25.0.0.0/8,%v6:fd00::/8,%v6:fe80::/10
@@ -1020,20 +1020,20 @@ conn L2TP-PSK-noNAT
   dpdaction=clear
 </code></pre></div></div>
 
-<p>Then for the <code class="highlighter-rouge">/etc/ipsec.secrets</code> (use the same server IP address):</p>
+<p>Then for the <code class="language-plaintext highlighter-rouge">/etc/ipsec.secrets</code> (use the same server IP address):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>%SameIP%  %any: PSK "super random key"
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>%SameIP%  %any: PSK "super random key"
 </code></pre></div></div>
 
 <p>The make systemd start openswan on boot as well:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl enable openswan
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl enable openswan
 </code></pre></div></div>
 
 <p>I also edited the openswan service file in
-<code class="highlighter-rouge">/etc/systemd/system/multi-user.target.wants/openswan.service</code></p>
+<code class="language-plaintext highlighter-rouge">/etc/systemd/system/multi-user.target.wants/openswan.service</code></p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
 Description=Openswan daemon
 After=netctl@eth0.service vpnboot.service
 Before=xl2tpd.service
@@ -1053,9 +1053,9 @@ WantedBy=multi-user.target
 dependency of <a href="https://wiki.archlinux.org/index.php/Netctl">netctl's</a>
 default network interface (we haven't enabled this yet).</p>
 
-<p>Next for <code class="highlighter-rouge">/etc/xl2tpd/xl2tpd.conf</code>:</p>
+<p>Next for <code class="language-plaintext highlighter-rouge">/etc/xl2tpd/xl2tpd.conf</code>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[global]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[global]
 ipsec saref = yes
 saref refinfo = 30
 
@@ -1069,17 +1069,17 @@ length bit = yes
 unix authentication = yes
 </code></pre></div></div>
 
-<p>Where <code class="highlighter-rouge">local ip</code> is the server's ip and the <code class="highlighter-rouge">ip range</code> is the range of
+<p>Where <code class="language-plaintext highlighter-rouge">local ip</code> is the server's ip and the <code class="language-plaintext highlighter-rouge">ip range</code> is the range of
 IP addresses you want to use for VPN clients. You need to enable this
 service too with:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl enable xl2tpd
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl enable xl2tpd
 </code></pre></div></div>
 
 <p>I also edited the systemd file for xl2tpd at
-<code class="highlighter-rouge">/etc/systemd/system/multi-user.target.wants/xl2tpd.service</code>:</p>
+<code class="language-plaintext highlighter-rouge">/etc/systemd/system/multi-user.target.wants/xl2tpd.service</code>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
 Description=Level 2 Tunnel Protocol Daemon (L2TP)
 After=syslog.target netctl@eth0.service openswan.service
 Requires=openswan.service
@@ -1096,12 +1096,12 @@ WantedBy=multi-user.target
 
 <p>The other guide also recommends creating the xl2tpd control folder with:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir /var/run/xl2tpd/
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir /var/run/xl2tpd/
 </code></pre></div></div>
 
-<p>Now we need to create/edit <code class="highlighter-rouge">/etc/ppp/options.xl2tpd</code>:</p>
+<p>Now we need to create/edit <code class="language-plaintext highlighter-rouge">/etc/ppp/options.xl2tpd</code>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ipcp-accept-local
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ipcp-accept-local
 ipcp-accept-remote
 ms-dns 8.8.8.8
 ms-dns 8.8.4.4
@@ -1118,43 +1118,43 @@ lcp-echo-failure 4
 login
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">/etc/pam.d/ppp</code>:</p>
+<p><code class="language-plaintext highlighter-rouge">/etc/pam.d/ppp</code>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>auth    required        pam_nologin.so
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>auth    required        pam_nologin.so
 auth    required        pam_unix.so
 account required        pam_unix.so
 session required        pam_unix.so
 </code></pre></div></div>
 
-<p>And <code class="highlighter-rouge">/etc/ppp/pap-secrets</code>:</p>
+<p>And <code class="language-plaintext highlighter-rouge">/etc/ppp/pap-secrets</code>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>*       l2tpd           ""              *
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>*       l2tpd           ""              *
 </code></pre></div></div>
 
 <p>If you'd like you can also restrict the users accounts that can access
 the vpn. This way you can separate your login user from your VPN users
 who can have much stronger passwords. You'd do that in your
-<code class="highlighter-rouge">/etc/ppp/pap-secrets</code>:</p>
+<code class="language-plaintext highlighter-rouge">/etc/ppp/pap-secrets</code>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vpnuser   l2tpd         ""              *
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vpnuser   l2tpd         ""              *
 </code></pre></div></div>
 
 <p>To enable the startup of the default netctl eth0 interface you need to
 run:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netctl enable eth0
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netctl enable eth0
 </code></pre></div></div>
 
 <p>You'll probably want to disable any other netctl systemd functions that are
-enabled by default. Check <code class="highlighter-rouge">/etc/systemd/system/mutli-user.target.wants</code> to for
-other <code class="highlighter-rouge">netctl</code> profiles.</p>
+enabled by default. Check <code class="language-plaintext highlighter-rouge">/etc/systemd/system/mutli-user.target.wants</code> to for
+other <code class="language-plaintext highlighter-rouge">netctl</code> profiles.</p>
 
 <p>So at this point you should be able to enable VPN clients using the
 super secret keys you enabled before and the username and passwords
 you've created previously. You can create new users for specifically VPN
 usage with something like this:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>useradd -s /sbin/nologin vpnuser
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>useradd -s /sbin/nologin vpnuser
 </code></pre></div></div>
 
 <p>This disallows users from being able to be used for login which is probably
@@ -1168,15 +1168,15 @@ change these before allowing access to the outside world.</p>
 how my setup works. The most useful things to seeing what was happening
 were these:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -tulpan
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -tulpan
 systemctl status openswan
 systemctl status xl2tpd
 journalctl -f
 </code></pre></div></div>
 
 <p>You can glance at some of the other guides to see what should be going
-on. You probably shouldn't see any red in the <code class="highlighter-rouge">openswan</code> status and you
-should see ports open under <code class="highlighter-rouge">pluto</code> with netstat. You can check out the
+on. You probably shouldn't see any red in the <code class="language-plaintext highlighter-rouge">openswan</code> status and you
+should see ports open under <code class="language-plaintext highlighter-rouge">pluto</code> with netstat. You can check out the
 <a href="http://linux.die.net/man/5/ipsec.conf">ipsec manpage</a> or the <a href="https://github.com/xelerance/Openswan/wiki/L2tp-ipsec-configuration-using-openswan-and-xl2tpd">openswan
 wiki
 page</a>
@@ -1230,8 +1230,8 @@ the signed binary
 <a href="https://github.com/keith/ColorConvert/releases/tag/1.0">here</a>.</p>
 
 <p>Using this newly created AppleScript I then made a zsh
-<a href="https://github.com/keith/dotfiles/blob/master/functions/colorize">function</a> so that I could call <code class="highlighter-rouge">colorize</code> from anywhere to update the color scheme of the current terminal.
-I also chose to do this at the end of my <code class="highlighter-rouge">.zshrc</code> <a href="https://github.com/keith/dotfiles/blob/763e6f3f2bbcd93775c70e0d9ed9878ac99896a3/zshrc#L51">here</a>.
+<a href="https://github.com/keith/dotfiles/blob/master/functions/colorize">function</a> so that I could call <code class="language-plaintext highlighter-rouge">colorize</code> from anywhere to update the color scheme of the current terminal.
+I also chose to do this at the end of my <code class="language-plaintext highlighter-rouge">.zshrc</code> <a href="https://github.com/keith/dotfiles/blob/763e6f3f2bbcd93775c70e0d9ed9878ac99896a3/zshrc#L51">here</a>.
 This way everytime I open a new session my theme is automatically set.</p>
 
 <p>If you have any input on how I could optimize this let me know.</p>
@@ -1266,10 +1266,10 @@ this logic there: http://httpd.apache.org/docs/current/howto/htaccess.html.</p>
 <p>This got me to their awesome collection of <a href="https://github.com/h5bp/server-configs">server configs</a>
 which has their, and in many ways the communities, recommended settings
 depending on your webserver. The <a href="https://github.com/h5bp/server-configs-apache">apache configs</a>
-have the same <code class="highlighter-rouge">.htaccess</code> file so I decided to dig into how to do this.</p>
+have the same <code class="language-plaintext highlighter-rouge">.htaccess</code> file so I decided to dig into how to do this.</p>
 
 <p>They direct you to the <a href="http://httpd.apache.org/docs/current/howto/htaccess.html">apache article</a>
-about using <code class="highlighter-rouge">.htaccess</code> files which has a similar comment about their
+about using <code class="language-plaintext highlighter-rouge">.htaccess</code> files which has a similar comment about their
 use.</p>
 
 <blockquote>
@@ -1280,23 +1280,23 @@ Using .htaccess files slows down your Apache http server. Any directive that you
 
 <p>So I decided to set this up on my <a href="http://www.linode.com/?r=c190426bf1ff0f144b48997675bae8b32d339824">Linode VPS</a> which is running Ubuntu 10.04.
 As stated in the original file comment they recommend using the
-<code class="highlighter-rouge">httpd.conf</code> file for your custom configuration like this. But
+<code class="language-plaintext highlighter-rouge">httpd.conf</code> file for your custom configuration like this. But
 <a href="http://stackoverflow.com/a/11687212/902968">apparently</a> that file could be
 overwritten on updates of Apache which would be pretty annoying. Luckily
-the default Apache config file (<code class="highlighter-rouge">apache2.conf</code> on 10.04) includes the
-contents of the <code class="highlighter-rouge">conf.d</code> folder which is in the same location. By
-creating a <code class="highlighter-rouge">foo.conf</code> file in that directory Apache should immediately
+the default Apache config file (<code class="language-plaintext highlighter-rouge">apache2.conf</code> on 10.04) includes the
+contents of the <code class="language-plaintext highlighter-rouge">conf.d</code> folder which is in the same location. By
+creating a <code class="language-plaintext highlighter-rouge">foo.conf</code> file in that directory Apache should immediately
 load its contents. As mentioned in the comment from the Apache site the
 custom configuration needs to be wrapped in a <a href="http://httpd.apache.org/docs/current/mod/core.html#directory">Directory</a> block.
 The block expects you to provide a path to the files you want to be
 affected by the contained configuration. Since I wanted this to work for
-all the sites being served by Apache I simply used <code class="highlighter-rouge">/srv/www/*/</code> which
+all the sites being served by Apache I simply used <code class="language-plaintext highlighter-rouge">/srv/www/*/</code> which
 includes my entire sites directory.</p>
 
-<p>Besides the speed increased gained by using a global <code class="highlighter-rouge">.htaccess</code> file
+<p>Besides the speed increased gained by using a global <code class="language-plaintext highlighter-rouge">.htaccess</code> file
 this allows you to have much shorter custom files for site specific
 configuration. For example only required configuration for one of my sites
-was the <code class="highlighter-rouge">ErrorDocument</code>s. Now my <code class="highlighter-rouge">.htaccess</code> file went from 300+ lines
+was the <code class="language-plaintext highlighter-rouge">ErrorDocument</code>s. Now my <code class="language-plaintext highlighter-rouge">.htaccess</code> file went from 300+ lines
 to</p>
 
 <figure class="highlight"><pre><code class="language-apache" data-lang="apache"><span class="nc">ErrorDocument</span> 403 /403.php
@@ -1340,7 +1340,7 @@ exact method didn't seem to work for me.</p>
 
 <p>Here is what did work for me. For my first abridged crash report I had this</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Process:         Sail [35072]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Process:         Sail [35072]
 Path:            /Applications/Sail.app/Contents/MacOS/Sail
 Load Address:    0x106823000
 Identifier:      com.keithsmiley.SailOSX
@@ -1369,16 +1369,16 @@ Binary Images:
 
 <p>Just glancing at this crash report it's not too difficult to understand a bit
 about what was going on. A notification was sent, some methods were called in my
-application and then <code class="highlighter-rouge">accountTypeWithAccountTypeIdentifier</code> was called. Based on
+application and then <code class="language-plaintext highlighter-rouge">accountTypeWithAccountTypeIdentifier</code> was called. Based on
 the small number of times I call that method I was quickly able to assume where
 the issue was but I still wanted to see exactly what methods of mine were being
 called first.</p>
 
-<p>This brings me to <code class="highlighter-rouge">atos</code> the command line tool Apple provides to symbolicate
+<p>This brings me to <code class="language-plaintext highlighter-rouge">atos</code> the command line tool Apple provides to symbolicate
 these reports. This is where my experience differs with most of what I found
 online. My usage looked like this:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x106823000
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x106823000
 </code></pre></div></div>
 
 <p>This uses my dSYM file that was generated with the archive build I submitted to
@@ -1388,22 +1388,22 @@ architecture and the most important part, for me, the load address.</p>
 <p>To find my dSYM file that was generated when I did my archive build I simply
 noted the version and build number from the crash report, went to the Archives
 tab in the Xcode organizer, found the build with the same number, right clicked
-and clicked "Show in Finder." This takes you directly to the <code class="highlighter-rouge">.xcarchive</code> file
+and clicked "Show in Finder." This takes you directly to the <code class="language-plaintext highlighter-rouge">.xcarchive</code> file
 on disk which you can right click and click "Show Package Contents." From there
 I copied my dSYM to the desktop so I didn't overwrite anything unintentionally.</p>
 
 <p>The load address is the starting memory address of your application. The tool
 uses this address as an offset to find the correct methods in your symbols. In
-the above crash report <code class="highlighter-rouge">Load Address</code> is a provided field. This was the only
-report I saw that had that, typically I needed to look under the <code class="highlighter-rouge">Binary Images</code>
+the above crash report <code class="language-plaintext highlighter-rouge">Load Address</code> is a provided field. This was the only
+report I saw that had that, typically I needed to look under the <code class="language-plaintext highlighter-rouge">Binary Images</code>
 section for the address range of my application. In this example it was
-<code class="highlighter-rouge">0x106823000 - 0x106896fff</code>.</p>
+<code class="language-plaintext highlighter-rouge">0x106823000 - 0x106896fff</code>.</p>
 
-<p>The <code class="highlighter-rouge">atos</code> command then provides an interactive prompt where you can paste
+<p>The <code class="language-plaintext highlighter-rouge">atos</code> command then provides an interactive prompt where you can paste
 addresses into the stdin and it will tell you the corresponding methods. Mine
 looked like this:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x00000001068308f7
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x00000001068308f7
 -[KSAccountsPreferences dealloc] (in Sail) (KSAccountsPreferences.m:77)
 0x0000000106830798
 -[KSAccountsPreferences viewDidLoad] (in Sail) (KSAccountsPreferences.m:73)
@@ -1412,16 +1412,16 @@ looked like this:</p>
 </code></pre></div></div>
 
 <p>Here I can see that the notification that was being posted was probably an
-<code class="highlighter-rouge">NSApplicationDidFinishLaunchingNotification</code> starting off some methods in my
+<code class="language-plaintext highlighter-rouge">NSApplicationDidFinishLaunchingNotification</code> starting off some methods in my
 app delegate. I then load the accounts preferences, which would make sense to
-call the <code class="highlighter-rouge">ACAccountStore</code> method, but then <code class="highlighter-rouge">dealloc</code> is called. Seeing this was
-an immediate red flag since <code class="highlighter-rouge">KSAccountsPreferences</code> should be retained since it
+call the <code class="language-plaintext highlighter-rouge">ACAccountStore</code> method, but then <code class="language-plaintext highlighter-rouge">dealloc</code> is called. Seeing this was
+an immediate red flag since <code class="language-plaintext highlighter-rouge">KSAccountsPreferences</code> should be retained since it
 provides information about available accounts to the rest of the application.</p>
 
 <p>I had another crash report from a different issue that was a little bit harder
 to parse without symbolicating the methods.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Process:         Sail [47027]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Process:         Sail [47027]
 Identifier:      com.keithsmiley.SailOSX
 Version:         1.2.0 (4)
 Code Type:       X86-64 (Native)
@@ -1445,14 +1445,14 @@ Binary Images:
   0x10b82a000 - 0x10b89dff7 +com.keithsmiley.SailOSX (1.2.0 - 4) &lt;47EC2733-B543-31EA-A6AA-9D998FB65803&gt;
 </code></pre></div></div>
 
-<p>Obviously this was caused by an invalid access to an array but that's a little harder to track down. So I again used <code class="highlighter-rouge">atos</code> with the dSYM and new memory location.</p>
+<p>Obviously this was caused by an invalid access to an array but that's a little harder to track down. So I again used <code class="language-plaintext highlighter-rouge">atos</code> with the dSYM and new memory location.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x10b82a000
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>atos -arch x86_64 -o Sail.app.dSYM/Contents/Resources/DWARF/Sail -l 0x10b82a000
 </code></pre></div></div>
 
 <p>I got this output for my memory addresses</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x000000010b838eed
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x000000010b838eed
 -[KSAccountsPreferences selectedADNUser] (in Sail) (KSAccountsPreferences.m:238)
 0x000000010b838f36
 -[KSAccountsPreferences selectTwitterUsername] (in Sail) (KSAccountsPreferences.m:243)
@@ -1464,10 +1464,10 @@ __36-[KSAccountsPreferences viewDidLoad]_block_invoke (in Sail) (KSAccountsPrefe
 
 <p>This ended up giving me the exact line where out of bounds issue was happening
 depending on a certain number of accounts. I noticed that this issue had been
-fixed since my last release so I did a <code class="highlighter-rouge">diff</code> on the tag I created for that
+fixed since my last release so I did a <code class="language-plaintext highlighter-rouge">diff</code> on the tag I created for that
 specific release with</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git difftool HEAD..1.2.0\(3\)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git difftool HEAD..1.2.0\(3\)
 </code></pre></div></div>
 
 <p>Then in <a href="http://www.kaleidoscopeapp.com/">Kaleidoscope</a> I was able to figure out
@@ -1530,7 +1530,7 @@ it's obviously worth it.</p>
 <h3 id="steps">Steps</h3>
 
 <ul>
-  <li>Create a <code class="highlighter-rouge">.travis.yml</code> file in the root of your repository (leading dot is intentional). For many projects a file may just look like:</li>
+  <li>Create a <code class="language-plaintext highlighter-rouge">.travis.yml</code> file in the root of your repository (leading dot is intentional). For many projects a file may just look like:</li>
 </ul>
 
 <figure class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="na">language</span><span class="pi">:</span> <span class="s">objective-c</span></code></pre></figure>
@@ -1552,11 +1552,11 @@ it's obviously worth it.</p>
     </ol>
   </li>
   <li>
-    <p>At this point for a simple project or a project using <a href="http://cocoapods.org/">CocoaPods</a> you should be good to go. If Travis finds a <code class="highlighter-rouge">Podfile</code> in the root of your repository it automatically runs <code class="highlighter-rouge">pod install</code> to get your dependencies (from their <a href="http://about.travis-ci.org/docs/user/languages/objective-c/">docs</a>). Otherwise there are a ton of <a href="http://about.travis-ci.org/docs/user/build-configuration/">configuration options</a> for your <code class="highlighter-rouge">.travis.yml</code> depending on how your repo is setup.</p>
+    <p>At this point for a simple project or a project using <a href="http://cocoapods.org/">CocoaPods</a> you should be good to go. If Travis finds a <code class="language-plaintext highlighter-rouge">Podfile</code> in the root of your repository it automatically runs <code class="language-plaintext highlighter-rouge">pod install</code> to get your dependencies (from their <a href="http://about.travis-ci.org/docs/user/languages/objective-c/">docs</a>). Otherwise there are a ton of <a href="http://about.travis-ci.org/docs/user/build-configuration/">configuration options</a> for your <code class="language-plaintext highlighter-rouge">.travis.yml</code> depending on how your repo is setup.</p>
   </li>
 </ul>
 
-<p>For one of my projects I created a <code class="highlighter-rouge">setup.sh</code> file at the root of my repo that looks like this:</p>
+<p>For one of my projects I created a <code class="language-plaintext highlighter-rouge">setup.sh</code> file at the root of my repo that looks like this:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/usr/bin/env bash</span>
 
@@ -1567,7 +1567,7 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
 <span class="nb">echo</span> <span class="s2">"Done"</span>
 <span class="nb">cd</span> ../../../</code></pre></figure>
 
-<p>This script which I run using the <code class="highlighter-rouge">before_install: ./setup.sh</code> option in my <code class="highlighter-rouge">.travis.yml</code> gets all my submodules, sets up Specta and Expecta and then goes back to the root directory for running. If you just have a few simple steps you can also have multiple <code class="highlighter-rouge">before_install</code> actions like:</p>
+<p>This script which I run using the <code class="language-plaintext highlighter-rouge">before_install: ./setup.sh</code> option in my <code class="language-plaintext highlighter-rouge">.travis.yml</code> gets all my submodules, sets up Specta and Expecta and then goes back to the root directory for running. If you just have a few simple steps you can also have multiple <code class="language-plaintext highlighter-rouge">before_install</code> actions like:</p>
 
 <figure class="highlight"><pre><code class="language-yaml" data-lang="yaml"><span class="na">before_install</span><span class="pi">:</span>
   <span class="pi">-</span> <span class="s">cd Example</span>
@@ -1614,11 +1614,11 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
 
 <ol>
   <li>
-    <p>Enable the <code class="highlighter-rouge">Terminal</code> and <code class="highlighter-rouge">iTerm2</code> Quicksilver plugins.
+    <p>Enable the <code class="language-plaintext highlighter-rouge">Terminal</code> and <code class="language-plaintext highlighter-rouge">iTerm2</code> Quicksilver plugins.
 <img src="/images/qs-terminal/qs-plugins.png" alt="Quicksilver plugins" /></p>
   </li>
   <li>
-    <p>Create a new custom hotkey trigger. Using the <code class="highlighter-rouge">Home</code> directory with the action <code class="highlighter-rouge">Open Directory in Terminal</code>
+    <p>Create a new custom hotkey trigger. Using the <code class="language-plaintext highlighter-rouge">Home</code> directory with the action <code class="language-plaintext highlighter-rouge">Open Directory in Terminal</code>
 <img src="/images/qs-terminal/qs-triggers.png" alt="Quicksilver trigger" /></p>
   </li>
   <li>
@@ -1626,7 +1626,7 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
 <img src="/images/qs-terminal/qs-hotkey.png" alt="Quicksilver hotkey" /></p>
   </li>
   <li>
-    <p>Set your default <code class="highlighter-rouge">Command Line Interface</code> <code class="highlighter-rouge">Trigger</code> to <code class="highlighter-rouge">iTerm</code> (if that's what you want)
+    <p>Set your default <code class="language-plaintext highlighter-rouge">Command Line Interface</code> <code class="language-plaintext highlighter-rouge">Trigger</code> to <code class="language-plaintext highlighter-rouge">iTerm</code> (if that's what you want)
 <img src="/images/qs-terminal/qs-cli.png" alt="Quicksilver CLI" /></p>
   </li>
 </ol>
@@ -1820,7 +1820,7 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
 
 <p>This functionality already exists in <a href="http://www.potionfactory.com/thehitlist/">The Hit List</a> an awesome GTD app that has a lot of baggage with me, and I'm sure it exists in other applications as well.</p>
 
-<p>In my <code class="highlighter-rouge">NSTableView</code> subclass' <code class="highlighter-rouge">keyDown:</code> method I tried a few things.</p>
+<p>In my <code class="language-plaintext highlighter-rouge">NSTableView</code> subclass' <code class="language-plaintext highlighter-rouge">keyDown:</code> method I tried a few things.</p>
 
 <p>Attempt 1: First I tried to re implement the functionality myself. In retrospect this doesn't make any sense but at first it was pretty simple. It looked something like this.</p>
 
@@ -1843,7 +1843,7 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
     <span class="p">}</span>
 <span class="p">}</span></code></pre></figure>
 
-<p>The issue with this is the way <code class="highlighter-rouge">NSTableView</code> typically expands it's selection. I think of it as a pivot point where you start. Then you go up and down relative to that point. So if you start at index 2 and go down till index 4, you should have 2 rows selected. Then when you go back up you should deselect the rows and indexes 3 and 4 and select the rows and index 1 and 0. At this point I realized it was more difficult than I realized at first and went in search on another solution.</p>
+<p>The issue with this is the way <code class="language-plaintext highlighter-rouge">NSTableView</code> typically expands it's selection. I think of it as a pivot point where you start. Then you go up and down relative to that point. So if you start at index 2 and go down till index 4, you should have 2 rows selected. Then when you go back up you should deselect the rows and indexes 3 and 4 and select the rows and index 1 and 0. At this point I realized it was more difficult than I realized at first and went in search on another solution.</p>
 
 <p>Attempt 2: The next solution I discovered used the <a href="https://developer.apple.com/library/mac/#documentation/Carbon/Reference/QuartzEventServicesRef/Reference/reference.html">Quartz Event Services</a> APIs.</p>
 
@@ -1859,7 +1859,7 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
 
 <p>This solution worked perfectly, at first. This mainly emulates a key press with a different key code. So as you can see I was catching j and k and spitting them out as down and up. I spent a few minutes testing this before I remembered that I had sandboxing disabled so I could more easily delete my application support folder while messing with my Core Data stack. There went that solution.</p>
 
-<p>Attempt 3: Before I used the weird <code class="highlighter-rouge">CGEventRef</code> solution I tried to create my own <code class="highlighter-rouge">NSEvent</code> passing it all the same attributes from the original event (all this code is being used in the <code class="highlighter-rouge">keyDown:</code> function of my subclass) but I couldn't figure out how to get the correct character string for the up and down arrows. I typically use <a href="http://manytricks.com/keycodes/">Key Codes</a> to get all the possible information you could want about each key you press. But for some keys, including the arrow keys, it returns garbage for the character code. Then I discovered <a href="http://stackoverflow.com/a/4434934/902968">this answer</a> on StackOverflow where there is a brief mention of <code class="highlighter-rouge">NSUpArrowFunctionKey</code>. With that I came up with this.</p>
+<p>Attempt 3: Before I used the weird <code class="language-plaintext highlighter-rouge">CGEventRef</code> solution I tried to create my own <code class="language-plaintext highlighter-rouge">NSEvent</code> passing it all the same attributes from the original event (all this code is being used in the <code class="language-plaintext highlighter-rouge">keyDown:</code> function of my subclass) but I couldn't figure out how to get the correct character string for the up and down arrows. I typically use <a href="http://manytricks.com/keycodes/">Key Codes</a> to get all the possible information you could want about each key you press. But for some keys, including the arrow keys, it returns garbage for the character code. Then I discovered <a href="http://stackoverflow.com/a/4434934/902968">this answer</a> on StackOverflow where there is a brief mention of <code class="language-plaintext highlighter-rouge">NSUpArrowFunctionKey</code>. With that I came up with this.</p>
 
 <figure class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="k">if</span> <span class="p">([</span><span class="n">theEvent</span> <span class="nf">keyCode</span><span class="p">]</span> <span class="o">==</span> <span class="mi">38</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// j</span>
     <span class="n">unichar</span> <span class="n">down</span> <span class="o">=</span> <span class="n">NSDownArrowFunctionKey</span><span class="p">;</span>
@@ -1895,7 +1895,7 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
     <span class="p">[</span><span class="n">super</span> <span class="nf">keyDown</span><span class="p">:</span><span class="n">theEvent</span><span class="p">];</span>
 <span class="p">}</span></code></pre></figure>
 
-<p>Not the prettiest solution I but one that seems to work perfectly, even sandboxed, to provide the expected behavior in an <code class="highlighter-rouge">NSTableView</code> subclass.</p>
+<p>Not the prettiest solution I but one that seems to work perfectly, even sandboxed, to provide the expected behavior in an <code class="language-plaintext highlighter-rouge">NSTableView</code> subclass.</p>
 ]]>
       </content>
     </entry>
@@ -1915,7 +1915,7 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
 
 <p>Many people use <a href="http://en.wikipedia.org/wiki/Rsync">rsync</a> to do their server backups. In fact Linode even has a <a href="http://library.linode.com/linux-tools/utilities/rsync#sph_use-rsync-to-back-up-production-environments">guide</a> on how to set it up (there's a better one <a href="http://feross.org/how-to-setup-your-linode/">here</a>). I decided that instead of a 1 for 1 directory backup, I would prefer to have a <a href="http://en.wikipedia.org/wiki/Tar_(file_format)">tarball</a> of the contents. While I could've easily done this with a few bash commands from the server that's not particular ideal for my setup. My local machines don't run 24/7 so if I set it up on the server to automate the backup every week, it may try to initiate the backup when my machine was off (I could try to guess when it's on every week but that's not ideal either).</p>
 
-<p>The obvious solution to this is run it from my local machine instead every week. That way once a week when it's powered up it would log in to the server, create the tarball and pull it down. Insert <a href="https://github.com/capistrano/capistrano">Capistrano</a> (<code class="highlighter-rouge">[sudo] gem install capistrano</code>) a <a href="http://rubygems.org/">RubyGem</a> for 'Remote multi-server automation.' So I wrote a very basic <code class="highlighter-rouge">Capfile</code> to automate this for me (replace the path to your <code class="highlighter-rouge">www</code> folder accordingly).</p>
+<p>The obvious solution to this is run it from my local machine instead every week. That way once a week when it's powered up it would log in to the server, create the tarball and pull it down. Insert <a href="https://github.com/capistrano/capistrano">Capistrano</a> (<code class="language-plaintext highlighter-rouge">[sudo] gem install capistrano</code>) a <a href="http://rubygems.org/">RubyGem</a> for 'Remote multi-server automation.' So I wrote a very basic <code class="language-plaintext highlighter-rouge">Capfile</code> to automate this for me (replace the path to your <code class="language-plaintext highlighter-rouge">www</code> folder accordingly).</p>
 
 <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="nb">load</span> <span class="s1">'deploy'</span>
 
@@ -1928,11 +1928,11 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   <span class="n">run_locally</span> <span class="s2">"scp </span><span class="si">#{</span> <span class="vg">$SERVER_USER</span> <span class="si">}</span><span class="s2">@</span><span class="si">#{</span> <span class="vg">$SERVER_IP</span> <span class="si">}</span><span class="s2">:~/backup.tar.gz ~/Dropbox/Backups/Server"</span>
 <span class="k">end</span></code></pre></figure>
 
-<p>Then I added this to my crontab on my local machine by running <code class="highlighter-rouge">crontab -e</code> and adding the line:</p>
+<p>Then I added this to my crontab on my local machine by running <code class="language-plaintext highlighter-rouge">crontab -e</code> and adding the line:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">@weekly /Users/ksmiley/.rbenv/shims/cap <span class="nt">-f</span> ~/path/to/Capfile backup</code></pre></figure>
 
-<p>I included the path to the Capistrano executable since cron (on OS X) executes tasks with <code class="highlighter-rouge">sh</code>, which isn't setup with my <code class="highlighter-rouge">$PATH</code>.</p>
+<p>I included the path to the Capistrano executable since cron (on OS X) executes tasks with <code class="language-plaintext highlighter-rouge">sh</code>, which isn't setup with my <code class="language-plaintext highlighter-rouge">$PATH</code>.</p>
 
 ]]>
       </content>
@@ -1949,9 +1949,9 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
         
       </author>
       <content type="html">
-        <![CDATA[<p>I spend a decent amount of time these days helping maintain the <a href="http://cocoapods.org/">CocoaPods</a> <a href="http://github.com/cocoapods/specs">specs repo</a> by managing pull requests and issues. CococaPods is an awesome dependency manager similar to <a href="http://rubygems.org/">Rubygems</a> for Objective-C projects. Unfortunately a lot of submitted podspecs haven't been correctly formatted or they're missing required information. CocoaPods has an awesome build in command <code class="highlighter-rouge">pod spec lint</code> that allows you to make sure the spec is valid and complete. Understandably people who are new to CocoaPods trying to submit their libraries are unaware of this awesome tool. Therefore when I look through the pull requests, I like to lint them myself (CocoaPods does <a href="https://travis-ci.org/CocoaPods/Specs">utilize Travis</a> but unfortunately it can't do everything).</p>
+        <![CDATA[<p>I spend a decent amount of time these days helping maintain the <a href="http://cocoapods.org/">CocoaPods</a> <a href="http://github.com/cocoapods/specs">specs repo</a> by managing pull requests and issues. CococaPods is an awesome dependency manager similar to <a href="http://rubygems.org/">Rubygems</a> for Objective-C projects. Unfortunately a lot of submitted podspecs haven't been correctly formatted or they're missing required information. CocoaPods has an awesome build in command <code class="language-plaintext highlighter-rouge">pod spec lint</code> that allows you to make sure the spec is valid and complete. Understandably people who are new to CocoaPods trying to submit their libraries are unaware of this awesome tool. Therefore when I look through the pull requests, I like to lint them myself (CocoaPods does <a href="https://travis-ci.org/CocoaPods/Specs">utilize Travis</a> but unfortunately it can't do everything).</p>
 
-<p>Since CocoaPods supports multiple versions of Ruby (1.8.7 and 1.9.3) to be complete ideally you'd lint them on both versions. Tools like <a href="https://rvm.io/">RVM</a> and <a href="https://github.com/sstephenson/rbenv">rbenv</a>(my tool of choice) make it easy to quickly switch between different versions of Ruby using <code class="highlighter-rouge">.rvmrc</code> and <code class="highlighter-rouge">.rbenv-version</code> respectively. As you can probably assume I wanted to automate this. So I wrote a quick <a href="http://rake.rubyforge.org/">Rakefile</a> to do this for me.</p>
+<p>Since CocoaPods supports multiple versions of Ruby (1.8.7 and 1.9.3) to be complete ideally you'd lint them on both versions. Tools like <a href="https://rvm.io/">RVM</a> and <a href="https://github.com/sstephenson/rbenv">rbenv</a>(my tool of choice) make it easy to quickly switch between different versions of Ruby using <code class="language-plaintext highlighter-rouge">.rvmrc</code> and <code class="language-plaintext highlighter-rouge">.rbenv-version</code> respectively. As you can probably assume I wanted to automate this. So I wrote a quick <a href="http://rake.rubyforge.org/">Rakefile</a> to do this for me.</p>
 
 <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1">#!/usr/bin/env rake</span>
 
@@ -2040,7 +2040,7 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
         
       </author>
       <content type="html">
-        <![CDATA[<p>I've recently been searching around for a good way to 'spawn' an <a href="http://www.iterm2.com/">iTerm</a> window (no I don't use tabs in iTerm), at the <code class="highlighter-rouge">pwd</code> in my current iTerm window. I couldn't find any good way to do it so I jumped in to AppleScript Editor and made something happen.</p>
+        <![CDATA[<p>I've recently been searching around for a good way to 'spawn' an <a href="http://www.iterm2.com/">iTerm</a> window (no I don't use tabs in iTerm), at the <code class="language-plaintext highlighter-rouge">pwd</code> in my current iTerm window. I couldn't find any good way to do it so I jumped in to AppleScript Editor and made something happen.</p>
 
 <figure class="highlight"><pre><code class="language-applescript" data-lang="applescript"><span class="k">on</span> <span class="nb">run</span><span class="w"> </span><span class="nv">argv</span><span class="w">
 	</span><span class="k">tell</span><span class="w"> </span><span class="nb">application</span><span class="w"> </span><span class="s2">"iTerm"</span><span class="w">
@@ -2061,7 +2061,7 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   osascript ~/Dropbox/Code/Applescript/Spawn/SpawniTerm.applescript <span class="nv">$PWD</span>
 <span class="o">}</span></code></pre></figure>
 
-<p>Now I can call <code class="highlighter-rouge">spawn</code> from any iTerm or Terminal window to open a new iTerm session wherever I called it from.</p>
+<p>Now I can call <code class="language-plaintext highlighter-rouge">spawn</code> from any iTerm or Terminal window to open a new iTerm session wherever I called it from.</p>
 ]]>
       </content>
     </entry>
@@ -2079,9 +2079,9 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
       <content type="html">
         <![CDATA[<p>For quite a while I was having trouble dealing with a global show/hide hotkey for windows in Objective-C. Global hotkeys are already <a href="http://stackoverflow.com/questions/4807319/register-hotkey">hard</a> <a href="https://github.com/keith/PTHotKeyTest">enough</a>. Although <a href="https://github.com/shpakovski/MASShortcut">MASShortcut</a> has solved that. Yes I know of <a href="http://wafflesoftware.net/shortcut/">ShortcutRecorder</a> but it's very dated (MASShortcut even uses blocks!).</p>
 
-<p>I found that once I had the shortcut working I was having a hard time dealing with opening and closing, showing and hiding the application. What seemed to happen was when the method was called and <code class="highlighter-rouge">[[NSRunningApplication currentApplication] isActive]</code> was evaluated in an <code class="highlighter-rouge">if</code> statement along with an <code class="highlighter-rouge">else</code> clause, if the application was hidden using <code class="highlighter-rouge">[[NSApplication sharedApplication] hide:self];</code> it was reevaluated and it hit the <code class="highlighter-rouge">else</code> case. This also happened with an <code class="highlighter-rouge">if</code> statement checking if the window was already visible with <code class="highlighter-rouge">[myWindow isVisible]</code> even with <code class="highlighter-rouge">return;</code> statements inserted in appropriate places.</p>
+<p>I found that once I had the shortcut working I was having a hard time dealing with opening and closing, showing and hiding the application. What seemed to happen was when the method was called and <code class="language-plaintext highlighter-rouge">[[NSRunningApplication currentApplication] isActive]</code> was evaluated in an <code class="language-plaintext highlighter-rouge">if</code> statement along with an <code class="language-plaintext highlighter-rouge">else</code> clause, if the application was hidden using <code class="language-plaintext highlighter-rouge">[[NSApplication sharedApplication] hide:self];</code> it was reevaluated and it hit the <code class="language-plaintext highlighter-rouge">else</code> case. This also happened with an <code class="language-plaintext highlighter-rouge">if</code> statement checking if the window was already visible with <code class="language-plaintext highlighter-rouge">[myWindow isVisible]</code> even with <code class="language-plaintext highlighter-rouge">return;</code> statements inserted in appropriate places.</p>
 
-<p>My solution was adding <code class="highlighter-rouge">NSNumber</code>s acting as booleans to keep track of the value allowing me to avoid <code class="highlighter-rouge">else</code> statements altogether and use <code class="highlighter-rouge">else if</code>s instead.</p>
+<p>My solution was adding <code class="language-plaintext highlighter-rouge">NSNumber</code>s acting as booleans to keep track of the value allowing me to avoid <code class="language-plaintext highlighter-rouge">else</code> statements altogether and use <code class="language-plaintext highlighter-rouge">else if</code>s instead.</p>
 
 <figure class="highlight"><pre><code class="language-objc" data-lang="objc"><span class="k">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">showHideMainWindow</span> <span class="p">{</span>
     <span class="n">NSNumber</span> <span class="o">*</span><span class="n">wasActive</span> <span class="o">=</span> <span class="nb">@NO</span><span class="p">;</span>

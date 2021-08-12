@@ -78,7 +78,7 @@ up nuking the work I had done and starting over.</p>
 
 <p>Start by installing the necessary components:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pacman -Sy openswan xl2tpd ppp lsof python2
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pacman -Sy openswan xl2tpd ppp lsof python2
 </code></pre></div></div>
 
 <p>You need to do some configuration of the firewall and redirects:</p>
@@ -94,7 +94,7 @@ up nuking the work I had done and starting over.</p>
 <p>To make these settings persist we need to create a script that gets launched by
 systemd each time we restart the system. As recommended in the original
 article, and being a <a href="http://brew.sh/">Homebrew</a> user I created the script in
-<code class="highlighter-rouge">/usr/local/bin/vpn-boot.sh</code>:</p>
+<code class="language-plaintext highlighter-rouge">/usr/local/bin/vpn-boot.sh</code>:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/usr/bin/bash</span>
 
@@ -109,19 +109,19 @@ iptables <span class="nt">--table</span> nat <span class="nt">--append</span> PO
 
 <p>There are a few things that differ here to the original article. First
 the hashbang path was changed since the default $PATH on the ARM version
-of Arch didn't include <code class="highlighter-rouge">/bin</code>. I would run <code class="highlighter-rouge">which -a bash</code> on your
+of Arch didn't include <code class="language-plaintext highlighter-rouge">/bin</code>. I would run <code class="language-plaintext highlighter-rouge">which -a bash</code> on your
 install to make sure this works for you. This obviously doesn't have
 to be changed, but I think it's better in the long run. I also added
-<code class="highlighter-rouge">sysctl -p</code> since these settings didn't seemed to be applied otherwise.
+<code class="language-plaintext highlighter-rouge">sysctl -p</code> since these settings didn't seemed to be applied otherwise.
 Then you must make this script executable with something like:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">chmod</span> +x /usr/local/bin/vpn-boot.sh</code></pre></figure>
 
 <p>Since Arch uses systemd to this script has to be launched by creating a
 service to be ran through systemd. You can create this file in
-<code class="highlighter-rouge">/etc/systemd/system/vpnboot.service</code></p>
+<code class="language-plaintext highlighter-rouge">/etc/systemd/system/vpnboot.service</code></p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
 Description=VPN Settings at boot
 After=netctl@eth0.service
 Before=openswan.service xl2tpd.service
@@ -140,13 +140,13 @@ be required for systemd to do what I wanted it to but the order really seemed
 to matter for here. After you create this service enable it within systemd
 with:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl enable vpnboot.service
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl enable vpnboot.service
 </code></pre></div></div>
 
-<p>I also made some changes to <code class="highlighter-rouge">/etc/ipsec.conf</code> (note the comments in the
+<p>I also made some changes to <code class="language-plaintext highlighter-rouge">/etc/ipsec.conf</code> (note the comments in the
 default file for some more info on these settings):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>config setup
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>config setup
   dumpdir=/var/run/pluto/
   nat_traversal=yes
   virtual_private=%v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v4:25.0.0.0/8,%v6:fd00::/8,%v6:fe80::/10
@@ -173,20 +173,20 @@ conn L2TP-PSK-noNAT
   dpdaction=clear
 </code></pre></div></div>
 
-<p>Then for the <code class="highlighter-rouge">/etc/ipsec.secrets</code> (use the same server IP address):</p>
+<p>Then for the <code class="language-plaintext highlighter-rouge">/etc/ipsec.secrets</code> (use the same server IP address):</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>%SameIP%  %any: PSK "super random key"
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>%SameIP%  %any: PSK "super random key"
 </code></pre></div></div>
 
 <p>The make systemd start openswan on boot as well:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl enable openswan
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl enable openswan
 </code></pre></div></div>
 
 <p>I also edited the openswan service file in
-<code class="highlighter-rouge">/etc/systemd/system/multi-user.target.wants/openswan.service</code></p>
+<code class="language-plaintext highlighter-rouge">/etc/systemd/system/multi-user.target.wants/openswan.service</code></p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
 Description=Openswan daemon
 After=netctl@eth0.service vpnboot.service
 Before=xl2tpd.service
@@ -206,9 +206,9 @@ WantedBy=multi-user.target
 dependency of <a href="https://wiki.archlinux.org/index.php/Netctl">netctl's</a>
 default network interface (we haven't enabled this yet).</p>
 
-<p>Next for <code class="highlighter-rouge">/etc/xl2tpd/xl2tpd.conf</code>:</p>
+<p>Next for <code class="language-plaintext highlighter-rouge">/etc/xl2tpd/xl2tpd.conf</code>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[global]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[global]
 ipsec saref = yes
 saref refinfo = 30
 
@@ -222,17 +222,17 @@ length bit = yes
 unix authentication = yes
 </code></pre></div></div>
 
-<p>Where <code class="highlighter-rouge">local ip</code> is the server's ip and the <code class="highlighter-rouge">ip range</code> is the range of
+<p>Where <code class="language-plaintext highlighter-rouge">local ip</code> is the server's ip and the <code class="language-plaintext highlighter-rouge">ip range</code> is the range of
 IP addresses you want to use for VPN clients. You need to enable this
 service too with:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl enable xl2tpd
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl enable xl2tpd
 </code></pre></div></div>
 
 <p>I also edited the systemd file for xl2tpd at
-<code class="highlighter-rouge">/etc/systemd/system/multi-user.target.wants/xl2tpd.service</code>:</p>
+<code class="language-plaintext highlighter-rouge">/etc/systemd/system/multi-user.target.wants/xl2tpd.service</code>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Unit]
 Description=Level 2 Tunnel Protocol Daemon (L2TP)
 After=syslog.target netctl@eth0.service openswan.service
 Requires=openswan.service
@@ -249,12 +249,12 @@ WantedBy=multi-user.target
 
 <p>The other guide also recommends creating the xl2tpd control folder with:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir /var/run/xl2tpd/
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkdir /var/run/xl2tpd/
 </code></pre></div></div>
 
-<p>Now we need to create/edit <code class="highlighter-rouge">/etc/ppp/options.xl2tpd</code>:</p>
+<p>Now we need to create/edit <code class="language-plaintext highlighter-rouge">/etc/ppp/options.xl2tpd</code>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ipcp-accept-local
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ipcp-accept-local
 ipcp-accept-remote
 ms-dns 8.8.8.8
 ms-dns 8.8.4.4
@@ -271,43 +271,43 @@ lcp-echo-failure 4
 login
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">/etc/pam.d/ppp</code>:</p>
+<p><code class="language-plaintext highlighter-rouge">/etc/pam.d/ppp</code>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>auth    required        pam_nologin.so
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>auth    required        pam_nologin.so
 auth    required        pam_unix.so
 account required        pam_unix.so
 session required        pam_unix.so
 </code></pre></div></div>
 
-<p>And <code class="highlighter-rouge">/etc/ppp/pap-secrets</code>:</p>
+<p>And <code class="language-plaintext highlighter-rouge">/etc/ppp/pap-secrets</code>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>*       l2tpd           ""              *
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>*       l2tpd           ""              *
 </code></pre></div></div>
 
 <p>If you'd like you can also restrict the users accounts that can access
 the vpn. This way you can separate your login user from your VPN users
 who can have much stronger passwords. You'd do that in your
-<code class="highlighter-rouge">/etc/ppp/pap-secrets</code>:</p>
+<code class="language-plaintext highlighter-rouge">/etc/ppp/pap-secrets</code>:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vpnuser   l2tpd         ""              *
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vpnuser   l2tpd         ""              *
 </code></pre></div></div>
 
 <p>To enable the startup of the default netctl eth0 interface you need to
 run:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netctl enable eth0
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netctl enable eth0
 </code></pre></div></div>
 
 <p>You'll probably want to disable any other netctl systemd functions that are
-enabled by default. Check <code class="highlighter-rouge">/etc/systemd/system/mutli-user.target.wants</code> to for
-other <code class="highlighter-rouge">netctl</code> profiles.</p>
+enabled by default. Check <code class="language-plaintext highlighter-rouge">/etc/systemd/system/mutli-user.target.wants</code> to for
+other <code class="language-plaintext highlighter-rouge">netctl</code> profiles.</p>
 
 <p>So at this point you should be able to enable VPN clients using the
 super secret keys you enabled before and the username and passwords
 you've created previously. You can create new users for specifically VPN
 usage with something like this:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>useradd -s /sbin/nologin vpnuser
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>useradd -s /sbin/nologin vpnuser
 </code></pre></div></div>
 
 <p>This disallows users from being able to be used for login which is probably
@@ -321,15 +321,15 @@ change these before allowing access to the outside world.</p>
 how my setup works. The most useful things to seeing what was happening
 were these:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -tulpan
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -tulpan
 systemctl status openswan
 systemctl status xl2tpd
 journalctl -f
 </code></pre></div></div>
 
 <p>You can glance at some of the other guides to see what should be going
-on. You probably shouldn't see any red in the <code class="highlighter-rouge">openswan</code> status and you
-should see ports open under <code class="highlighter-rouge">pluto</code> with netstat. You can check out the
+on. You probably shouldn't see any red in the <code class="language-plaintext highlighter-rouge">openswan</code> status and you
+should see ports open under <code class="language-plaintext highlighter-rouge">pluto</code> with netstat. You can check out the
 <a href="http://linux.die.net/man/5/ipsec.conf">ipsec manpage</a> or the <a href="https://github.com/xelerance/Openswan/wiki/L2tp-ipsec-configuration-using-openswan-and-xl2tpd">openswan
 wiki
 page</a>
