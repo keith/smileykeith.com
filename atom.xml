@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2021-08-12T14:30:42-07:00</updated>
+  <updated>2021-08-12T14:31:33-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -12,6 +12,114 @@
   <rights>Copyright (c) 2021 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
+  
+    <entry>
+      <title type="html"><![CDATA[Switching Xcode versions without a password]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2021/08/12/xcode-select-sudoers/" />
+      <id>http://smileykeith.com/2021/08/12/xcode-select-sudoers</id>
+      <updated>2021-08-12T13:40:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>When switching between multiple Xcode versions one way to globally
+update the version you want to use is by running
+<a href="https://keith.github.io/xcode-man-pages/xcode-select.1.html"><code class="language-plaintext highlighter-rouge">xcode-select</code></a> like this:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>xcode-select <span class="nt">-s</span> /Applications/Xcode-12.5.1.app
+</code></pre></div></div>
+
+<p>Then, if you want to automatically accept Xcode's license, and install
+any extra packages it requires (which should only be required the for
+the first time you run a new version), you can run:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>xcodebuild <span class="nt">-runFirstLaunch</span>
+</code></pre></div></div>
+
+<p>This works fine locally, but when updating remote CI machines, entering
+the password can be troublesome. Furthermore if you want to support
+having CI machines automatically switch between Xcode versions when
+testing upcoming changes, you may not have the opportunity to be
+prompted at all. Lucky for us, the <a href="https://keith.github.io/xcode-man-pages/sudoers.5.html"><code class="language-plaintext highlighter-rouge">sudoers</code></a> file format,
+which configures the <code class="language-plaintext highlighter-rouge">sudo</code> command, allows us to skip password entry
+for specific commands with a bit of configuration.</p>
+
+<p>The easiest way to edit this configuration is by running:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>visudo
+</code></pre></div></div>
+
+<p>This opens the default <code class="language-plaintext highlighter-rouge">/etc/sudoers</code> configuration file in vim. While
+we could add our custom configuration here, we can also see the default
+configuration that ships with macOS contains this line:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#includedir /private/etc/sudoers.d
+</code></pre></div></div>
+
+<p>This tells <code class="language-plaintext highlighter-rouge">sudo</code> to load all the files in <code class="language-plaintext highlighter-rouge">/etc/sudoers.d</code><sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup> as
+configuration as well. Using this knowledge we can nicely separate our
+custom configuration, making it easier to overwrite, or remove, in the
+future. Separating our custom configuration also makes us less likely to
+break the default configuration, potentially leading to major issues.</p>
+
+<p>To setup our custom configuration we can run this command:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"%admin ALL=NOPASSWD: /usr/bin/xcode-select,/usr/bin/xcodebuild -runFirstLaunch"</span> | <span class="nb">sudo tee</span> /etc/sudoers.d/xcode
+</code></pre></div></div>
+
+<p>Let's break this down<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup>. The <code class="language-plaintext highlighter-rouge">%admin</code> component makes this
+configuration apply to all users that are in the <code class="language-plaintext highlighter-rouge">admin</code> group<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup>.
+Using this group is probably good enough for this use case, but if you'd
+like to restrict this more, you can change this to a your account's
+specific username such as <code class="language-plaintext highlighter-rouge">ksmiley</code>.</p>
+
+<p>The second component <code class="language-plaintext highlighter-rouge">ALL</code> makes this rule apply to all hosts, I'm not
+sure in what context any host besides the current one would take these
+rules into account, but <code class="language-plaintext highlighter-rouge">ALL</code> ignores that.</p>
+
+<p>The third component <code class="language-plaintext highlighter-rouge">NOPASSWD</code> is the key piece of this functionality.
+This enables us to run the following commands without being prompted for
+our password.</p>
+
+<p>The last component is the commands we want to allow to be run without a
+password. There are 2 things to note here.</p>
+
+<ol>
+  <li>We specify just the <code class="language-plaintext highlighter-rouge">xcode-select</code> binary, using the absolute path.
+This allows all subcommands handled by <code class="language-plaintext highlighter-rouge">xcode-select</code> to be run
+without a password.</li>
+  <li>The <code class="language-plaintext highlighter-rouge">xcodebuild</code> command also contains the one subcommand we want to
+be able to run without a password. Limiting this is important because
+otherwise you could run <code class="language-plaintext highlighter-rouge">sudo xcodebuild build</code> without a password,
+which could execute malicious run scripts or do other terrible
+things. With this argument specified any other invocation of <code class="language-plaintext highlighter-rouge">sudo
+xcodebuild</code> will still require a password.</li>
+</ol>
+
+<p>Just like that we no longer have to enter our password when swapping
+between Xcode versions.</p>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p><code class="language-plaintext highlighter-rouge">/etc</code> is actually a symlink to <code class="language-plaintext highlighter-rouge">/private/etc</code>, which is why we
+  can use them interchangeably in this case <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+      <p>For many more format examples checkout the <a href="https://keith.github.io/xcode-man-pages/sudoers.5.html">man page</a> <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:3" role="doc-endnote">
+      <p>You can see what groups the current user is in by running
+  <code class="language-plaintext highlighter-rouge">groups</code>, but for macOS all administrator accounts are part of
+  this group. <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+]]>
+      </content>
+    </entry>
   
     <entry>
       <title type="html"><![CDATA[Locking Xcode versions in bazel]]></title>
