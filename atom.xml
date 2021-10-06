@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2021-10-05T22:46:28-07:00</updated>
+  <updated>2021-10-05T22:54:04-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -220,6 +220,13 @@ need to do 2 things for binaries without <code class="language-plaintext highlig
 <code class="language-plaintext highlighter-rouge">-no_adhoc_codesign</code></li>
   <li>Pass an explicit identifier when linking binaries with <code class="language-plaintext highlighter-rouge">--identifier</code>
 to the <code class="language-plaintext highlighter-rouge">codesign</code> invocation</li>
+</ol>
+
+<p>I filed 2 radars about this behavior:</p>
+
+<ol>
+  <li>Make codesign for fat binaries reproducible across architectures FB9681559</li>
+  <li>Make linker adhoc codesign invocations reproducible FB9681562</li>
 </ol>
 
 <div class="footnotes" role="doc-endnotes">
