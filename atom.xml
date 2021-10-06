@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2021-08-12T14:31:33-07:00</updated>
+  <updated>2021-10-05T22:46:28-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -12,6 +12,240 @@
   <rights>Copyright (c) 2021 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
+  
+    <entry>
+      <title type="html"><![CDATA[Reproducible codesigning on Apple Silicon]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2021/10/05/codesign-m1/" />
+      <id>http://smileykeith.com/2021/10/05/codesign-m1</id>
+      <updated>2021-10-05T20:00:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>For people who expect <a href="https://reproducible-builds.org">reproducible builds</a>, Apple Silicon machines
+provide an interesting challenge. Apple Silicon <a href="https://eclecticlight.co/2020/08/22/apple-silicon-macs-will-require-signed-code/">requires</a> <code class="language-plaintext highlighter-rouge">arm64</code>
+binaries, including command line tools you build yourself, be
+codesigned. This change is mostly transparent to developers, because
+<a href="https://github.com/keith/ld64/blob/90cb020963ce62a84000b99362cbed36bd16adcd/src/ld/Options.cpp#L5683-L5685">Apple updated their linker</a> to automatically ad-hoc sign
+binaries<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>. Unfortunately, if you're interested in producing binaries
+that support both Intel Macs and Apple Silicon Macs, you likely want to
+produce a <a href="https://en.wikipedia.org/wiki/Fat_binary"><code class="language-plaintext highlighter-rouge">fat binary</code></a>. When codesigning this binary you hit
+some behavior that depends on your current machine's architecture.</p>
+
+<h2 id="example">Example</h2>
+
+<p>You can consistently produce the same result across multiple machines
+when compiling a binary without signing it. Here's an example with a
+simple C program:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ echo "int main() { return 0; }" &gt; main.c
+$ clang main.c -Wl,-no_adhoc_codesign -arch arm64 -arch x86_64 -o main
+$ shasum main
+113033b3d9a247210b49a476bbfadb2e347846fe  main
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">shasum</code> of <code class="language-plaintext highlighter-rouge">main</code> should always be the same regardless of your host
+machine<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup>. On Apple Silicon machines you can see this binary has the
+same <code class="language-plaintext highlighter-rouge">sha1</code> even if you run <code class="language-plaintext highlighter-rouge">clang</code> under Rosetta 2<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ arch -x86_64 clang main.c -Wl,-no_adhoc_codesign -arch arm64 -arch x86_64 -o main
+$ shasum main
+113033b3d9a247210b49a476bbfadb2e347846fe  main
+</code></pre></div></div>
+
+<p>The issue is introduced when you <code class="language-plaintext highlighter-rouge">codesign</code> the binary on Apple Silicon
+machines versus Intel machines. You can immediately see the
+difference<sup id="fnref:3:1" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ codesign --force --sign - main
+$ shasum main
+84631e812bd480c306766ba03a728dd2565dd672  main
+% arch -x86_64 codesign --force --sign - main
+% shasum main
+f631b6c0daf3ffd0bb5f65d19fa045acf447a72d  main
+</code></pre></div></div>
+
+<p>We get closer to identifying the problem when you compare the details of
+these differences:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ codesign --force --sign - main
+$ codesign -dvvv main &gt; arm.txt 2&gt;&amp;1
+$ arch -x86_64 codesign --force --sign - main
+$ codesign -dvvv main &gt; intel.txt 2&gt;&amp;1
+$ diff -Nur intel.txt arm.txt
+</code></pre></div></div>
+
+<div class="language-diff highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gd">--- intel.txt   2021-10-05 21:26:32.731918710 -0700
+</span><span class="gi">+++ arm.txt     2021-10-05 21:26:29.473702845 -0700
+</span><span class="p">@@ -1,14 +1,14 @@</span>
+ Executable=/private/tmp/main
+<span class="gd">-Identifier=main-555549445413bc88d3b13dfa855a7f47cf229020
+</span><span class="gi">+Identifier=main-55554944e4472179d9ec3bff92ff3f8e6d013184
+</span> Format=Mach-O universal (x86_64 arm64)
+ CodeDirectory v=20400 size=358 flags=0x2(adhoc) hashes=5+2 location=embedded
+ Hash type=sha256 size=32
+<span class="gd">-CandidateCDHash sha256=78fab81d4fef72ae942e3272ba2c9085e1893828
+-CandidateCDHashFull sha256=78fab81d4fef72ae942e3272ba2c9085e1893828a77095ae517ab7d3b8229ad0
+</span><span class="gi">+CandidateCDHash sha256=1a9fcc4eabde35d87326380f5eca6672a1c96f78
++CandidateCDHashFull sha256=1a9fcc4eabde35d87326380f5eca6672a1c96f78f252bbecec7f19ffdd56e420
+</span> Hash choices=sha256
+<span class="gd">-CMSDigest=78fab81d4fef72ae942e3272ba2c9085e1893828a77095ae517ab7d3b8229ad0
+</span><span class="gi">+CMSDigest=1a9fcc4eabde35d87326380f5eca6672a1c96f78f252bbecec7f19ffdd56e420
+</span> CMSDigestType=2
+<span class="gd">-CDHash=78fab81d4fef72ae942e3272ba2c9085e1893828
+</span><span class="gi">+CDHash=1a9fcc4eabde35d87326380f5eca6672a1c96f78
+</span> Signature=adhoc
+ Info.plist=not bound
+ TeamIdentifier=not set
+</code></pre></div></div>
+
+<p>There are a few fields that differ here, but, given that most of them
+seem to be hashes, it felt natural to focus on the <code class="language-plaintext highlighter-rouge">Identifier</code> field
+(especially since that appears to contain our file name).</p>
+
+<p>In the manual page for <a href="https://keith.github.io/xcode-man-pages/codesign.1.html#i,"><code class="language-plaintext highlighter-rouge">codesign(1)</code></a>, we see some useful
+information related to <code class="language-plaintext highlighter-rouge">identifier</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-i, --identifier identifier
+    During signing, explicitly specify the unique identifier string that is
+    embedded in code signatures. If this option is omitted, the identifier
+    is derived from either the Info.plist (if present), or the filename of
+    the executable being signed, possibly modified by the --prefix option.
+    It is a very bad idea to sign different programs with the same
+    identifier.
+</code></pre></div></div>
+
+<p>This gives us further hints to what is going on. Specifically, since we
+do not have an <code class="language-plaintext highlighter-rouge">Info.plist</code>, the logic must not be deriving the
+identifier in that way. Given this information we can assume
+<code class="language-plaintext highlighter-rouge">codesign</code> is falling back to some other value here, but it's still
+not clear why it isn't reproducible across architectures.</p>
+
+<p>Luckily, Apple's <a href="https://opensource.apple.com">open source</a> page has quite a few internal
+libraries, which in this case covers our issue. Looking through the
+<a href="https://opensource.apple.com/tarballs/Security"><code class="language-plaintext highlighter-rouge">Security</code> project's source code</a><sup id="fnref:4" role="doc-noteref"><a href="#fn:4" class="footnote" rel="footnote">4</a></sup>, we can immediately see
+some useful information for this field:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@constant kSecCodeSignerIdentifier If present, a CFString that explicitly specifies
+ the unique identifier string sealed into the code signature. If absent, the identifier
+ is derived implicitly from the code being signed.
+</code></pre></div></div>
+
+<p>This begs the question: How is this information derived if there is no
+explicit identifier? Tracing this constant through the code, we can see
+it sets the <code class="language-plaintext highlighter-rouge">mIdentifier</code> field, which is otherwise only set through
+this logic:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">identifier</span> <span class="o">=</span> <span class="n">rep</span><span class="o">-&gt;</span><span class="n">recommendedIdentifier</span><span class="p">(</span><span class="o">*</span><span class="n">this</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">identifier</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="sc">'.'</span><span class="p">)</span> <span class="o">==</span> <span class="n">string</span><span class="o">::</span><span class="n">npos</span><span class="p">)</span>
+  <span class="n">identifier</span> <span class="o">=</span> <span class="n">state</span><span class="p">.</span><span class="n">mIdentifierPrefix</span> <span class="o">+</span> <span class="n">identifier</span><span class="p">;</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">identifier</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="sc">'.'</span><span class="p">)</span> <span class="o">==</span> <span class="n">string</span><span class="o">::</span><span class="n">npos</span> <span class="o">&amp;&amp;</span> <span class="n">isAdhoc</span><span class="p">())</span>
+  <span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span> <span class="o">+</span> <span class="s">"-"</span> <span class="o">+</span> <span class="n">uniqueName</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>The prefix referenced here is from the <code class="language-plaintext highlighter-rouge">--prefix</code> field mentioned in the
+<a href="https://keith.github.io/xcode-man-pages/codesign.1.html#i,"><code class="language-plaintext highlighter-rouge">codesign(1)</code></a> man page. Since we're also not passing that we can
+ignore this logic and assume the <code class="language-plaintext highlighter-rouge">uniqueName()</code> logic is key here (which
+also explains the <code class="language-plaintext highlighter-rouge">-</code> we see after our filename). As we trace this logic
+through the codebase, we begin to see the core issue:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//</span>
+<span class="c1">// Generate a unique string from our underlying DiskRep.</span>
+<span class="c1">// We could get 90%+ of the uniquing benefit by just generating</span>
+<span class="c1">// a random string here. Instead, we pick the (hex string encoding of)</span>
+<span class="c1">// the source rep's unique identifier blob. For universal binaries,</span>
+<span class="c1">// this is the canonical local architecture, which is a bit arbitrary.</span>
+<span class="c1">// This provides us with a consistent unique string for all architectures</span>
+<span class="c1">// of a fat binary, *and* (unlike a random string) is reproducible</span>
+<span class="c1">// for identical inputs, even upon resigning.</span>
+<span class="c1">//</span>
+<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">SecCodeSigner</span><span class="o">::</span><span class="n">Signer</span><span class="o">::</span><span class="n">uniqueName</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+  <span class="n">CFRef</span><span class="o">&lt;</span><span class="n">CFDataRef</span><span class="o">&gt;</span> <span class="n">identification</span> <span class="o">=</span> <span class="n">rep</span><span class="o">-&gt;</span><span class="n">identification</span><span class="p">();</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+
+<span class="c1">//</span>
+<span class="c1">// We choose the binary identifier for a Mach-O binary as follows:</span>
+<span class="c1">//  - If the Mach-O headers have a UUID command, use the UUID.</span>
+<span class="c1">//  - Otherwise, use the SHA-1 hash of the (entire) load commands.</span>
+<span class="c1">//</span>
+<span class="n">CFDataRef</span> <span class="n">MachORep</span><span class="o">::</span><span class="n">identification</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">MachO</span><span class="o">&gt;</span> <span class="n">macho</span><span class="p">(</span><span class="n">mainExecutableImage</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">architecture</span><span class="p">());</span>
+  <span class="k">return</span> <span class="n">identificationFor</span><span class="p">(</span><span class="n">macho</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+<span class="p">}</span>
+
+<span class="n">CFDataRef</span> <span class="n">MachORep</span><span class="o">::</span><span class="n">identificationFor</span><span class="p">(</span><span class="n">MachO</span> <span class="o">*</span><span class="n">macho</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// if there is a LC_UUID load command, use the UUID contained therein</span>
+  <span class="k">if</span> <span class="p">(</span><span class="k">const</span> <span class="n">load_command</span> <span class="o">*</span><span class="n">cmd</span> <span class="o">=</span> <span class="n">macho</span><span class="o">-&gt;</span><span class="n">findCommand</span><span class="p">(</span><span class="n">LC_UUID</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">const</span> <span class="n">uuid_command</span> <span class="o">*</span><span class="n">uuidc</span> <span class="o">=</span> <span class="n">reinterpret_cast</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">uuid_command</span> <span class="o">*&gt;</span><span class="p">(</span><span class="n">cmd</span><span class="p">);</span>
+    <span class="c1">// uuidc-&gt;cmdsize should be sizeof(uuid_command), so if it is not,</span>
+    <span class="c1">// something is wrong. Fail out.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">macho</span><span class="o">-&gt;</span><span class="n">flip</span><span class="p">(</span><span class="n">uuidc</span><span class="o">-&gt;</span><span class="n">cmdsize</span><span class="p">)</span> <span class="o">!=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">uuid_command</span><span class="p">))</span>
+      <span class="n">MacOSError</span><span class="o">::</span><span class="n">throwMe</span><span class="p">(</span><span class="n">errSecCSSignatureInvalid</span><span class="p">);</span>
+    <span class="kt">char</span> <span class="n">result</span><span class="p">[</span><span class="mi">4</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">uuidc</span><span class="o">-&gt;</span><span class="n">uuid</span><span class="p">)];</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s">"UUID"</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="n">result</span><span class="o">+</span><span class="mi">4</span><span class="p">,</span> <span class="n">uuidc</span><span class="o">-&gt;</span><span class="n">uuid</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">uuidc</span><span class="o">-&gt;</span><span class="n">uuid</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">makeCFData</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">result</span><span class="p">));</span>
+  <span class="p">}</span>
+
+  <span class="c1">// otherwise, use the SHA-1 hash of the entire load command area (this is way, way obsolete)</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The gist of this logic is to fetch the UUID embedded in every binary
+and use that to derive the identifier. The reason this isn't
+reproducible across architectures is because the UUID is based on the
+content of each binary, which differs across architectures. You can
+print these UUIDs with:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ dwarfdump -u main
+UUID: 5413BC88-D3B1-3DFA-855A-7F47CF229020 (x86_64) main
+UUID: E4472179-D9EC-3BFF-92FF-3F8E6D013184 (arm64) main
+</code></pre></div></div>
+
+<p>The fallback logic we see above relies on the contents of binary's load
+commands which unfortunately also differs based on architecture.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>While this was a very informative deep dive into this logic, if you rely
+on reproducible binaries and want to support Apple Silicon machines, you
+need to do 2 things for binaries without <code class="language-plaintext highlighter-rouge">Info.plist</code> files:</p>
+
+<ol>
+  <li>Don't allow the linker to automatically sign your binaries by passing
+<code class="language-plaintext highlighter-rouge">-no_adhoc_codesign</code></li>
+  <li>Pass an explicit identifier when linking binaries with <code class="language-plaintext highlighter-rouge">--identifier</code>
+to the <code class="language-plaintext highlighter-rouge">codesign</code> invocation</li>
+</ol>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p>This behavior can be disabled by passing <code class="language-plaintext highlighter-rouge">-no_adhoc_codesign</code> to
+  link invocations. With <code class="language-plaintext highlighter-rouge">OTHER_LDFLAGS</code> in Xcode you need to pass
+  <code class="language-plaintext highlighter-rouge">-Wl,-no_adhoc_codesign</code> since link invocations go through
+  <code class="language-plaintext highlighter-rouge">clang</code>, not directly to <code class="language-plaintext highlighter-rouge">ld</code> <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+      <p>As long as you're using the same version of <code class="language-plaintext highlighter-rouge">clang</code>. This example
+  was built with Xcode 13.0 13A233 <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:3" role="doc-endnote">
+      <p>Luckily if you run this on an Intel machine, instead of through
+  <code class="language-plaintext highlighter-rouge">arch</code>'s Intel emulation, you'll get the same results <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a> <a href="#fnref:3:1" class="reversefootnote" role="doc-backlink">&#8617;<sup>2</sup></a></p>
+    </li>
+    <li id="fn:4" role="doc-endnote">
+      <p>I was looking at 59754.140.13 <a href="#fnref:4" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+]]>
+      </content>
+    </entry>
   
     <entry>
       <title type="html"><![CDATA[Switching Xcode versions without a password]]></title>
