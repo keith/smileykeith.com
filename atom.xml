@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2021-10-06T09:28:27-07:00</updated>
+  <updated>2021-11-09T09:47:00-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -224,6 +224,20 @@ to the <code class="language-plaintext highlighter-rouge">codesign</code> invoca
 
 <p>I filed a radar about this behavior: FB9681559 (Make codesign for fat
 binaries reproducible across architectures).</p>
+
+<h2 id="updates">Updates</h2>
+
+<ul>
+  <li>After working around this codesign issue it was noted that the same
+issue with random binary names also affects the UUID computation. To
+workaround this you can pass <code class="language-plaintext highlighter-rouge">-Wl,-no_uuid</code> but note this has a
+negative impact on LLDB attach times for binaries if you need to debug
+them.</li>
+  <li>I landed a <a href="https://reviews.llvm.org/rG17386cb4dc89afad62623b9bc08516b99b9c6df7">fix in
+clang</a>
+to make these temporary binary names reproducible. It will hopefully
+be part of a future version of Apple's clang fork.</li>
+</ul>
 
 <div class="footnotes" role="doc-endnotes">
   <ol>

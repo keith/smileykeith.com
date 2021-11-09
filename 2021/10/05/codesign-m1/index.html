@@ -242,6 +242,20 @@ to the <code class="language-plaintext highlighter-rouge">codesign</code> invoca
 <p>I filed a radar about this behavior: FB9681559 (Make codesign for fat
 binaries reproducible across architectures).</p>
 
+<h2 id="updates">Updates</h2>
+
+<ul>
+  <li>After working around this codesign issue it was noted that the same
+issue with random binary names also affects the UUID computation. To
+workaround this you can pass <code class="language-plaintext highlighter-rouge">-Wl,-no_uuid</code> but note this has a
+negative impact on LLDB attach times for binaries if you need to debug
+them.</li>
+  <li>I landed a <a href="https://reviews.llvm.org/rG17386cb4dc89afad62623b9bc08516b99b9c6df7">fix in
+clang</a>
+to make these temporary binary names reproducible. It will hopefully
+be part of a future version of Apple's clang fork.</li>
+</ul>
+
 <div class="footnotes" role="doc-endnotes">
   <ol>
     <li id="fn:1" role="doc-endnote">
