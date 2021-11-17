@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2021-11-09T09:47:00-08:00</updated>
+  <updated>2021-11-16T19:57:34-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -12,6 +12,55 @@
   <rights>Copyright (c) 2021 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
+  
+    <entry>
+      <title type="html"><![CDATA[Silencing iOS simulator log noise]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2021/11/16/simulator-log-spew/" />
+      <id>http://smileykeith.com/2021/11/16/simulator-log-spew</id>
+      <updated>2021-11-16T18:00:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>When Apple transitioned to using <code class="language-plaintext highlighter-rouge">os_log</code> for system logs it seemed they
+also decided to open the floodgates for what logs were surfaced in our
+apps.</p>
+
+<p>This lead to a plethora of stackoverflow questions recommending you
+disable <code class="language-plaintext highlighter-rouge">os_log</code> entirely by setting <code class="language-plaintext highlighter-rouge">OS_ACTIVITY_MODE=disable</code> in your
+target's scheme. This is fine for some cases but might also silence some
+actually useful logs, or your own logs if you want to use <code class="language-plaintext highlighter-rouge">os_log</code> for
+its feature-set.</p>
+
+<p><code class="language-plaintext highlighter-rouge">os_log</code> has a nice set of categorization for logs, for example when
+viewing streaming logs in <code class="language-plaintext highlighter-rouge">Console.app</code> you can show the process,
+subsystem, and category for each log.</p>
+
+<p><img src="/images/console-categories.png" alt="Screenshot of Console.app UI" /></p>
+
+<p>Perhaps ideally we could use an environment variable with more granular
+filtering based on this categorization, but that would likely get
+complex quickly. Instead we can update OS log's configuration to disable
+some specific types of logs. Here are a few examples I found useful for
+Lyft's iOS project:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>xcrun simctl spawn booted log config --subsystem com.apple.CoreBluetooth --mode level:off
+xcrun simctl spawn booted log config --subsystem com.apple.CoreTelephony --mode level:off
+xcrun simctl spawn booted log config --subsystem com.apple.network --category boringssl --mode level:off
+</code></pre></div></div>
+
+<p>You can replace <code class="language-plaintext highlighter-rouge">booted</code> here with a specific iOS simulator UDID, which
+can be found by running <code class="language-plaintext highlighter-rouge">xcrun simctl list devices</code>. Since this is
+simulator specific, you will have to re-run whatever commands you decide
+on when you create new simulators.</p>
+
+<p>More options for the <code class="language-plaintext highlighter-rouge">log</code> command can be found with <a href="https://keith.github.io/xcode-man-pages/log.1.html"><code class="language-plaintext highlighter-rouge">man
+log</code></a></p>
+]]>
+      </content>
+    </entry>
   
     <entry>
       <title type="html"><![CDATA[Reproducible codesigning on Apple Silicon]]></title>
