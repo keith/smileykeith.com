@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2022-02-23T22:57:21-08:00</updated>
+  <updated>2022-02-23T23:03:46-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -61,13 +61,12 @@ the linker to make sure you link <code class="language-plaintext highlighter-rou
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ld foo.o -syslibroot `xcrun --show-sdk-path`
 </code></pre></div></div>
 
-<p>For comparison contrast, if you compile the binary without
-<code class="language-plaintext highlighter-rouge">-fmodules</code><sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>:</p>
+<p>To compare, if you compile the binary without <code class="language-plaintext highlighter-rouge">-fmodules</code><sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ clang -c foo.m -o foo.o
 </code></pre></div></div>
 
-<p>You don't get any <code class="language-plaintext highlighter-rouge">LC_LINKER_OPTION</code>s, and when linking the binary with
+<p>You don't get any <code class="language-plaintext highlighter-rouge">LC_LINKER_OPTION</code>s. Then when linking the binary with
 the same command as before, it fails with these errors:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ld foo.o -syslibroot `xcrun --show-sdk-path`
@@ -86,7 +85,7 @@ argument to your linker invocation:</p>
 </code></pre></div></div>
 
 <p>Auto linking is also applied when using module maps that use the <code class="language-plaintext highlighter-rouge">link</code>
-directive:</p>
+directive. For example with this module map file:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// module.modulemap
 module foo {
@@ -95,7 +94,7 @@ module foo {
 }
 </code></pre></div></div>
 
-<p>Then including <code class="language-plaintext highlighter-rouge">foo</code> as a module:</p>
+<p>That you include with in this source file:</p>
 
 <div class="language-objc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@import</span> <span class="n">foo</span><span class="p">;</span>
 
@@ -104,15 +103,15 @@ module foo {
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>And compiling this file with an include path to the <code class="language-plaintext highlighter-rouge">module.modulemap</code>
-file:</p>
+<p>And compile (with an include path to the <code class="language-plaintext highlighter-rouge">module.modulemap</code> file):</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ clang -fmodules -c foo.m -o foo.o -I.
 </code></pre></div></div>
 
-<p>The produced object depends on <code class="language-plaintext highlighter-rouge">foo</code> and <code class="language-plaintext highlighter-rouge">Foundation</code>. This is useful
-for handwriting module map files for prebuilt libraries. You can read
-about this file format in <a href="https://clang.llvm.org/docs/Modules.html">the docs</a>.</p>
+<p>The produced object depends on <code class="language-plaintext highlighter-rouge">foo</code> and <code class="language-plaintext highlighter-rouge">Foundation</code>. This can be
+useful for handwriting module map files for prebuilt libraries, and for
+quite a few other cases. You can read about this file format in <a href="https://clang.llvm.org/docs/Modules.html">the
+docs</a>.</p>
 
 <p>You can also see auto linking with Swift code:</p>
 
@@ -143,7 +142,9 @@ are never exposed to.</p>
 linking. But there are some situations where you might want to force
 binaries to include <code class="language-plaintext highlighter-rouge">LC_LINKER_OPTION</code>s when they don't automatically.
 For example, if your build system builds without <code class="language-plaintext highlighter-rouge">-fmodules</code> (like bazel
-and cmake by default) and for some reason you cannot enable it<sup id="fnref:1:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>.</p>
+and cmake by default) and for some reason you cannot enable it<sup id="fnref:1:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>, or
+when you're distributing a library and don't want your consumers to have
+to worry about adding extra linker flags.</p>
 
 <p>There are 2 different ways you can explicitly add <code class="language-plaintext highlighter-rouge">LC_LINKER_OPTION</code>s
 during your builds. First you can pass a flag when compiling your
@@ -152,7 +153,7 @@ sources with clang:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ clang -c foo.m -o foo.o -Xclang --linker-option=-lfoo
 </code></pre></div></div>
 
-<p>Or verbosely with swiftc:</p>
+<p>Or with swiftc:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ swiftc foo.swift -o foo.o -emit-object -Xcc -Xclang -Xcc --linker-option=-lfoo
 </code></pre></div></div>
@@ -162,7 +163,7 @@ frameworks you need to pass multiple flags, and because of the space
 between them, it doesn't seem like there is a way to pass this with the
 current clang flags (although it seems reasonable to add support for
 this). Luckily the second option supports spaces in options. Instead of
-passing a flag, you can add an assembly directive to one of your source
+passing a flag, you can add an assembly directive to one of the source
 files you're compiling with clang:</p>
 
 <div class="language-objc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;Foundation/Foundation.h&gt;
@@ -177,10 +178,7 @@ files you're compiling with clang:</p>
 </code></pre></div></div>
 
 <p>Compiling this results in a binary that automatically links <code class="language-plaintext highlighter-rouge">Foundation</code>
-and <code class="language-plaintext highlighter-rouge">foo</code>:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ clang -c foo.m -o foo.o
-</code></pre></div></div>
+and <code class="language-plaintext highlighter-rouge">foo</code>.</p>
 
 <p>To see a real world example where this was helpful, check out <a href="https://github.com/keith/StaticIndexStore/blob/a2158c3419a7591bb4a89283abe7a8183d9596d9/example.patch">this
 change</a> for building a static library from a C++ library that
