@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0;" />
+  
+    <title>Auto linking with Mach-O binaries - Keith Smiley</title>
+  
+
+    <meta name="author" content="Keith Smiley">
+    <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/atom.xml">
+
+    <link rel="icon" href="/images/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon">
+
+    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
+  </head>
+  <body>
+    <section class="container">
+      <div id="masthead">
+        <h1>
+          <a href="/">Keith Smiley</a>
+          | <a href="https://www.keith.so">About</a>
+          | <a href="/atom.xml">RSS</a>
+        </h1>
+      </div>
+
+      <section class="content">
+        <article>
+  <header class="seven columns">
+    
+      <h1 class="title">Auto linking with Mach-O binaries</h1>
+    
+    <p class="date">
+      <time datetime="2022-02-23 18:00:00 -0800" pubdate="pubdate">
+        23 Feb 2022
+      </time>
+      <a class="permalink" title="Permalink" href="/2022/02/23/lc-linker-option/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>Auto linking is a feature that embeds information in your binaries' at
+compile time which is then used at link time to automatically link your
+dependencies. This allows you to reduce the duplication of flags between
+the different phases of your (or your consumers') builds.</p>
+
+<p>For example, with this Objective-C file:</p>
+
+<div class="language-objc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;Foundation/Foundation.h&gt;
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">NSLog</span><span class="p">(</span><span class="s">@"Hello, World!"</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Compiled with:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ clang -fmodules -c foo.m -o foo.o
+</code></pre></div></div>
+
+<p>You can then inspect the options added for use at link time:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ otool -l foo.o | grep LC_LINKER_OPTION -A3
+     cmd LC_LINKER_OPTION
+ cmdsize 40
+   count 2
+  string #1 -framework
+  string #2 Foundation
+...
+</code></pre></div></div>
+
+<p>Now when linking this binary you don't have to pass any extra flags to
+the linker to make sure you link <code class="language-plaintext highlighter-rouge">Foundation</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ld foo.o -syslibroot `xcrun --show-sdk-path`
+</code></pre></div></div>
+
+<p>For comparison contrast, if you compile the binary without
+<code class="language-plaintext highlighter-rouge">-fmodules</code><sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ clang -c foo.m -o foo.o
+</code></pre></div></div>
+
+<p>You don't get any <code class="language-plaintext highlighter-rouge">LC_LINKER_OPTION</code>s, and when linking the binary with
+the same command as before, it fails with these errors:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ld foo.o -syslibroot `xcrun --show-sdk-path`
+Undefined symbols for architecture arm64:
+  "_NSLog", referenced from:
+      _main in foo.o
+  "___CFConstantStringClassReference", referenced from:
+      CFString in foo.o
+ld: symbol(s) not found for architecture arm64
+</code></pre></div></div>
+
+<p>To make it succeed you must explicitly link <code class="language-plaintext highlighter-rouge">Foundation</code> through an
+argument to your linker invocation:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ld foo.o -syslibroot `xcrun --show-sdk-path` -framework Foundation
+</code></pre></div></div>
+
+<p>Auto linking is also applied when using module maps that use the <code class="language-plaintext highlighter-rouge">link</code>
+directive:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// module.modulemap
+module foo {
+ link "foo"
+ link framework "Foundation"
+}
+</code></pre></div></div>
+
+<p>Then including <code class="language-plaintext highlighter-rouge">foo</code> as a module:</p>
+
+<div class="language-objc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">@import</span> <span class="n">foo</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And compiling this file with an include path to the <code class="language-plaintext highlighter-rouge">module.modulemap</code>
+file:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ clang -fmodules -c foo.m -o foo.o -I.
+</code></pre></div></div>
+
+<p>The produced object depends on <code class="language-plaintext highlighter-rouge">foo</code> and <code class="language-plaintext highlighter-rouge">Foundation</code>. This is useful
+for handwriting module map files for prebuilt libraries. You can read
+about this file format in <a href="https://clang.llvm.org/docs/Modules.html">the docs</a>.</p>
+
+<p>You can also see auto linking with Swift code:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">print</span><span class="p">(</span><span class="s">"Hello, World!"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Compiled with:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ swiftc foo.swift -o foo.o -emit-object
+</code></pre></div></div>
+
+<p>You can see it requires the Swift standard libraries:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ otool -l foo.o | grep LC_LINKER_OPTION -A3
+     cmd LC_LINKER_OPTION
+ cmdsize 24
+   count 1
+  string #1 -lswiftCore
+...
+</code></pre></div></div>
+
+<p>For Swift this is especially useful since there are some underlying
+libraries like <code class="language-plaintext highlighter-rouge">libswiftSwiftOnoneSupport.dylib</code> that need to be linked,
+but should be treated as implementation details that Swift developers
+are never exposed to.</p>
+
+<p>In general, this is more than you'll ever need to know about auto
+linking. But there are some situations where you might want to force
+binaries to include <code class="language-plaintext highlighter-rouge">LC_LINKER_OPTION</code>s when they don't automatically.
+For example, if your build system builds without <code class="language-plaintext highlighter-rouge">-fmodules</code> (like bazel
+and cmake by default) and for some reason you cannot enable it<sup id="fnref:1:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>.</p>
+
+<p>There are 2 different ways you can explicitly add <code class="language-plaintext highlighter-rouge">LC_LINKER_OPTION</code>s
+during your builds. First you can pass a flag when compiling your
+sources with clang:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ clang -c foo.m -o foo.o -Xclang --linker-option=-lfoo
+</code></pre></div></div>
+
+<p>Or verbosely with swiftc:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ swiftc foo.swift -o foo.o -emit-object -Xcc -Xclang -Xcc --linker-option=-lfoo
+</code></pre></div></div>
+
+<p>This case works perfectly for libraries you depend on, but for
+frameworks you need to pass multiple flags, and because of the space
+between them, it doesn't seem like there is a way to pass this with the
+current clang flags (although it seems reasonable to add support for
+this). Luckily the second option supports spaces in options. Instead of
+passing a flag, you can add an assembly directive to one of your source
+files you're compiling with clang:</p>
+
+<div class="language-objc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;Foundation/Foundation.h&gt;
+</span>
+<span class="n">asm</span><span class="p">(</span><span class="s">".linker_option </span><span class="se">\"</span><span class="s">-lfoo</span><span class="se">\"</span><span class="s">"</span><span class="p">);</span>
+<span class="n">asm</span><span class="p">(</span><span class="s">".linker_option </span><span class="se">\"</span><span class="s">-framework</span><span class="se">\"</span><span class="s">, </span><span class="se">\"</span><span class="s">Foundation</span><span class="se">\"</span><span class="s">"</span><span class="p">);</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">NSLog</span><span class="p">(</span><span class="s">@"Hello, World!"</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Compiling this results in a binary that automatically links <code class="language-plaintext highlighter-rouge">Foundation</code>
+and <code class="language-plaintext highlighter-rouge">foo</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ clang -c foo.m -o foo.o
+</code></pre></div></div>
+
+<p>To see a real world example where this was helpful, check out <a href="https://github.com/keith/StaticIndexStore/blob/a2158c3419a7591bb4a89283abe7a8183d9596d9/example.patch">this
+change</a> for building a static library from a C++ library that
+requires some dependencies, but doesn't build with <code class="language-plaintext highlighter-rouge">-fmodules</code>.</p>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p>You should try to enable modules if possible, this flag just shows
+  the difference in behavior. <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a> <a href="#fnref:1:1" class="reversefootnote" role="doc-backlink">&#8617;<sup>2</sup></a></p>
+    </li>
+  </ol>
+</div>
+
+  </div>
+</article>
+
+      </section>
+    </section>
+  </body>
+</html>
