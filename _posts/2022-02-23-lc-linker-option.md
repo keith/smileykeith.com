@@ -45,14 +45,13 @@ the linker to make sure you link `Foundation`:
 $ ld foo.o -syslibroot `xcrun --show-sdk-path`
 ```
 
-For comparison contrast, if you compile the binary without
-`-fmodules`[^1]:
+To compare, if you compile the binary without `-fmodules`[^1]:
 
 ```
 $ clang -c foo.m -o foo.o
 ```
 
-You don't get any `LC_LINKER_OPTION`s, and when linking the binary with
+You don't get any `LC_LINKER_OPTION`s. Then when linking the binary with
 the same command as before, it fails with these errors:
 
 ```
@@ -73,7 +72,7 @@ $ ld foo.o -syslibroot `xcrun --show-sdk-path` -framework Foundation
 ```
 
 Auto linking is also applied when using module maps that use the `link`
-directive:
+directive. For example with this module map file:
 
 ```
 // module.modulemap
@@ -83,7 +82,7 @@ module foo {
 }
 ```
 
-Then including `foo` as a module:
+That you include with in this source file:
 
 ```objc
 @import foo;
@@ -93,16 +92,16 @@ int main() {
 }
 ```
 
-And compiling this file with an include path to the `module.modulemap`
-file:
+And compile (with an include path to the `module.modulemap` file):
 
 ```
 $ clang -fmodules -c foo.m -o foo.o -I.
 ```
 
-The produced object depends on `foo` and `Foundation`. This is useful
-for handwriting module map files for prebuilt libraries. You can read
-about this file format in [the docs][docs].
+The produced object depends on `foo` and `Foundation`. This can be
+useful for handwriting module map files for prebuilt libraries, and for
+quite a few other cases. You can read about this file format in [the
+docs][docs].
 
 You can also see auto linking with Swift code:
 
@@ -136,7 +135,9 @@ In general, this is more than you'll ever need to know about auto
 linking. But there are some situations where you might want to force
 binaries to include `LC_LINKER_OPTION`s when they don't automatically.
 For example, if your build system builds without `-fmodules` (like bazel
-and cmake by default) and for some reason you cannot enable it[^1].
+and cmake by default) and for some reason you cannot enable it[^1], or
+when you're distributing a library and don't want your consumers to have
+to worry about adding extra linker flags.
 
 There are 2 different ways you can explicitly add `LC_LINKER_OPTION`s
 during your builds. First you can pass a flag when compiling your
@@ -146,7 +147,7 @@ sources with clang:
 $ clang -c foo.m -o foo.o -Xclang --linker-option=-lfoo
 ```
 
-Or verbosely with swiftc:
+Or with swiftc:
 
 ```
 $ swiftc foo.swift -o foo.o -emit-object -Xcc -Xclang -Xcc --linker-option=-lfoo
@@ -157,7 +158,7 @@ frameworks you need to pass multiple flags, and because of the space
 between them, it doesn't seem like there is a way to pass this with the
 current clang flags (although it seems reasonable to add support for
 this). Luckily the second option supports spaces in options. Instead of
-passing a flag, you can add an assembly directive to one of your source
+passing a flag, you can add an assembly directive to one of the source
 files you're compiling with clang:
 
 ```objc
@@ -173,11 +174,7 @@ int main() {
 ```
 
 Compiling this results in a binary that automatically links `Foundation`
-and `foo`:
-
-```
-$ clang -c foo.m -o foo.o
-```
+and `foo`.
 
 To see a real world example where this was helpful, check out [this
 change][change] for building a static library from a C++ library that
