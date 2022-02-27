@@ -139,7 +139,7 @@ and cmake by default) and for some reason you cannot enable it[^1], or
 when you're distributing a library and don't want your consumers to have
 to worry about adding extra linker flags.
 
-There are 2 different ways you can explicitly add `LC_LINKER_OPTION`s
+There are 3 different ways you can explicitly add `LC_LINKER_OPTION`s
 during your builds. First you can pass a flag when compiling your
 sources with clang:
 
@@ -153,13 +153,19 @@ Or with swiftc:
 $ swiftc foo.swift -o foo.o -emit-object -Xcc -Xclang -Xcc --linker-option=-lfoo
 ```
 
-This case works perfectly for libraries you depend on, but for
-frameworks you need to pass multiple flags, and because of the space
-between them, it doesn't seem like there is a way to pass this with the
-current clang flags (although it seems reasonable to add support for
-this). Luckily the second option supports spaces in options. Instead of
-passing a flag, you can add an assembly directive to one of the source
-files you're compiling with clang:
+Specifically for libraries there's an even easier way to do this:
+
+```
+$ clang -c foo.m -o foo.o -Xclang --dependent-lib=foo
+```
+
+These work perfectly for libraries you depend on, but for frameworks you
+need to pass multiple flags, and because of the space between them, it
+doesn't seem like there is a way to pass this with the current clang
+flags (although it seems reasonable to add support for this). Luckily
+the second option supports spaces in options. Instead of passing a flag,
+you can add an assembly directive to one of the source files you're
+compiling with clang:
 
 ```objc
 #include <Foundation/Foundation.h>
