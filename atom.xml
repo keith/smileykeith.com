@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2022-02-23T23:03:46-08:00</updated>
+  <updated>2022-02-26T16:30:34-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -146,7 +146,7 @@ and cmake by default) and for some reason you cannot enable it<sup id="fnref:1:1
 when you're distributing a library and don't want your consumers to have
 to worry about adding extra linker flags.</p>
 
-<p>There are 2 different ways you can explicitly add <code class="language-plaintext highlighter-rouge">LC_LINKER_OPTION</code>s
+<p>There are 3 different ways you can explicitly add <code class="language-plaintext highlighter-rouge">LC_LINKER_OPTION</code>s
 during your builds. First you can pass a flag when compiling your
 sources with clang:</p>
 
@@ -158,13 +158,18 @@ sources with clang:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ swiftc foo.swift -o foo.o -emit-object -Xcc -Xclang -Xcc --linker-option=-lfoo
 </code></pre></div></div>
 
-<p>This case works perfectly for libraries you depend on, but for
-frameworks you need to pass multiple flags, and because of the space
-between them, it doesn't seem like there is a way to pass this with the
-current clang flags (although it seems reasonable to add support for
-this). Luckily the second option supports spaces in options. Instead of
-passing a flag, you can add an assembly directive to one of the source
-files you're compiling with clang:</p>
+<p>Specifically for libraries there's an even easier way to do this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ clang -c foo.m -o foo.o -Xclang --dependent-lib=foo
+</code></pre></div></div>
+
+<p>These work perfectly for libraries you depend on, but for frameworks you
+need to pass multiple flags, and because of the space between them, it
+doesn't seem like there is a way to pass this with the current clang
+flags (although it seems reasonable to add support for this). Luckily
+the second option supports spaces in options. Instead of passing a flag,
+you can add an assembly directive to one of the source files you're
+compiling with clang:</p>
 
 <div class="language-objc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;Foundation/Foundation.h&gt;
 </span>
