@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2022-02-26T16:30:34-08:00</updated>
+  <updated>2022-03-02T20:22:42-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -12,6 +12,160 @@
   <rights>Copyright (c) 2022 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
+  
+    <entry>
+      <title type="html"><![CDATA[Debugging bazel actions]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2022/03/02/debugging-bazel-actions/" />
+      <id>http://smileykeith.com/2022/03/02/debugging-bazel-actions</id>
+      <updated>2022-03-02T18:00:00-08:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>When working on bazel build infrastructure, something I often need to do
+is reproduce an action outside of bazel's infrastructure in order to
+debug it further. This debugging often involves changing flags or
+swapping out the tool itself for a custom built version.</p>
+
+<p>In many cases updating your bazel configuration as normal should work
+well enough. But sometimes when you're iterating on things that
+invalidate a significant portion of your build it can be faster to work
+on things outside of bazel first, and then update your bazel
+configuration based on your discoveries. Another case where this is
+useful is if you want to benchmark a specific action by running it many
+times individually without the contention caused by bazel parallelizing
+other actions.</p>
+
+<p>Since bazel has a lot of infrastructure for keeping builds hermetic,
+there are a few steps you need to take to <em>roughly</em> reproduce what bazel
+is doing so your debugging is as close to what it runs as possible.</p>
+
+<h1 id="1-build-and-disable-sandboxing">1. Build and disable sandboxing</h1>
+
+<p>In order for bazel to setup your build environment (including your
+downloaded dependencies), and leave it intact for you to muck around
+with, you must run a normal build and also either disable sandboxing by
+passing <code class="language-plaintext highlighter-rouge">--spawn_strategy=standalone</code>, or make it leave the sandbox base
+around by passing <code class="language-plaintext highlighter-rouge">--sandbox_debug</code>.</p>
+
+<h1 id="2-grab-your-actions-command-line">2. Grab your action's command line</h1>
+
+<p>Once bazel has run and left its environment intact, you need to grab the
+command line being run for the action you want to debug. I find that
+passing bazel's <code class="language-plaintext highlighter-rouge">-s</code> flag (also known as <a href="https://bazel.build/reference/command-line-reference#flag--subcommands"><code class="language-plaintext highlighter-rouge">--subcommands</code></a>)
+is the easiest way to do this. You just have to make sure that the
+action you're interested in actually runs. There are a few different
+ways you can force bazel to run an action:</p>
+
+<ul>
+  <li>Invalidate the inputs for the action. Unlike other build systems
+<code class="language-plaintext highlighter-rouge">touch</code>ing input files isn't enough, I often add newlines or comments
+to files to force actions to re-run.</li>
+  <li>Change the flags for a command line. For some actions such as C++
+compiles, or native binary linking, there are easy command line flags
+you can pass to invalidate the actions, specifically things like
+<code class="language-plaintext highlighter-rouge">--copt=-v</code> and <code class="language-plaintext highlighter-rouge">--linkopt=-v</code> respectively. Another useful thing to
+know for this case is that bazel doesn't have any semantics around
+flags like this, so if you need to invalidate the action a second
+time, you can often append the same option again, repeating it, to
+make bazel re-run it, for example <code class="language-plaintext highlighter-rouge">--linkopt=-v --linkopt=-v</code>, and the
+underlying tool won't care about the repitition. This works best when
+changing flags will only invalidate a small number of actions so you
+don't have to rebuild a ton of things before you get to the action you
+care about.</li>
+  <li>change flags on the specific target. If changing flags globally is too
+invasive for your build, you can often edit the <code class="language-plaintext highlighter-rouge">copts</code> attribute of
+the specific target you care about to invalid the action. Again
+passing <code class="language-plaintext highlighter-rouge">-v</code> is often a useful way to get it to re-run without
+changing semantics of the build.</li>
+  <li>Make it fail. Change the inputs or flags to something that is invalid,
+then your bazel invocation will stop after hitting the action in
+question.</li>
+</ul>
+
+<p>Once you have forcibly re-run your action with <code class="language-plaintext highlighter-rouge">-s</code>, you should see some
+output like this (specifics will vary based on your platform and the
+action you're debugging):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SUBCOMMAND: # //some_target:some_target [action 'Compiling Swift module //some_target:some_target', configuration: 725a049b28caa74d2a9605a6748b603bdab9e977931b2d02c0bb07b9a06575b2, execution platform: //:macos_x86_64]
+(cd /private/var/tmp/_bazel_ksmiley/751b7cfc481e6eb168e92ffcfb919baa/execroot/someworkspace &amp;&amp; \
+  exec env - \
+    APPLE_SDK_PLATFORM=iPhoneSimulator \
+    APPLE_SDK_VERSION_OVERRIDE=15.2 \
+    XCODE_VERSION_OVERRIDE=13.2.1.13C100 \
+  bazel-out/darwin_x86_64-opt-exec-8F99CFCD-ST-41e1ca5c471d/bin/external/build_bazel_rules_swift/tools/worker/universal_worker swiftc @bazel-out/ios-sim_arm64-min12.0-applebin_ios-ios_sim_arm64-fastbuild-ST-40c63e007684/bin/some_target/some_target.swiftmodule-0.params
+</code></pre></div></div>
+
+<h1 id="2-reproduce-bazels-environment-and-run">2. Reproduce bazel's environment and run</h1>
+
+<p>Now that you have the environment and command line bazel ran, you can
+roughly reproduce what it did:</p>
+
+<ol>
+  <li>Switch to the directory it built in using the <code class="language-plaintext highlighter-rouge">cd</code> command it prints:
+<code class="language-plaintext highlighter-rouge">cd /private/var/tmp/_bazel_ksmiley/751b7cfc481e6eb168e92ffcfb919baa/execroot/someworkspace</code></li>
+  <li>
+    <p>Reproduce the environment variables bazel sets:</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> export APPLE_SDK_PLATFORM=iPhoneSimulator
+ export APPLE_SDK_VERSION_OVERRIDE=15.2
+ export XCODE_VERSION_OVERRIDE=13.2.1.13C100
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Run the action:</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> bazel-out/darwin_x86_64-opt-exec-8F99CFCD-ST-41e1ca5c471d/bin/external/build_bazel_rules_swift/tools/worker/universal_worker \
+   swiftc \
+   @bazel-out/ios-sim_arm64-min12.0-applebin_ios-ios_sim_arm64-fastbuild-ST-40c63e007684/bin/some_target/some_target.swiftmodule-0.params
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h1 id="gotchas">Gotchas</h1>
+
+<p>At this point you're likely very close to what bazel was running, but
+there are a few other things to keep in mind:</p>
+
+<ul>
+  <li>Bazel has some implicit environment variable manipulation in some
+cases that you need to reproduce. For example for builds that rely on
+Xcode on macOS, the Xcode discovery logic is done implicitly by bazel,
+requiring you to approximate that logic yourself. Often to do this you
+need to make sure to set <code class="language-plaintext highlighter-rouge">DEVELOPER_DIR</code> and <code class="language-plaintext highlighter-rouge">SDKROOT</code> with something
+like<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>:</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export DEVELOPER_DIR=$(xcode-select -p)
+export SDKROOT=$(xcrun --show-sdk-path --sdk iphonesimulator)
+</code></pre></div></div>
+
+<ul>
+  <li>Some actions in bazel use a number of wrappers before getting down to
+the actual command being run. In the example above <code class="language-plaintext highlighter-rouge">universal_worker</code>
+is a pre-processor for the Swift command line. Sometimes you might
+want to go a bit deeper in the stack. I often pass <code class="language-plaintext highlighter-rouge">-v</code> as an extra
+argument to the wrapper invocation to get the final command line it
+runs, and then iterate on that instead of the one bazel invokes.</li>
+  <li>Other environment variables can impact outputs. Depending on how you
+run bazel normally and what you're debugging, this might matter as the
+action may have access the environment variables that it wouldn't have
+inside of bazel. This often doesn't make a difference if your build is
+hermetic, but is worth keeping in mind (especially for <code class="language-plaintext highlighter-rouge">PATH</code>).</li>
+</ul>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p>I use <a href="https://github.com/keith/dotfiles/blob/main/functions/set-bazel-env">a script</a> for this <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+]]>
+      </content>
+    </entry>
   
     <entry>
       <title type="html"><![CDATA[Auto linking with Mach-O binaries]]></title>
