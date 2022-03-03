@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2022-03-02T20:22:42-08:00</updated>
+  <updated>2022-03-02T20:33:03-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -67,15 +67,14 @@ to files to force actions to re-run.</li>
 compiles, or native binary linking, there are easy command line flags
 you can pass to invalidate the actions, specifically things like
 <code class="language-plaintext highlighter-rouge">--copt=-v</code> and <code class="language-plaintext highlighter-rouge">--linkopt=-v</code> respectively. Another useful thing to
-know for this case is that bazel doesn't have any semantics around
-flags like this, so if you need to invalidate the action a second
-time, you can often append the same option again, repeating it, to
-make bazel re-run it, for example <code class="language-plaintext highlighter-rouge">--linkopt=-v --linkopt=-v</code>, and the
-underlying tool won't care about the repitition. This works best when
-changing flags will only invalidate a small number of actions so you
-don't have to rebuild a ton of things before you get to the action you
-care about.</li>
-  <li>change flags on the specific target. If changing flags globally is too
+know is bazel doesn't have any semantics around the contents of these
+flags, so if you need to invalidate the action a second time, you can
+often append the same option again, repeating it, to make bazel re-run
+it. For example <code class="language-plaintext highlighter-rouge">--linkopt=-v --linkopt=-v</code>, often the underlying tool
+won't care about the repetition. This works best when changing flags
+will only invalidate a small number of actions so you don't have to
+rebuild a ton of things before you get to the action you care about.</li>
+  <li>Change flags on the specific target. If changing flags globally is too
 invasive for your build, you can often edit the <code class="language-plaintext highlighter-rouge">copts</code> attribute of
 the specific target you care about to invalid the action. Again
 passing <code class="language-plaintext highlighter-rouge">-v</code> is often a useful way to get it to re-run without
@@ -98,16 +97,16 @@ action you're debugging):</p>
   bazel-out/darwin_x86_64-opt-exec-8F99CFCD-ST-41e1ca5c471d/bin/external/build_bazel_rules_swift/tools/worker/universal_worker swiftc @bazel-out/ios-sim_arm64-min12.0-applebin_ios-ios_sim_arm64-fastbuild-ST-40c63e007684/bin/some_target/some_target.swiftmodule-0.params
 </code></pre></div></div>
 
-<h1 id="2-reproduce-bazels-environment-and-run">2. Reproduce bazel's environment and run</h1>
+<h1 id="3-reproduce-bazels-environment-and-run">3. Reproduce bazel's environment and run</h1>
 
 <p>Now that you have the environment and command line bazel ran, you can
-roughly reproduce what it did:</p>
+roughly reproduce what it did in a few steps:</p>
 
 <ol>
   <li>Switch to the directory it built in using the <code class="language-plaintext highlighter-rouge">cd</code> command it prints:
 <code class="language-plaintext highlighter-rouge">cd /private/var/tmp/_bazel_ksmiley/751b7cfc481e6eb168e92ffcfb919baa/execroot/someworkspace</code></li>
   <li>
-    <p>Reproduce the environment variables bazel sets:</p>
+    <p>Reproduce the environment variables it sets for the action:</p>
 
     <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> export APPLE_SDK_PLATFORM=iPhoneSimulator
  export APPLE_SDK_VERSION_OVERRIDE=15.2
@@ -115,7 +114,7 @@ roughly reproduce what it did:</p>
 </code></pre></div>    </div>
   </li>
   <li>
-    <p>Run the action:</p>
+    <p>Run the command line:</p>
 
     <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> bazel-out/darwin_x86_64-opt-exec-8F99CFCD-ST-41e1ca5c471d/bin/external/build_bazel_rules_swift/tools/worker/universal_worker \
    swiftc \
@@ -126,16 +125,16 @@ roughly reproduce what it did:</p>
 
 <h1 id="gotchas">Gotchas</h1>
 
-<p>At this point you're likely very close to what bazel was running, but
-there are a few other things to keep in mind:</p>
+<p>At this point you're likely very close to reproducing what bazel was
+running, but there are a few other things to keep in mind:</p>
 
 <ul>
   <li>Bazel has some implicit environment variable manipulation in some
 cases that you need to reproduce. For example for builds that rely on
 Xcode on macOS, the Xcode discovery logic is done implicitly by bazel,
-requiring you to approximate that logic yourself. Often to do this you
-need to make sure to set <code class="language-plaintext highlighter-rouge">DEVELOPER_DIR</code> and <code class="language-plaintext highlighter-rouge">SDKROOT</code> with something
-like<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>:</li>
+requiring you to approximate that logic yourself. To reproduce this
+specific case you need to make sure to set <code class="language-plaintext highlighter-rouge">DEVELOPER_DIR</code> and
+<code class="language-plaintext highlighter-rouge">SDKROOT</code> with something like<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>:</li>
 </ul>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export DEVELOPER_DIR=$(xcode-select -p)
@@ -149,11 +148,15 @@ is a pre-processor for the Swift command line. Sometimes you might
 want to go a bit deeper in the stack. I often pass <code class="language-plaintext highlighter-rouge">-v</code> as an extra
 argument to the wrapper invocation to get the final command line it
 runs, and then iterate on that instead of the one bazel invokes.</li>
-  <li>Other environment variables can impact outputs. Depending on how you
+  <li>Other environment variables can impact behavior. Depending on how you
 run bazel normally and what you're debugging, this might matter as the
 action may have access the environment variables that it wouldn't have
 inside of bazel. This often doesn't make a difference if your build is
 hermetic, but is worth keeping in mind (especially for <code class="language-plaintext highlighter-rouge">PATH</code>).</li>
+  <li>These steps may change over time. Ideally there would be a more
+straightforward way to reproduce actions like this, potentially by
+parsing bazel's execution log, but in the meantime this approach works
+well in my experience.</li>
 </ul>
 
 <div class="footnotes" role="doc-endnotes">
