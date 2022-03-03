@@ -46,15 +46,14 @@ ways you can force bazel to run an action:
   compiles, or native binary linking, there are easy command line flags
   you can pass to invalidate the actions, specifically things like
   `--copt=-v` and `--linkopt=-v` respectively. Another useful thing to
-  know for this case is that bazel doesn't have any semantics around
-  flags like this, so if you need to invalidate the action a second
-  time, you can often append the same option again, repeating it, to
-  make bazel re-run it, for example `--linkopt=-v --linkopt=-v`, and the
-  underlying tool won't care about the repitition. This works best when
-  changing flags will only invalidate a small number of actions so you
-  don't have to rebuild a ton of things before you get to the action you
-  care about.
-- change flags on the specific target. If changing flags globally is too
+  know is bazel doesn't have any semantics around the contents of these
+  flags, so if you need to invalidate the action a second time, you can
+  often append the same option again, repeating it, to make bazel re-run
+  it. For example `--linkopt=-v --linkopt=-v`, often the underlying tool
+  won't care about the repetition. This works best when changing flags
+  will only invalidate a small number of actions so you don't have to
+  rebuild a ton of things before you get to the action you care about.
+- Change flags on the specific target. If changing flags globally is too
   invasive for your build, you can often edit the `copts` attribute of
   the specific target you care about to invalid the action. Again
   passing `-v` is often a useful way to get it to re-run without
@@ -77,14 +76,14 @@ SUBCOMMAND: # //some_target:some_target [action 'Compiling Swift module //some_t
   bazel-out/darwin_x86_64-opt-exec-8F99CFCD-ST-41e1ca5c471d/bin/external/build_bazel_rules_swift/tools/worker/universal_worker swiftc @bazel-out/ios-sim_arm64-min12.0-applebin_ios-ios_sim_arm64-fastbuild-ST-40c63e007684/bin/some_target/some_target.swiftmodule-0.params
 ```
 
-# 2. Reproduce bazel's environment and run
+# 3. Reproduce bazel's environment and run
 
 Now that you have the environment and command line bazel ran, you can
-roughly reproduce what it did:
+roughly reproduce what it did in a few steps:
 
 1. Switch to the directory it built in using the `cd` command it prints:
    `cd /private/var/tmp/_bazel_ksmiley/751b7cfc481e6eb168e92ffcfb919baa/execroot/someworkspace`
-2. Reproduce the environment variables bazel sets:
+2. Reproduce the environment variables it sets for the action:
 
     ```
     export APPLE_SDK_PLATFORM=iPhoneSimulator
@@ -92,7 +91,7 @@ roughly reproduce what it did:
     export XCODE_VERSION_OVERRIDE=13.2.1.13C100
     ```
 
-3. Run the action:
+3. Run the command line:
 
     ```
     bazel-out/darwin_x86_64-opt-exec-8F99CFCD-ST-41e1ca5c471d/bin/external/build_bazel_rules_swift/tools/worker/universal_worker \
@@ -102,15 +101,15 @@ roughly reproduce what it did:
 
 # Gotchas
 
-At this point you're likely very close to what bazel was running, but
-there are a few other things to keep in mind:
+At this point you're likely very close to reproducing what bazel was
+running, but there are a few other things to keep in mind:
 
 - Bazel has some implicit environment variable manipulation in some
   cases that you need to reproduce. For example for builds that rely on
   Xcode on macOS, the Xcode discovery logic is done implicitly by bazel,
-  requiring you to approximate that logic yourself. Often to do this you
-  need to make sure to set `DEVELOPER_DIR` and `SDKROOT` with something
-  like[^1]:
+  requiring you to approximate that logic yourself. To reproduce this
+  specific case you need to make sure to set `DEVELOPER_DIR` and
+  `SDKROOT` with something like[^1]:
 
 ```
 export DEVELOPER_DIR=$(xcode-select -p)
@@ -123,11 +122,15 @@ export SDKROOT=$(xcrun --show-sdk-path --sdk iphonesimulator)
   want to go a bit deeper in the stack. I often pass `-v` as an extra
   argument to the wrapper invocation to get the final command line it
   runs, and then iterate on that instead of the one bazel invokes.
-- Other environment variables can impact outputs. Depending on how you
+- Other environment variables can impact behavior. Depending on how you
   run bazel normally and what you're debugging, this might matter as the
   action may have access the environment variables that it wouldn't have
   inside of bazel. This often doesn't make a difference if your build is
   hermetic, but is worth keeping in mind (especially for `PATH`).
+- These steps may change over time. Ideally there would be a more
+  straightforward way to reproduce actions like this, potentially by
+  parsing bazel's execution log, but in the meantime this approach works
+  well in my experience.
 
 [^1]: I use [a script][a script] for this
 
