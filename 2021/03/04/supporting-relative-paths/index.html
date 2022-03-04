@@ -160,7 +160,10 @@ literally.</p>
 <a href="https://developer.apple.com/documentation/bundleresources/information_property_list/nsprincipalclass"><code class="language-plaintext highlighter-rouge">NSPrincipalClass</code> plist
 key</a>,
 we can define a class that is initialized as soon as your test bundle
-starts to run. We can define a small class to call this:</p>
+starts to run. This key must be set in your test bundle's plist, not any
+host apps you are using for the test bundle. For bazel this means on the
+<code class="language-plaintext highlighter-rouge">infoplists</code> key of your <code class="language-plaintext highlighter-rouge">ios_unit_test</code> rule. We can define a small
+class to call our swizzling code:</p>
 
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">import</span> <span class="kt">ObjectiveC</span>
 

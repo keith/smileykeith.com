@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2022-03-02T20:33:03-08:00</updated>
+  <updated>2022-03-03T16:54:32-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -1069,7 +1069,10 @@ literally.</p>
 <a href="https://developer.apple.com/documentation/bundleresources/information_property_list/nsprincipalclass"><code class="language-plaintext highlighter-rouge">NSPrincipalClass</code> plist
 key</a>,
 we can define a class that is initialized as soon as your test bundle
-starts to run. We can define a small class to call this:</p>
+starts to run. This key must be set in your test bundle's plist, not any
+host apps you are using for the test bundle. For bazel this means on the
+<code class="language-plaintext highlighter-rouge">infoplists</code> key of your <code class="language-plaintext highlighter-rouge">ios_unit_test</code> rule. We can define a small
+class to call our swizzling code:</p>
 
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">import</span> <span class="kt">ObjectiveC</span>
 
