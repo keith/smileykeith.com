@@ -57,7 +57,9 @@ ways you can force bazel to run an action:
   invasive for your build, you can often edit the `copts` attribute of
   the specific target you care about to invalid the action. Again
   passing `-v` is often a useful way to get it to re-run without
-  changing semantics of the build.
+  changing semantics of the build. You can also do this with
+  [`--per_file_copt`][perfilecopt] so you don't have to change any BUILD
+  files. Thanks to Tom Rybka for pointing this out.
 - Make it fail. Change the inputs or flags to something that is invalid,
   then your bazel invocation will stop after hitting the action in
   question.
@@ -135,4 +137,5 @@ export SDKROOT=$(xcrun --show-sdk-path --sdk iphonesimulator)
 [^1]: I use [a script][a script] for this
 
 [a script]: https://github.com/keith/dotfiles/blob/main/functions/set-bazel-env
+[perfilecopt]: https://bazel.build/reference/command-line-reference#flag--per_file_coptg
 [subcommands]: https://bazel.build/reference/command-line-reference#flag--subcommands
