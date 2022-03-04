@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2022-03-03T16:54:32-08:00</updated>
+  <updated>2022-03-03T16:56:54-08:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -78,7 +78,9 @@ rebuild a ton of things before you get to the action you care about.</li>
 invasive for your build, you can often edit the <code class="language-plaintext highlighter-rouge">copts</code> attribute of
 the specific target you care about to invalid the action. Again
 passing <code class="language-plaintext highlighter-rouge">-v</code> is often a useful way to get it to re-run without
-changing semantics of the build.</li>
+changing semantics of the build. You can also do this with
+<a href="https://bazel.build/reference/command-line-reference#flag--per_file_coptg"><code class="language-plaintext highlighter-rouge">--per_file_copt</code></a> so you don't have to change any BUILD
+files. Thanks to Tom Rybka for pointing this out.</li>
   <li>Make it fail. Change the inputs or flags to something that is invalid,
 then your bazel invocation will stop after hitting the action in
 question.</li>
