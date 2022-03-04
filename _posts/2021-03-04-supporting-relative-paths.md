@@ -127,7 +127,10 @@ With this implementation, you need to call
 [`NSPrincipalClass` plist
 key](https://developer.apple.com/documentation/bundleresources/information_property_list/nsprincipalclass),
 we can define a class that is initialized as soon as your test bundle
-starts to run. We can define a small class to call this:
+starts to run. This key must be set in your test bundle's plist, not any
+host apps you are using for the test bundle. For bazel this means on the
+`infoplists` key of your `ios_unit_test` rule. We can define a small
+class to call our swizzling code:
 
 ```swift
 import ObjectiveC
