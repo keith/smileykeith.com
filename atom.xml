@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2022-03-03T16:56:54-08:00</updated>
+  <updated>2022-03-16T10:24:16-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -12,6 +12,55 @@
   <rights>Copyright (c) 2022 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
+  
+    <entry>
+      <title type="html"><![CDATA[Printing rpaths with objdump]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2022/03/16/objdump-rpaths/" />
+      <id>http://smileykeith.com/2022/03/16/objdump-rpaths</id>
+      <updated>2022-03-16T10:00:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>MachO binaries contain load commands to indicate to dyld where it should
+search for the libraries the binary depends on.</p>
+
+<p>These paths are often useful to inspect when debugging why your binary
+isn't discovering the libraries you'd expect.</p>
+
+<p>Previously you could discover these with:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% otool -l `xcrun -f swiftc` \
+  | grep -A2 LC_RPATH \
+  | grep "^\s*path" \
+  | cut -d " " -f 11
+@executable_path/../lib/swift/macosx
+@executable_path/../lib/swift/macosx
+</code></pre></div></div>
+
+<p>This example is quite verbose and fragile for such a common action, so
+recently I <a href="https://reviews.llvm.org/D100681">committed a change</a> to add an easier option with
+LLVM's <code class="language-plaintext highlighter-rouge">objdump</code>. This change shipped with LLVM 13 or Xcode 13.3 on
+macOS, allowing you to run:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% objdump --macho --rpaths `xcrun -f swiftc`
+/Applications/Xcode-13.3.0.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc:
+@executable_path/../lib/swift/macosx
+</code></pre></div></div>
+
+<p>This is much more succinct and memorable, but also has slightly
+different output. This is because <code class="language-plaintext highlighter-rouge">objdump</code> automatically detects the
+current machine's architecture, and only prints the rpaths for that
+slice of the fat binary. It also outputs the path of the binary being
+run on, which you can disable with <code class="language-plaintext highlighter-rouge">--no-leading-headers</code>.</p>
+
+<p>Hopefully you find this as useful as I do!</p>
+
+]]>
+      </content>
+    </entry>
   
     <entry>
       <title type="html"><![CDATA[Debugging bazel actions]]></title>
