@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0;" />
+  
+    <title>Bazel caching and compressed debug info - Keith Smiley</title>
+  
+
+    <meta name="author" content="Keith Smiley">
+    <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/atom.xml">
+
+    <link rel="icon" href="/images/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon">
+
+    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
+  </head>
+  <body>
+    <section class="container">
+      <div id="masthead">
+        <h1>
+          <a href="/">Keith Smiley</a>
+          | <a href="https://www.keith.so">About</a>
+          | <a href="/atom.xml">RSS</a>
+          | <a rel="me" href="https://hachyderm.io/@SmileyKeith">Mastodon</a>
+        </h1>
+      </div>
+
+      <section class="content">
+        <article>
+  <header class="seven columns">
+    
+      <h1 class="title">Bazel caching and compressed debug info</h1>
+    
+    <p class="date">
+      <time datetime="2025-02-14 10:00:00 -0800" pubdate="pubdate">
+        14 Feb 2025
+      </time>
+      <a class="permalink" title="Permalink" href="/2025/02/14/compressed-debug-info/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>One of bazel's most attractive features is the ability for it to
+remotely cache artifacts to reduce unnecessary work for large builds.
+Unfortunately users quickly discover this comes with non-trivial
+financial and bandwidth implications.</p>
+
+<p>There are many ways, of varying difficulty, to try and improve your
+cache usage. From breaking unnecessary dependencies, to adding
+larger local storage for CI workers, builds without the bytes, build
+avoidance, etc.</p>
+
+<p>For codebases with lots of C or C++ one of the potentially easiest wins
+is to enable compressed debug information<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>. Let's look at an example from
+our codebase.</p>
+
+<p>Looking at the size of a non-trivial C++ binary built with <code class="language-plaintext highlighter-rouge">-g -O2</code>
+(similar to cmake's <code class="language-plaintext highlighter-rouge">RelWithDebInfo</code> configuration), or binary clocks in
+at ~530mbs:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% du -sh bin
+536M    bin
+</code></pre></div></div>
+
+<p>To get a sense of what percentage of this binary is debug info, we can
+use <code class="language-plaintext highlighter-rouge">llvm-objcopy</code> to strip the debug info entirely:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% llvm-objcopy --strip-debug bin strippedbin
+% du -sh strippedbin
+159M    strippedbin
+</code></pre></div></div>
+
+<p>This shows us that almost 70%(!!) of the binary size is taken up with
+debug info. In release configurations we can eliminate this entirely
+with bazel's <code class="language-plaintext highlighter-rouge">--strip</code> argument, but for developer builds, or other use
+cases where you need debug info, we can still improve this.</p>
+
+<p>If we use <code class="language-plaintext highlighter-rouge">llvm-objcopy</code> again, this time to compress the debug info, we
+can immediately see our potential gains:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>% llvm-objcopy --compress-debug-sections bin compressedbin
+% du -sh compressedbin
+290M    compressedbin
+</code></pre></div></div>
+
+<p>This shows us we can get an almost 50%(!!) improvement in binary size in
+this example.</p>
+
+<p>To enable this in bazel, assuming you're using a relatively recent
+version of <code class="language-plaintext highlighter-rouge">gcc</code> or <code class="language-plaintext highlighter-rouge">clang</code>, you can add something like this to your
+<code class="language-plaintext highlighter-rouge">.bazelrc</code><sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>build --enable_platform_specific_config
+build:linux --copt=-gz --host_copt=-gz
+build:linux --linkopt=-gz --host_linkopt=-gz
+</code></pre></div></div>
+
+<p>In practice we saw cache reads drop by nearly 60% when we rolled out
+this change.</p>
+
+<p>Reducing binary size with this approach has a lot of benefits, but it's
+even more pronounced when using bazel and closely monitoring your cache
+download sizes.</p>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p><a href="https://maskray.me/blog/2022-01-23-compressed-debug-sections">This post</a> goes into way more detail than I will <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+      <p>Passing these flags on macOS likely doesn't have a downside, but they are ignored <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+  </div>
+</article>
+
+      </section>
+    </section>
+  </body>
+</html>
