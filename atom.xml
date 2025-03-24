@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2025-02-14T12:16:23-08:00</updated>
+  <updated>2025-03-24T12:12:54-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -12,6 +12,85 @@
   <rights>Copyright (c) 2025 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
+  
+    <entry>
+      <title type="html"><![CDATA[Finding unused targets with bazel]]></title>
+      <link rel="alternate" type="text/html" href="http://smileykeith.com/2025/03/24/unused-bazel-targets/" />
+      <id>http://smileykeith.com/2025/03/24/unused-bazel-targets</id>
+      <updated>2025-03-24T11:00:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>Once you've fully migrated a codebase to bazel, one of the many
+advantages is that you can easily inspect your build graph using <code class="language-plaintext highlighter-rouge">bazel
+query</code>.</p>
+
+<p>One of the many things you can do with queries is write scripts to
+enforce coding standards, or in today's example, find unused targets
+that can lead to discovering unused code.</p>
+
+<p>The simplest version of this query starts like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let all_targets = //... in
+let top_level_targets = tests($all_targets) union kind("(.*_binary) rule", $all_targets)
+$all_targest - deps($top_level_targets)
+</code></pre></div></div>
+
+<p>This initial version discovers all your first party targets, and then
+subtracts the dependencies of all "top level" targets, so that any
+remaining targets are considered unused.</p>
+
+<p>The idea of "top level" targets is better defined as: anything that you
+consider to be important enough that its dependencies are used.
+Depending on your codebase you might want to exclude test targets from
+this so that targets only in the dependencies of test targets are
+diagnosed as unused (this won't work if you have intentional <code class="language-plaintext highlighter-rouge">testonly</code>
+dependencies, although you could special case those as shown below).</p>
+
+<p>Once you have this initial query, you can start iterating in order to
+handle in edge cases. For example it's likely that you have some targets
+that aren't binaries or tests, but are considered used. There are 2
+approaches I would recommend to handle this. First you can continue to
+build out the <code class="language-plaintext highlighter-rouge">kind</code> filter:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kind("(.*_binary|platform|test_suite) rule", $all_targets)
+</code></pre></div></div>
+
+<p>The downside with this approach is it can get unwieldy quickly. I like
+adding rules here that have many uses, but for other one off cases
+another approach you can use is to expand the query to look for special
+tags:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let all_targets = //... in
+let top_level_targets = tests($all_targets) union kind("(.*_binary|platform|test_suite) rule", $all_targets)
+let allowed_unused = attr(tags, allow-unused, $all_targets) in
+$all_targest - deps($top_level_targets) - $allowed_unused
+</code></pre></div></div>
+
+<p>Then you can add <code class="language-plaintext highlighter-rouge">tags = ["allow-unused"]</code> to whatever targets that you need.</p>
+
+<p>Similarly if you want to special case targets that can be considered
+"top level" you can use a tag for that case as well:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let all_targets = //... in
+let top_level_targets = tests($all_targets) union kind("(.*_binary|platform|test_suite) rule", $all_targets) union attr(tags, top-level, $all_targets) in
+let allowed_unused = attr(tags, allow-unused, $all_targets) in
+$all_targest - deps($top_level_targets) - $allowed_unused
+</code></pre></div></div>
+
+<p>Now adding <code class="language-plaintext highlighter-rouge">tags = ["top-level"]</code> to various targets will ensure their
+entire dependency tree is also considered used. This case is especially
+useful for targets like CC toolchains which are used in your
+<code class="language-plaintext highlighter-rouge">MODULE.bazel</code> but potentially don't appear as used by bazel query.</p>
+
+<p>Hopefully this post was instructive and gives you some ideas for how you
+can write more advanced queries for your use cases.</p>
+]]>
+      </content>
+    </entry>
   
     <entry>
       <title type="html"><![CDATA[Bazel caching and compressed debug info]]></title>
