@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2025-03-24T12:12:54-07:00</updated>
+  <updated>2025-03-25T16:03:09-07:00</updated>
   <id>http://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
 
@@ -35,8 +35,8 @@ that can lead to discovering unused code.</p>
 <p>The simplest version of this query starts like this:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let all_targets = //... in
-let top_level_targets = tests($all_targets) union kind("(.*_binary) rule", $all_targets)
-$all_targest - deps($top_level_targets)
+let top_level_targets = tests($all_targets) union kind("(.*_binary) rule", $all_targets) in
+$all_targets - deps($top_level_targets)
 </code></pre></div></div>
 
 <p>This initial version discovers all your first party targets, and then
@@ -65,9 +65,9 @@ another approach you can use is to expand the query to look for special
 tags:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let all_targets = //... in
-let top_level_targets = tests($all_targets) union kind("(.*_binary|platform|test_suite) rule", $all_targets)
+let top_level_targets = tests($all_targets) union kind("(.*_binary|platform|test_suite) rule", $all_targets) in
 let allowed_unused = attr(tags, allow-unused, $all_targets) in
-$all_targest - deps($top_level_targets) - $allowed_unused
+$all_targets - deps($top_level_targets) - $allowed_unused
 </code></pre></div></div>
 
 <p>Then you can add <code class="language-plaintext highlighter-rouge">tags = ["allow-unused"]</code> to whatever targets that you need.</p>
@@ -78,7 +78,7 @@ $all_targest - deps($top_level_targets) - $allowed_unused
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let all_targets = //... in
 let top_level_targets = tests($all_targets) union kind("(.*_binary|platform|test_suite) rule", $all_targets) union attr(tags, top-level, $all_targets) in
 let allowed_unused = attr(tags, allow-unused, $all_targets) in
-$all_targest - deps($top_level_targets) - $allowed_unused
+$all_targets - deps($top_level_targets) - $allowed_unused
 </code></pre></div></div>
 
 <p>Now adding <code class="language-plaintext highlighter-rouge">tags = ["top-level"]</code> to various targets will ensure their
