@@ -16,8 +16,8 @@ The simplest version of this query starts like this:
 
 ```
 let all_targets = //... in
-let top_level_targets = tests($all_targets) union kind("(.*_binary) rule", $all_targets)
-$all_targest - deps($top_level_targets)
+let top_level_targets = tests($all_targets) union kind("(.*_binary) rule", $all_targets) in
+$all_targets - deps($top_level_targets)
 ```
 
 This initial version discovers all your first party targets, and then
@@ -48,9 +48,9 @@ tags:
 
 ```
 let all_targets = //... in
-let top_level_targets = tests($all_targets) union kind("(.*_binary|platform|test_suite) rule", $all_targets)
+let top_level_targets = tests($all_targets) union kind("(.*_binary|platform|test_suite) rule", $all_targets) in
 let allowed_unused = attr(tags, allow-unused, $all_targets) in
-$all_targest - deps($top_level_targets) - $allowed_unused
+$all_targets - deps($top_level_targets) - $allowed_unused
 ```
 
 Then you can add `tags = ["allow-unused"]` to whatever targets that you need.
@@ -62,7 +62,7 @@ Similarly if you want to special case targets that can be considered
 let all_targets = //... in
 let top_level_targets = tests($all_targets) union kind("(.*_binary|platform|test_suite) rule", $all_targets) union attr(tags, top-level, $all_targets) in
 let allowed_unused = attr(tags, allow-unused, $all_targets) in
-$all_targest - deps($top_level_targets) - $allowed_unused
+$all_targets - deps($top_level_targets) - $allowed_unused
 ```
 
 Now adding `tags = ["top-level"]` to various targets will ensure their
