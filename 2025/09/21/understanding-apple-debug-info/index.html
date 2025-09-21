@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0;" />
+  
+    <title>Understanding Apple Debug Info - Keith Smiley</title>
+  
+
+    <meta name="author" content="Keith Smiley">
+    <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/atom.xml">
+
+    <link rel="icon" href="/images/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon">
+
+    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
+  </head>
+  <body>
+    <section class="container">
+      <div id="masthead">
+        <h1>
+          <a href="/">Keith Smiley</a>
+          | <a href="https://www.keith.so">About</a>
+          | <a href="/atom.xml">RSS</a>
+          | <a rel="me" href="https://hachyderm.io/@SmileyKeith">Mastodon</a>
+        </h1>
+      </div>
+
+      <section class="content">
+        <article>
+  <header class="seven columns">
+    
+      <h1 class="title">Understanding Apple Debug Info</h1>
+    
+    <p class="date">
+      <time datetime="2025-09-21 10:00:00 -0700" pubdate="pubdate">
+        21 Sep 2025
+      </time>
+      <a class="permalink" title="Permalink" href="/2025/09/21/understanding-apple-debug-info/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>Apple platforms (macOS, iOS, etc), and specifically Mach-O binaries,
+have a slightly different approach to debug info than ELF binaries for
+Linux. If you are familiar with Xcode, you might have seen a few related
+settings that control what is produced and wondered what the trade-offs
+are. The goal of this post is to help you debug cases where these
+differences lead to a degraded debugging experience in <code class="language-plaintext highlighter-rouge">lldb</code> so that
+you can fix them.</p>
+
+<p>If you have a particularly complex build, potentially managed by
+Bazel<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup> or another tool, especially if you are using distributed
+builds, you are even more likely to hit issues.</p>
+
+<p>Let's dive in to how the pieces fit together.</p>
+
+<h1 id="a-brief-explanation-of-debug-info">A brief explanation of debug info</h1>
+
+<p>Debug info is metadata produced by the compiler that is consumed by
+debuggers (like <code class="language-plaintext highlighter-rouge">lldb</code>), profilers, and other tools. It is used to map
+runtime information, like addresses, function arguments, and stack
+traces, back to the source that was used to produce the binary. Without
+this information debugging in <code class="language-plaintext highlighter-rouge">lldb</code> shows primarily raw instructions
+and addresses, which is rarely acceptable for common debugging
+workflows.</p>
+
+<h1 id="inspecting-debug-info">Inspecting debug info</h1>
+
+<p>When building for Apple platforms debug info isn't contained in the
+final binary (this is the primary difference from the default Linux
+workflows). Instead the binary contains references to the files where
+<code class="language-plaintext highlighter-rouge">lldb</code> can find it (this is conceptually similar to if you use
+<code class="language-plaintext highlighter-rouge">-gsplit-dwarf</code> on Linux).</p>
+
+<p>Let's inspect some binaries to see what this really means. First we
+create a small binary:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cat </span>main.c
+int main<span class="o">()</span> <span class="o">{</span>
+  <span class="k">return </span>0<span class="p">;</span>
+<span class="o">}</span>
+
+<span class="nv">$ </span>clang main.c <span class="nt">-g</span> <span class="nt">-c</span> <span class="nt">-o</span> main.o
+<span class="nv">$ </span>clang main.o <span class="nt">-o</span> main
+</code></pre></div></div>
+
+<p>If we attempt to inspect the debug info contained in <code class="language-plaintext highlighter-rouge">main</code>, we find
+nothing:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>dwarfdump main  <span class="c"># use llvm-dwarfdump if not on macOS</span>
+main:   file format Mach-O arm64
+
+.debug_info contents:
+</code></pre></div></div>
+
+<p>However when we debug this binary in <code class="language-plaintext highlighter-rouge">lldb</code>, you will correctly see the
+source file and line number information:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>lldb <span class="nt">--</span> main
+<span class="o">(</span>lldb<span class="o">)</span> target create <span class="s2">"main"</span>
+Current executable <span class="nb">set </span>to <span class="s1">'/tmp/demo/main'</span> <span class="o">(</span>arm64<span class="o">)</span><span class="nb">.</span>
+<span class="o">(</span>lldb<span class="o">)</span> b main
+Breakpoint 1: where <span class="o">=</span> main<span class="sb">`</span>main + 12 at main.c:2:3, address <span class="o">=</span> 0x0000000100000334
+<span class="o">(</span>lldb<span class="o">)</span> r
+Process 33357 launched: <span class="s1">'/tmp/demo/main'</span> <span class="o">(</span>arm64<span class="o">)</span>
+Process 33357 stopped
+<span class="k">*</span> thread <span class="c">#1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1</span>
+    frame <span class="c">#0: 0x0000000100000334 main`main at main.c:2:3</span>
+   1    int main<span class="o">()</span> <span class="o">{</span>
+-&gt; 2      <span class="k">return </span>0<span class="p">;</span>
+   3    <span class="o">}</span>
+Target 0: <span class="o">(</span>main<span class="o">)</span> stopped.
+</code></pre></div></div>
+
+<p>Let's trace back how <code class="language-plaintext highlighter-rouge">lldb</code> discovers the debug info. First the <code class="language-plaintext highlighter-rouge">main</code>
+binary has a reference to the intermediate <code class="language-plaintext highlighter-rouge">main.o</code> object file. We can
+see the references by looking for the <code class="language-plaintext highlighter-rouge">N_OSO</code> entries in the binary:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>dsymutil <span class="nt">-s</span> main | <span class="nb">grep </span>N_OSO  <span class="c"># use llvm-dsymutil if not on macOS</span>
+<span class="o">[</span>     3] 0000002e 66 <span class="o">(</span>N_OSO        <span class="o">)</span> 00     0001   0000000068d03443 <span class="s1">'/private/tmp/demo/main.o'</span>
+</code></pre></div></div>
+
+<p>Then <code class="language-plaintext highlighter-rouge">lldb</code> loads the debug info directly from the <code class="language-plaintext highlighter-rouge">main.o</code> object file.
+We can see the debug info it contains:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>dwarfdump main.o
+0x0000000c: DW_TAG_compile_unit
+              DW_AT_producer    <span class="o">(</span><span class="s2">"Apple clang version 17.0.0 (clang-1700.3.19.1)"</span><span class="o">)</span>
+              DW_AT_language    <span class="o">(</span>DW_LANG_C11<span class="o">)</span>
+              DW_AT_name        <span class="o">(</span><span class="s2">"main.c"</span><span class="o">)</span>
+              DW_AT_LLVM_sysroot        <span class="o">(</span><span class="s2">"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"</span><span class="o">)</span>
+              DW_AT_APPLE_sdk   <span class="o">(</span><span class="s2">"MacOSX.sdk"</span><span class="o">)</span>
+              DW_AT_str_offsets_base    <span class="o">(</span>0x00000008<span class="o">)</span>
+              DW_AT_stmt_list   <span class="o">(</span>0x00000000<span class="o">)</span>
+              DW_AT_comp_dir    <span class="o">(</span><span class="s2">"/tmp/demo"</span><span class="o">)</span>
+              DW_AT_low_pc      <span class="o">(</span>0x0000000000000000<span class="o">)</span>
+              DW_AT_high_pc     <span class="o">(</span>0x0000000000000014<span class="o">)</span>
+              DW_AT_addr_base   <span class="o">(</span>0x00000008<span class="o">)</span>
+
+0x00000025:   DW_TAG_subprogram
+                DW_AT_low_pc    <span class="o">(</span>0x0000000000000000<span class="o">)</span>
+                DW_AT_high_pc   <span class="o">(</span>0x0000000000000014<span class="o">)</span>
+                DW_AT_APPLE_omit_frame_ptr      <span class="o">(</span><span class="nb">true</span><span class="o">)</span>
+                DW_AT_frame_base        <span class="o">(</span>DW_OP_reg31 WSP<span class="o">)</span>
+                DW_AT_name      <span class="o">(</span><span class="s2">"main"</span><span class="o">)</span>
+                DW_AT_decl_file <span class="o">(</span><span class="s2">"/tmp/demo/main.c"</span><span class="o">)</span>
+                DW_AT_decl_line <span class="o">(</span>1<span class="o">)</span>
+                DW_AT_type      <span class="o">(</span>0x00000034 <span class="s2">"int"</span><span class="o">)</span>
+                DW_AT_external  <span class="o">(</span><span class="nb">true</span><span class="o">)</span>
+
+0x00000034:   DW_TAG_base_type
+                DW_AT_name      <span class="o">(</span><span class="s2">"int"</span><span class="o">)</span>
+                DW_AT_encoding  <span class="o">(</span>DW_ATE_signed<span class="o">)</span>
+                DW_AT_byte_size <span class="o">(</span>0x04<span class="o">)</span>
+
+0x00000038:   NULL
+</code></pre></div></div>
+
+<p>We can also see the object file contains specific <code class="language-plaintext highlighter-rouge">__debug*</code> sections
+when debug info is present that are absent in our main binary:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>size <span class="nt">-m</span> main  <span class="c"># use llvm-size if not on macOS</span>
+Segment __PAGEZERO: 4294967296 <span class="o">(</span>zero fill<span class="o">)</span>
+Segment __TEXT: 16384
+        Section __text: 20
+        Section __unwind_info: 88
+        total 108
+Segment __LINKEDIT: 16384
+total 4295000064
+
+<span class="nv">$ </span>size <span class="nt">-m</span> main.o
+Segment : 628
+  Section <span class="o">(</span>__TEXT, __text<span class="o">)</span>: 20
+  Section <span class="o">(</span>__DWARF, __debug_abbrev<span class="o">)</span>: 65
+  Section <span class="o">(</span>__DWARF, __debug_info<span class="o">)</span>: 57
+  Section <span class="o">(</span>__DWARF, __debug_str_offs<span class="o">)</span>: 36
+  Section <span class="o">(</span>__DWARF, __debug_str<span class="o">)</span>: 179
+  Section <span class="o">(</span>__DWARF, __debug_addr<span class="o">)</span>: 16
+  Section <span class="o">(</span>__DWARF, __debug_names<span class="o">)</span>: 112
+  Section <span class="o">(</span>__LD, __compact_unwind<span class="o">)</span>: 32
+  Section <span class="o">(</span>__DWARF, __debug_line<span class="o">)</span>: 91
+  Section <span class="o">(</span>__DWARF, __debug_line_str<span class="o">)</span>: 17
+  total 625
+total 628
+</code></pre></div></div>
+
+<p>The same pattern holds when you depend on static libraries:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ar cr libmain.a main.o
+$ ar t libmain.a
+__.SYMDEF SORTED
+main.o
+
+$ clang -lmain -L. -o main
+$ dsymutil -s main | grep N_OSO
+[     3] 0000002e 66 (N_OSO        ) 00     0001   0000000068d03443 '/private/tmp/demo/./libmain.a(main.o)'
+</code></pre></div></div>
+
+<p>This is almost everything we need to know for where to find debug info,
+so now let's try to understand where this can go wrong.</p>
+
+<h1 id="common-issues">Common Issues</h1>
+
+<h2 id="1-invalid-absolute-paths">1. Invalid absolute paths</h2>
+
+<p>So far we've been looking at an isolated example outside of Bazel. If
+you've debugged Bazel issues before you may have rightfully felt some
+alarm bells go off when you saw the absolute paths in the debug info. In
+Bazel, if we are not being careful, those absolute paths would point to
+ephemeral locations that only exist during the Bazel link action, and
+not exist during debug time. This can also be the case if you are using
+distributed builds with other tools. For example if I break
+<code class="language-plaintext highlighter-rouge">apple_support</code> today, this is what you would see:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bazel build main <span class="nt">--compilation_mode</span><span class="o">=</span>dbg
+...
+
+<span class="nv">$ </span>dsymutil <span class="nt">-s</span> bazel-bin/main | <span class="nb">grep </span>N_OSO
+<span class="o">[</span>     3] 0000008d 66 <span class="o">(</span>N_OSO        <span class="o">)</span> 00     0001   0000000000000000 <span class="s1">'/private/var/tmp/_bazel_ksmiley/14bc203d9bd4089231ecb78dafab0640/sandbox/darwin-sandbox/4/execroot/_main/bazel-out/darwin_arm64-dbg/bin/_objs/main/main.o'</span>
+</code></pre></div></div>
+
+<p>In this case you can see the <code class="language-plaintext highlighter-rouge">.../darwin-sandbox/4</code> directory is where
+the final binary recorded the object file existed during link time.
+While this was valid during the link action, these directories are wiped
+after the build completes, so if you try to <code class="language-plaintext highlighter-rouge">dwarfdump</code> this file
+afterwards, you will see it doesn't exist.</p>
+
+<p>You could potentially workaround this issue with <code class="language-plaintext highlighter-rouge">--sandbox_debug</code>,
+which will keep those directories around, but instead of doing that we
+use the
+<a href="https://keith.github.io/xcode-man-pages/ld.1.html#oso_prefix"><code class="language-plaintext highlighter-rouge">-oso_prefix</code></a>
+linker argument. This argument tells the linker to strip the given
+prefix from the final <code class="language-plaintext highlighter-rouge">N_OSO</code> entries, and replace it with <code class="language-plaintext highlighter-rouge">.</code> so that
+it is relative to the current directory. With this applied, the <code class="language-plaintext highlighter-rouge">N_OSO</code>
+entries look like this:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>dsymutil <span class="nt">-s</span> bazel-bin/main | <span class="nb">grep </span>N_OSO
+<span class="o">[</span>     3] 00000026 66 <span class="o">(</span>N_OSO        <span class="o">)</span> 00     0001   0000000068d039ba <span class="s1">'bazel-out/darwin_arm64-dbg/bin/_objs/main/main.o'</span>
+</code></pre></div></div>
+
+<p>This path now exists relative to the root of the repository, so as long
+as you are launching <code class="language-plaintext highlighter-rouge">lldb</code> from the root of the repository, it will
+correctly discover this object file.</p>
+
+<p>Now that these paths are reproducible and valid, let's shift our
+attention to the paths in the object file itself (again by breaking
+<code class="language-plaintext highlighter-rouge">apple_support</code>):</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>dwarfdump bazel-out/darwin_arm64-dbg/bin/_objs/main/main.o | <span class="nb">grep</span> <span class="s1">'"/'</span>
+  DW_AT_LLVM_sysroot        <span class="o">(</span><span class="s2">"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk"</span><span class="o">)</span>
+  DW_AT_comp_dir    <span class="o">(</span><span class="s2">"/private/var/tmp/_bazel_ksmiley/14bc203d9bd4089231ecb78dafab0640/sandbox/darwin-sandbox/12/execroot/_main"</span><span class="o">)</span>
+  DW_AT_decl_file <span class="o">(</span><span class="s2">"/private/var/tmp/_bazel_ksmiley/14bc203d9bd4089231ecb78dafab0640/sandbox/darwin-sandbox/12/execroot/_main/main.c"</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>Here we can see 3 different absolute paths which might affect our
+ability to debug, and undoubtedly affects the reproducibility of our
+build. In this case if I debug the binary, while it can find the debug
+info, it cannot find the source files to display inline when it hits a
+breakpoint:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>lldb bazel-bin/main
+<span class="o">(</span>lldb<span class="o">)</span> target create <span class="s2">"bazel-bin/main"</span>
+Current executable <span class="nb">set </span>to <span class="s1">'/tmp/demo/bazel-bin/main'</span> <span class="o">(</span>arm64<span class="o">)</span><span class="nb">.</span>
+<span class="o">(</span>lldb<span class="o">)</span> b main
+Breakpoint 1: 17 locations.
+<span class="o">(</span>lldb<span class="o">)</span> b
+Current breakpoints:
+1: name <span class="o">=</span> <span class="s1">'main'</span>, locations <span class="o">=</span> 1
+  1.1: where <span class="o">=</span> main<span class="sb">`</span>main + 12 at main.c:2:3, address <span class="o">=</span> main[0x0000000100000334], unresolved, hit count <span class="o">=</span> 0
+<span class="o">(</span>lldb<span class="o">)</span> r
+Process 38440 launched: <span class="s1">'/tmp/demo/bazel-bin/main'</span> <span class="o">(</span>arm64<span class="o">)</span>
+1 location added to breakpoint 1
+Process 38440 stopped
+<span class="k">*</span> thread <span class="c">#1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1</span>
+    frame <span class="c">#0: 0x00000001000013ec main`main at main.c:2:3</span>
+Target 0: <span class="o">(</span>main<span class="o">)</span> stopped.
+</code></pre></div></div>
+
+<p>Notably <code class="language-plaintext highlighter-rouge">lldb</code> knows that the breakpoint is set at <code class="language-plaintext highlighter-rouge">main.c:2:3</code> which is
+pulled from the debug info, even though the source file cannot be found
+to be displayed. If it didn't have the debug info at all, that output
+would be subtly different and instead show no specific file location:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(lldb) b
+Current breakpoints:
+1: name = 'main', locations = 1
+  1.1: where = main`main, address = 0x0000000100000328, unresolved, hit count = 0
+</code></pre></div></div>
+
+<p>To solve this clang has a few different arguments, similar to
+<code class="language-plaintext highlighter-rouge">-oso_prefix</code>, to rewrite the absolute paths in the object files. The
+most modern and comprehensive version of this flag is
+<code class="language-plaintext highlighter-rouge">-ffile-compilation-dir=.</code>. This flag remaps all known paths that can be
+embedded in the binary (not only debug info, but also coverage info, and
+<code class="language-plaintext highlighter-rouge">__FILE__</code> macros, which otherwise won't be covered in this post) to be
+relative to the current directory.</p>
+
+<p>Once we apply this flag, we see the source file paths are fixed:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>dwarfdump bazel-out/darwin_arm64-dbg/bin/_objs/main/main.o | <span class="nb">grep</span> <span class="nt">-e</span> sysroot <span class="nt">-e</span> comp_dir <span class="nt">-e</span> decl_file
+  DW_AT_LLVM_sysroot        <span class="o">(</span><span class="s2">"/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk"</span><span class="o">)</span>
+  DW_AT_comp_dir    <span class="o">(</span><span class="s2">"."</span><span class="o">)</span>
+  DW_AT_decl_file <span class="o">(</span><span class="s2">"./main.c"</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">DW_AT_LLVM_sysroot</code> path is still absolute, but this likely doesn't
+affect debugging since <code class="language-plaintext highlighter-rouge">lldb</code> rediscovers the SDK if this path is
+invalid. In this case for reproducibility in Bazel we still rewrite this
+to:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DW_AT_LLVM_sysroot ("/PLACEHOLDER_DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk")
+</code></pre></div></div>
+
+<p>By passing
+<code class="language-plaintext highlighter-rouge">-fdebug-prefix-map=$DEVELOPER_DIR=/PLACEHOLDER_DEVELOPER_DIR</code>, which
+works similar to <code class="language-plaintext highlighter-rouge">-ffile-compilation-dir</code> but instead affects a single
+prefix, not only relative paths.</p>
+
+<p>With these 3 flags applied, our final binary is debuggable, and
+reproducible!</p>
+
+<h2 id="2-missing-object-or-source-files">2. Missing object or source Files</h2>
+
+<p>Since we're relying on <code class="language-plaintext highlighter-rouge">lldb</code> reading the <code class="language-plaintext highlighter-rouge">N_OSO</code> entries in our final
+binary, tracing those back to the object files, and then finally tracing
+those back to the source files, all of those files must exist on the
+machine running <code class="language-plaintext highlighter-rouge">lldb</code> at the time you are debugging the binary.</p>
+
+<p>For simple local builds, this should always be the case, but in Bazel
+there are a few potential times where you would break this assumption.</p>
+
+<h3 id="21-pulling-from-the-bazel-cache">2.1. Pulling from the Bazel cache</h3>
+
+<p>If you are using a remote cache or remote execution in Bazel, along with
+<code class="language-plaintext highlighter-rouge">--remote_download_toplevel</code> (also known as BwtB or Builds Without The
+Bytes which is enabled by default in modern Bazel versions), then Bazel
+will avoid downloading as much as possible to speed up build time.</p>
+
+<p>In this case if you didn't compile something locally, the intermediate
+files may never be downloaded to your local machine, and therefore might
+be missing when you go to debug. This can be pretty subtle since if you
+do make changes that result in a local recompile (specifically if you
+are only using the remote cache, or are using dynamic mode with
+remote execution), the intermediate object files will be present and
+your ability to debug will appear to be flaky.</p>
+
+<p>To fix this you can instruct Bazel to always download the intermediate
+files with something like this in your <code class="language-plaintext highlighter-rouge">.bazelrc</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>build --enable_platform_specific_config
+# Specify the relevant extensions, likely only needed on macOS
+build:macos --remote_download_regex='.*\.(a|lo|o)$'
+</code></pre></div></div>
+
+<h3 id="22-bazel-external-symlink">2.2. Bazel <code class="language-plaintext highlighter-rouge">external</code> symlink</h3>
+
+<p>Another subtle case in Bazel is that while all first party code is
+valid with the flags above, third party code is compiled from a separate
+directory (since it isn't in your source tree), and therefore requires
+more paths to be available at debug time.</p>
+
+<p>For example building a binary that depends on <code class="language-plaintext highlighter-rouge">boringssl</code> has valid
+<code class="language-plaintext highlighter-rouge">N_OSO</code> paths:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>dsymutil <span class="nt">-s</span> bazel-bin/third_party_dep | <span class="nb">grep </span>N_OSO | <span class="nb">tail</span> <span class="nt">-1</span>
+<span class="o">[</span> 49167] 00062e25 66 <span class="o">(</span>N_OSO        <span class="o">)</span> 00     0001   0000000000000000 <span class="s1">'bazel-out/darwin_arm64-dbg/bin/external/boringssl+/libcrypto_cxx.a(mlkem.o)'</span>
+</code></pre></div></div>
+
+<p>But if you inspect that archive's debug info, you see the source file
+paths are nested under a directory called <code class="language-plaintext highlighter-rouge">external</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>dwarfdump bazel-out/darwin_arm64-dbg/bin/external/boringssl+/libcrypto_cxx.a | <span class="nb">grep </span>decl_file | <span class="nb">head</span> <span class="nt">-1</span>
+  DW_AT_decl_file <span class="o">(</span><span class="s2">"./external/boringssl+/crypto/mlkem/mlkem.cc"</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>Unfortunately this path doesn't exist in the root of your repository
+like <code class="language-plaintext highlighter-rouge">bazel-out</code> does. The common workaround to solve this is to create
+a symlink in the root of your repository manually with:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">ln</span> <span class="nt">-s</span> bazel-out/../../../external <span class="nb">.</span>
+</code></pre></div></div>
+
+<p>Then you can validate that this path exists so that <code class="language-plaintext highlighter-rouge">lldb</code> can find it:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">head</span> <span class="nt">-5</span> external/boringssl+/crypto/mlkem/mlkem.cc
+/<span class="k">*</span> Copyright <span class="o">(</span>c<span class="o">)</span> 2024, Google Inc.
+ <span class="k">*</span>
+ <span class="k">*</span> Permission to use, copy, modify, and/or distribute this software <span class="k">for </span>any
+ <span class="k">*</span> purpose with or without fee is hereby granted, provided that the above
+ <span class="k">*</span> copyright notice and this permission notice appear <span class="k">in </span>all copies.
+</code></pre></div></div>
+
+<p>If you don't often debug third party code in your project you can choose
+to skip this, but it is also required for producing valid
+<code class="language-plaintext highlighter-rouge">compile_commands.json</code> files for IDEs, so you might want it for that
+too. You should add this symlink to your <code class="language-plaintext highlighter-rouge">gitignore</code> after creating it.</p>
+
+<h2 id="3-using-rules_cc-or-toolchains_llvm-over-apple_support">3. Using <code class="language-plaintext highlighter-rouge">rules_cc</code> or <code class="language-plaintext highlighter-rouge">toolchains_llvm</code> over <code class="language-plaintext highlighter-rouge">apple_support</code></h2>
+
+<p>Currently only <code class="language-plaintext highlighter-rouge">apple_support</code> handles all the flags above for Apple
+platforms. That isn't an inherent limitation of <code class="language-plaintext highlighter-rouge">rules_cc</code> or
+<code class="language-plaintext highlighter-rouge">toolchains_llvm</code> (which uses the config from <code class="language-plaintext highlighter-rouge">rules_cc</code>), but would
+require some work to implement. Because of this you have to make sure
+that you are getting the correct CC toolchain when building for
+everything to work correctly.</p>
+
+<p>If you think Bazel isn't choosing the correct toolchain you can pass
+<code class="language-plaintext highlighter-rouge">--toolchain_resolution_debug=".*"</code> while building and you should see a
+line like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>INFO: ToolchainResolution: Target platform @@platforms//host:host: Selected execution platform @@platforms//host:host, type @@bazel_tools//tools/cpp:toolchain_type -&gt; toolchain @@apple_support++apple_cc_configure_extension+local_config_apple_cc//:cc-compiler-darwin_arm64
+</code></pre></div></div>
+
+<p>Where the important part is that the toolchain on the right hand side is
+from <code class="language-plaintext highlighter-rouge">@apple_support</code>, if it instead looks like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>INFO: ToolchainResolution: Target platform @@platforms//host:host: Selected execution platform @@platforms//host:host, type @@bazel_tools//tools/cpp:toolchain_type -&gt; toolchain @@rules_cc++cc_configure_extension+local_config_cc//:cc-compiler-darwin_arm64
+</code></pre></div></div>
+
+<p>You are getting the toolchain from <code class="language-plaintext highlighter-rouge">@rules_cc</code>.</p>
+
+<p>When using <code class="language-plaintext highlighter-rouge">bzlmod</code> you must be sure to have <code class="language-plaintext highlighter-rouge">apple_support</code> <em>above</em>
+<code class="language-plaintext highlighter-rouge">rules_cc</code> in your <code class="language-plaintext highlighter-rouge">MODULE.bazel</code> file to ensure this happens (this
+won't affect non-Apple platforms):</p>
+
+<pre><code class="language-bzl"># Has to be above rules_cc
+bazel_dep(name = "apple_support", version = "1.23.1")
+bazel_dep(name = "rules_cc", version = "0.2.8")
+</code></pre>
+
+<h2 id="4-bazel-producing-no-debug-info">4. Bazel producing no debug info</h2>
+
+<p>By default only the <code class="language-plaintext highlighter-rouge">dbg</code> compilation mode produces debug info.
+Therefore you must make sure to pass <code class="language-plaintext highlighter-rouge">--compilation_mode=dbg</code> in order
+to get debug info. Otherwise the final binary will have no <code class="language-plaintext highlighter-rouge">N_OSO</code>
+entries at all, which you can verify with <code class="language-plaintext highlighter-rouge">dsymutil -s &lt;binary&gt;</code>.
+Alternatively you could manually pass <code class="language-plaintext highlighter-rouge">--copt=-g</code> in your build.</p>
+
+<h2 id="5-bazel-stripping-produced-debug-info">5. Bazel stripping produced debug info</h2>
+
+<p>If you pass <code class="language-plaintext highlighter-rouge">--strip=always</code> or <code class="language-plaintext highlighter-rouge">--strip=sometimes</code> (the default) to
+Bazel, it will strip the <code class="language-plaintext highlighter-rouge">N_OSO</code> references from the produced binary.
+Therefore you must make sure you don't do this in the cases where you
+want debug info. Bazel also attempts to warn you in this case:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bazel build main <span class="nt">-c</span> fastbuild <span class="nt">--copt</span><span class="o">=</span><span class="nt">-g</span>
+WARNING: Stripping enabled, but <span class="s1">'--copt=-g'</span> <span class="o">(</span>or <span class="nt">--per_file_copt</span><span class="o">=</span>...@-g<span class="o">)</span> specified. Debug information will be generated and <span class="k">then </span>stripped away. This is probably not what you want! Use <span class="s1">'-c dbg'</span> <span class="k">for </span>debug mode, or use <span class="s1">'--strip=never'</span> to disable stripping
+...
+</code></pre></div></div>
+
+<h2 id="6-debugging-bazel-exec-tools">6. Debugging Bazel exec tools</h2>
+
+<p>By default Bazel doesn't produce debug info for tools built in the exec
+configuration (because the default exec compilation mode is <code class="language-plaintext highlighter-rouge">opt</code>).
+Instead of debugging a tool built for the exec configuration, you should
+likely rebuild it directly (for the target configuration) and debug that
+instead. This issue most commonly happens if you are debugging a bazel
+rule and copy a command from Bazel's <code class="language-plaintext highlighter-rouge">--subcommands</code> output. You could
+also pass <code class="language-plaintext highlighter-rouge">--host_copt=-g</code> if building the target directly doesn't work
+for you.</p>
+
+<h2 id="7-temporary-files">7. Temporary files</h2>
+
+<p>If you use a single <code class="language-plaintext highlighter-rouge">clang</code> command to both compile and link a binary,
+the intermediate object files referenced by the <code class="language-plaintext highlighter-rouge">N_OSO</code> entries are
+temporary and deleted after the build:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>clang main.c <span class="nt">-o</span> main <span class="nt">-g</span>
+<span class="nv">$ </span>dsymutil <span class="nt">-s</span> main | <span class="nb">grep </span>N_OSO
+<span class="o">[</span>     3] 0000002e 66 <span class="o">(</span>N_OSO        <span class="o">)</span> 00     0001   0000000068d059de <span class="s1">'/var/folders/68/rn88yggx76bdgkj66fnxc1hc0000gn/T/main-637516.o'</span>
+</code></pre></div></div>
+
+<p>In this case you should likely split these commands apart to ensure the
+object files are kept around. Alternatively as a quick workaround you
+can pass <code class="language-plaintext highlighter-rouge">-save-temps</code> to <code class="language-plaintext highlighter-rouge">clang</code> to keep the intermediate object file
+around.</p>
+
+<h1 id="using-dsyms">Using <code class="language-plaintext highlighter-rouge">dSYM</code>s</h1>
+
+<p>An entirely separate option for how to produce debug info for Apple
+platforms is to use <code class="language-plaintext highlighter-rouge">dSYM</code> bundles. A <code class="language-plaintext highlighter-rouge">dSYM</code> is created from a linked
+binary and accumulates the debug info for all transitive dependencies,
+so you don't have to keep the other intermediate files around.</p>
+
+<p>All of the same concerns stated above around absolute paths still apply,
+but this can potentially simplify downloading intermediates or
+redistributing debug info alongside a binary.</p>
+
+<p>You can produce a <code class="language-plaintext highlighter-rouge">dSYM</code> from a binary with:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>dsymutil <span class="nt">-o</span> main.dSYM main
+</code></pre></div></div>
+
+<p>If you are missing intermediates when creating a <code class="language-plaintext highlighter-rouge">dSYM</code>, you will see
+relevant warnings (I would love a <code class="language-plaintext highlighter-rouge">dsymutil</code> flag to be able to make
+this an error):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ dsymutil -o main.dSYM main
+warning: (arm64) /private/tmp/demo/main.o unable to open object file: No such file or directory
+warning: no debug symbols in executable (-arch arm64)
+</code></pre></div></div>
+
+<p>After you have the <code class="language-plaintext highlighter-rouge">dSYM</code> you can delete the intermediate files and
+still debug as expected.</p>
+
+<p>Bazel can automatically produce <code class="language-plaintext highlighter-rouge">dSYM</code>s for you if you pass
+<code class="language-plaintext highlighter-rouge">--apple_generate_dsym --output_groups=+dsyms</code> when building (with any
+<code class="language-plaintext highlighter-rouge">--compilation_mode</code>, but the <code class="language-plaintext highlighter-rouge">--strip</code> concerns above still apply).
+Previously this wasn't supported for <code class="language-plaintext highlighter-rouge">cc_binary</code> targets but that has
+recently been added in Bazel.</p>
+
+<p>In Bazel, after producing the <code class="language-plaintext highlighter-rouge">dSYM</code>, the <code class="language-plaintext highlighter-rouge">N_OSO</code> entries in the binary
+are stripped, and all debug info can be inspected in the <code class="language-plaintext highlighter-rouge">dSYM</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bazel build main <span class="nt">--apple_generate_dsym</span> <span class="nt">--output_groups</span><span class="o">=</span>+dsyms
+...
+  bazel-bin/main
+  bazel-bin/main.dSYM
+
+<span class="nv">$ </span>dsymutil <span class="nt">-s</span> bazel-bin/main | <span class="nb">grep </span>N_OSO  <span class="c"># No output because they were stripped</span>
+<span class="nv">$ </span>dwarfdump bazel-bin/main.dSYM
+bazel-bin/main.dSYM/Contents/Resources/DWARF/main:      file format Mach-O arm64
+
+.debug_info contents:
+0x00000000: Compile Unit: length <span class="o">=</span> 0x00000035, format <span class="o">=</span> DWARF32, version <span class="o">=</span> 0x0005, unit_type <span class="o">=</span> DW_UT_compile, abbr_offset <span class="o">=</span> 0x0000, addr_size <span class="o">=</span> 0x08 <span class="o">(</span>next unit at 0x00000039<span class="o">)</span>
+...
+</code></pre></div></div>
+
+<p>Since there are no <code class="language-plaintext highlighter-rouge">N_OSO</code> entries in the binary, <code class="language-plaintext highlighter-rouge">lldb</code> uses a
+different mechanism to discover the <code class="language-plaintext highlighter-rouge">dSYM</code>. This is done by looking up
+the UUID of the binary, and then looking for a matching <code class="language-plaintext highlighter-rouge">dSYM</code>. You can
+inspect the UUIDs to make sure you have the appropriate <code class="language-plaintext highlighter-rouge">dSYM</code> locally:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>dwarfdump <span class="nt">-u</span> bazel-bin/main bazel-bin/main.dSYM
+UUID: 152D8F32-5A7E-31DF-9BF2-2F48E32450AE <span class="o">(</span>arm64<span class="o">)</span> bazel-bin/main
+UUID: 152D8F32-5A7E-31DF-9BF2-2F48E32450AE <span class="o">(</span>arm64<span class="o">)</span> bazel-bin/main.dSYM/Contents/Resources/DWARF/main
+</code></pre></div></div>
+
+<p>If <code class="language-plaintext highlighter-rouge">lldb</code> isn't correctly discovering the <code class="language-plaintext highlighter-rouge">dSYM</code>, you can manually add
+it with:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">(</span>lldb<span class="o">)</span> target symbols add bazel-bin/main.dSYM
+</code></pre></div></div>
+
+<p>You can also verify that <code class="language-plaintext highlighter-rouge">lldb</code> is correctly discovering the <code class="language-plaintext highlighter-rouge">dSYM</code> by
+enabling the host logging by adding this to your <code class="language-plaintext highlighter-rouge">~/.lldbinit</code> file:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>log enable -f /tmp/host.log lldb host
+</code></pre></div></div>
+
+<p>After running <code class="language-plaintext highlighter-rouge">lldb</code> you will see that log should be populated with a
+line like:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ head -1 /tmp/host.log
+dSYM with matching UUID &amp; arch found at /tmp/demo/bazel-bin/main.dSYM/Contents/Resources/DWARF/main
+</code></pre></div></div>
+
+<p>If the <code class="language-plaintext highlighter-rouge">dSYM</code> isn't found, there will be no related log entry. If you are
+using other macOS tools like <code class="language-plaintext highlighter-rouge">Instruments.app</code> and it cannot find the
+<code class="language-plaintext highlighter-rouge">dSYM</code>, you should try using the <code class="language-plaintext highlighter-rouge">symbolscache</code> CLI to manually add it.
+See <code class="language-plaintext highlighter-rouge">symbolscache --help</code> for usage.</p>
+
+<p>Generally the downside of using <code class="language-plaintext highlighter-rouge">dSYM</code>s is the (potentially small)
+amount of time it takes to produce them, especially if you don't end up
+debugging the binary. On the other hand if you use a crash reporting
+service, you likely need to produce them anyway to symbolicate crash
+reports, so it might be worth unifying the debug workflows.</p>
+
+<p>Another benefit of using <code class="language-plaintext highlighter-rouge">dSYMs</code> is that you can fully <code class="language-plaintext highlighter-rouge">strip</code> the final
+binary and still debug it. This is useful for making sure to produce the
+smallest possible binary for release and test the same artifacts so you
+know that the stripped binary works correctly (primarily risky if you are
+using aggressive <code class="language-plaintext highlighter-rouge">strip</code> flags to heavily optimize binary size).</p>
+
+<p>In Bazel, because producing the <code class="language-plaintext highlighter-rouge">dSYM</code> requires all the intermediate
+files from the entire transitive dependency tree of the binary, it must
+be done at the same time as the linking of the binary. This is done with
+custom logic in <code class="language-plaintext highlighter-rouge">apple_support</code>'s CC toolchain, which doesn't exist in
+<code class="language-plaintext highlighter-rouge">rules_cc</code>. You cannot run <code class="language-plaintext highlighter-rouge">dsymutil</code> manually on a Bazel binary unless
+you have also downloaded all the intermediate files.</p>
+
+<h1 id="other-considerations">Other considerations</h1>
+
+<h2 id="launching-lldb-from-other-directories">Launching <code class="language-plaintext highlighter-rouge">lldb</code> from other directories</h2>
+
+<p>Many of the recommendations above are about using relative paths for the
+files that <code class="language-plaintext highlighter-rouge">lldb</code> is attempting to load. This works great as long as you
+always launch <code class="language-plaintext highlighter-rouge">lldb</code> from the same directory (usually the root of your
+repository). In some cases you might want to launch <code class="language-plaintext highlighter-rouge">lldb</code> from another
+directory (especially in Bazel where runfiles discovery might require a
+different PWD). In this case you can set the processes' working
+directory separately from <code class="language-plaintext highlighter-rouge">lldb</code>'s working directory by still launching
+<code class="language-plaintext highlighter-rouge">lldb</code> from the root of the repository (so that the relative debug info
+paths are still valid), but then passing the other directory as a
+setting:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>lldb <span class="nt">--one-line-before-file</span> <span class="s1">'settings set target.launch-working-dir some/other/directory'</span> <span class="nt">--</span> main
+</code></pre></div></div>
+
+<p>Or once you've launched <code class="language-plaintext highlighter-rouge">lldb</code> itself:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(lldb) platform settings -w some/other/directory
+</code></pre></div></div>
+
+<h2 id="partially-missing-debug-info">Partially missing debug info</h2>
+
+<p>If you are linking pre-built artifacts, such as 3rd party static
+libraries, it's possible they are built without debug info. In this case
+if you are debugging and stop in their code, you might see no useful
+information. You can use the commands outlined above to try and
+understand if they have any information at all, but it is common
+that closed source libraries ship stripped of debug info. If their
+code is open source it's possible that you could pull it locally in
+order to debug it, even while using the prebuilt artifact (if you
+attempt this make sure to use the same sha the prebuilt artifact is
+built from).</p>
+
+<h2 id="lldb-source-maps"><code class="language-plaintext highlighter-rouge">lldb</code> source maps</h2>
+
+<p>If you have prebuilt artifacts as outlined above which have absolute
+paths in their debug info that you cannot change, you can attempt to use
+<code class="language-plaintext highlighter-rouge">lldb</code>'s source mapping feature to rewrite those paths at debug time to
+something that exists locally. In that case once you've identified the
+path you need to rewrite by inspecting the binary with <code class="language-plaintext highlighter-rouge">dwarfdump</code>, you
+can add a mapping in <code class="language-plaintext highlighter-rouge">lldb</code> like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(lldb) settings set target.source-map /absolute/path/in/binary /local/path/on/machine
+</code></pre></div></div>
+
+<p>You can have multiple of these paths which can be useful if you have
+multiple prebuilt artifacts with different debug locations:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(lldb) settings set target.source-map /absolute/path/in/binary1 /local/path/on/machine1
+(lldb) settings append target.source-map /absolute/path/in/binary2 /local/path/on/machine2
+</code></pre></div></div>
+
+<p>You could also use this instead of the <code class="language-plaintext highlighter-rouge">clang</code> flags, or the <code class="language-plaintext highlighter-rouge">external</code>
+symlink mentioned above, but often this is harder to manage since the
+paths could differ between different developer's machines and requires
+injecting <code class="language-plaintext highlighter-rouge">lldb</code> settings.</p>
+
+<p>Note that <code class="language-plaintext highlighter-rouge">-oso_prefix</code> is not affected by these mappings, and there can
+only be 1 of them. If this is an issue for you, you could potentially
+create your own symlink tree to solve this. I imagine it would also be
+possible to rewrite the <code class="language-plaintext highlighter-rouge">N_OSO</code> entries in the binary but I don't think
+any of the related tools do this today.</p>
+
+<h2 id="shared-libraries">Shared libraries</h2>
+
+<p>If you are debugging a binary that depends on shared libraries
+(<code class="language-plaintext highlighter-rouge">dylib</code>s), the same principles that apply to the main binary apply to
+every individual shared library. The shared libraries will have their
+own <code class="language-plaintext highlighter-rouge">N_OSO</code> entries that must be valid, and their own <code class="language-plaintext highlighter-rouge">dSYMs</code> (if you go
+that route). In this case the main binary won't have <code class="language-plaintext highlighter-rouge">N_OSO</code> entries for
+the shared libraries (or their transitive dependencies), but instead
+<code class="language-plaintext highlighter-rouge">lldb</code> will discover them as they are loaded by <code class="language-plaintext highlighter-rouge">dyld</code>.</p>
+
+<p>In <code class="language-plaintext highlighter-rouge">lldb</code> you can see all of the loaded shared libraries with <code class="language-plaintext highlighter-rouge">image
+list</code> (the first field is the same UUID discussed above):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(lldb) image list
+[  0] 503338F7-DF39-3284-9927-7BF3F9E07F94 0x0000000100000000 /tmp/demo/main
+[  1] 072C7C60-2B6C-3E07-AA56-FD1750EADC2F 0x000000018e6cf000 /usr/lib/libSystem.B.dylib
+[  2] 25DE2C92-147C-3AC7-91BA-51B8F7EDC72B 0x0000000000000000 libfoo.dylib
+[  3] 3247E185-CED2-36FF-9E29-47A77C23E004 0x00000001800cc000 /usr/lib/dyld
+</code></pre></div></div>
+
+<h2 id="symlinks-versus-actual-paths">Symlinks versus actual paths</h2>
+
+<p>In the past there have been multiple bugs around how <code class="language-plaintext highlighter-rouge">-oso_prefix</code> and
+<code class="language-plaintext highlighter-rouge">-ffile-compilation-dir</code> handle symlinks in paths. If your build heavily
+uses symlinks, as Bazel does, and you're getting unexpected absolute
+path behavior, this is something to consider. The typical bugs arise
+from whether the path is remapped before or after the symlinks are
+resolved.</p>
+
+<h1 id="thanks-for-reading">Thanks for reading!</h1>
+
+<p>Hopefully all this information helps you the next time you need to debug
+something related to debug info!</p>
+
+<p>If you have any questions or feedback please reach out to me on the
+Bazel slack or Mastodon. Feel free to cc me on any relevant Bazel
+issues.</p>
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p>Using a modern version of Bazel and the
+<a href="https://github.com/bazelbuild/apple_support"><code class="language-plaintext highlighter-rouge">apple_support</code></a> CC
+toolchain handles all of this for you <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+  </div>
+</article>
+
+      </section>
+    </section>
+  </body>
+</html>
