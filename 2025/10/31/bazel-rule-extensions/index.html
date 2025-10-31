@@ -135,7 +135,9 @@ different platforms.</p>
 
 <p>I was able to achieve this with a rule extension of <code class="language-plaintext highlighter-rouge">cc_binary</code>:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_cc_binary_impl</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">load</span><span class="p">(</span><span class="s">"@cc_compatibility_proxy//:proxy.bzl"</span><span class="p">,</span> <span class="n">_upstream_cc_binary</span> <span class="o">=</span> <span class="s">"cc_binary"</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_cc_binary_impl</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
     <span class="n">providers</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">()</span>
 
     <span class="n">output_group_info</span> <span class="o">=</span> <span class="bp">None</span>
