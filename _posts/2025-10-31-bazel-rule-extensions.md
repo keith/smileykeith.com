@@ -104,6 +104,8 @@ different platforms.
 I was able to achieve this with a rule extension of `cc_binary`:
 
 ```python
+load("@cc_compatibility_proxy//:proxy.bzl", _upstream_cc_binary = "cc_binary")
+
 def _cc_binary_impl(ctx):
     providers = ctx.super()
 
