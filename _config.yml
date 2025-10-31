@@ -1,6 +1,6 @@
 name: Keith Smiley
 author: Keith Smiley
-url: http://smileykeith.com
+url: https://smileykeith.com
 feed: /atom.xml
 permalink: /:year/:month/:day/:title/
 include: ['.htaccess']
