@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0;" />
+  
+    <title>Bazel rule extensions - Keith Smiley</title>
+  
+
+    <meta name="author" content="Keith Smiley">
+    <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/atom.xml">
+
+    <link rel="icon" href="/images/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon">
+
+    <link rel="stylesheet" type="text/css" href="/css/style.css" title="default">
+  </head>
+  <body>
+    <section class="container">
+      <div id="masthead">
+        <h1>
+          <a href="/">Keith Smiley</a>
+          | <a href="https://www.keith.so">About</a>
+          | <a href="/atom.xml">RSS</a>
+          | <a rel="me" href="https://hachyderm.io/@SmileyKeith">Mastodon</a>
+        </h1>
+      </div>
+
+      <section class="content">
+        <article>
+  <header class="seven columns">
+    
+      <h1 class="title">Bazel rule extensions</h1>
+    
+    <p class="date">
+      <time datetime="2025-10-31 10:00:00 -0700" pubdate="pubdate">
+        31 Oct 2025
+      </time>
+      <a class="permalink" title="Permalink" href="/2025/10/31/bazel-rule-extensions/">&infin;</a>
+    </p>
+  </header>
+
+  <div class="post ten columns">
+    <p>One of Bazel's best features is being able to easily write custom rules
+specific to your project. This is great for many use cases, but when
+what you really want is to enhance the behavior of existing rules,
+historically your options have been limited. What you would often do is
+wrap the existing rule in a macro, and add some number of custom rules
+to try and achieve the desired effect. When really what you want is to
+edit the existing rule, without having to re-implement all of its
+functionality (or maintain a fork).</p>
+
+<p>With Bazel 8.0, Googlers added a few new ways to extend existing rules
+that can help with this use case. In this post we will look at the aptly
+named <a href="https://docs.google.com/document/d/1p6z-shWf9sdqo_ep7dcjZCGvqN5r2jsPkJCqHHgfRp4/edit?tab=t.0#heading=h.5mcn15i0e1ch">rule extensions</a> feature and some practical use cases I have
+found for it.</p>
+
+<h1 id="basic-rule-extensions">Basic rule extensions</h1>
+
+<p>Rule extensions allow you to inherit the behavior of an existing rule,
+similar to class inheritance in object-oriented programming. Importantly
+you can make a few modifications to augment the behavior of the rule to
+your liking.</p>
+
+<p>Let's say you have a rule that concatenates the given <code class="language-plaintext highlighter-rouge">srcs</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_foo_impl</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="n">actions</span><span class="p">.</span><span class="n">declare_file</span><span class="p">(</span><span class="s">"output.txt"</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="p">.</span><span class="n">actions</span><span class="p">.</span><span class="n">run_shell</span><span class="p">(</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="n">files</span><span class="p">.</span><span class="n">srcs</span><span class="p">,</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span><span class="p">],</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="s">"cat {} &gt; {}"</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="s">" "</span><span class="p">.</span><span class="n">join</span><span class="p">([</span><span class="n">src</span><span class="p">.</span><span class="n">path</span> <span class="k">for</span> <span class="n">src</span> <span class="ow">in</span> <span class="n">ctx</span><span class="p">.</span><span class="n">files</span><span class="p">.</span><span class="n">srcs</span><span class="p">]),</span> <span class="n">output</span><span class="p">.</span><span class="n">path</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">DefaultInfo</span><span class="p">(</span><span class="n">files</span> <span class="o">=</span> <span class="n">depset</span><span class="p">([</span><span class="n">output</span><span class="p">]))]</span>
+
+<span class="n">foo</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="n">_foo_impl</span><span class="p">,</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"srcs"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">label_list</span><span class="p">(</span><span class="n">allow_files</span> <span class="o">=</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Now let's assume in your project, you want the output file to be sorted.
+If you own the original rule you could of course change <code class="language-plaintext highlighter-rouge">_foo_impl</code> to
+handle that for you, but if you are relying on a more complex upstream
+rule, you may not have that luxury. Here's how we can extend this to
+post-process the file it produces:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_bar_impl</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
+    <span class="n">providers</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">()</span> <span class="c1"># Invoke 'foo' and get the providers
+</span>    <span class="c1"># NOTE: This assumes there's always only the provider we want.
+</span>    <span class="n">original_output</span> <span class="o">=</span> <span class="n">providers</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">files</span><span class="p">.</span><span class="n">to_list</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">new_output</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="n">actions</span><span class="p">.</span><span class="n">declare_file</span><span class="p">(</span><span class="s">"new_output.txt"</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="p">.</span><span class="n">actions</span><span class="p">.</span><span class="n">run_shell</span><span class="p">(</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">original_output</span><span class="p">],</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_output</span><span class="p">],</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="s">"sort {} &gt; {}"</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">original_output</span><span class="p">.</span><span class="n">path</span><span class="p">,</span> <span class="n">new_output</span><span class="p">.</span><span class="n">path</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">DefaultInfo</span><span class="p">(</span><span class="n">files</span> <span class="o">=</span> <span class="n">depset</span><span class="p">([</span><span class="n">new_output</span><span class="p">]))]</span>
+
+<span class="n">bar</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="n">_bar_impl</span><span class="p">,</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">foo</span><span class="p">,</span>  <span class="c1"># Inherit everything from 'foo'
+</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This example illustrates the core new features of rule extensions. First
+we inherit everything from <code class="language-plaintext highlighter-rouge">foo</code> with:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">parent</span> <span class="o">=</span> <span class="n">foo</span><span class="p">,</span>
+</code></pre></div></div>
+
+<p>Then we invoke the original implementation with:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">providers</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>At this point we have all of the original providers, and we can
+post-process them however we want. In this example we choose to extract
+what we need from them and return entirely different providers based on
+our new action.</p>
+
+<h1 id="manipulating-providers">Manipulating providers</h1>
+
+<p>As well as creating new providers, you can also manipulate the returned
+providers for your use case. Recently I wanted to unify how debug info
+was returned for <code class="language-plaintext highlighter-rouge">cc_binary</code> targets across macOS and Linux.
+Specifically I wanted to be able to create a <code class="language-plaintext highlighter-rouge">filegroup</code> target pointing
+to a specific <code class="language-plaintext highlighter-rouge">output_group</code> that would work on both platforms, where by
+default you would have to fetch these from different output locations on
+different platforms.</p>
+
+<p>I was able to achieve this with a rule extension of <code class="language-plaintext highlighter-rouge">cc_binary</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_cc_binary_impl</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
+    <span class="n">providers</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">()</span>
+
+    <span class="n">output_group_info</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">debug_package_info</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">passthrough_providers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">providers</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span> <span class="o">==</span> <span class="s">"OutputGroupInfo"</span><span class="p">:</span>
+            <span class="n">output_group_info</span> <span class="o">=</span> <span class="n">provider</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span> <span class="o">==</span> <span class="s">"struct"</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="s">"unstripped_file"</span><span class="p">):</span>  <span class="c1"># NOTE: Will require an update when this provider moves to starlark
+</span>            <span class="n">debug_package_info</span> <span class="o">=</span> <span class="n">provider</span>
+            <span class="n">passthrough_providers</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">passthrough_providers</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">output_group_info</span><span class="p">:</span>
+        <span class="n">fail</span><span class="p">(</span><span class="s">"No OutputGroupInfo provider found"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">debug_package_info</span><span class="p">:</span>
+        <span class="n">fail</span><span class="p">(</span><span class="s">"No DebugPackageInfo provider found"</span><span class="p">)</span>
+
+    <span class="n">dsyms</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">output_group_info</span><span class="p">,</span> <span class="s">"dsyms"</span><span class="p">,</span> <span class="n">depset</span><span class="p">())</span>
+    <span class="n">new_output_group_info</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">dsyms</span><span class="p">:</span>
+        <span class="n">new_output_group_info</span><span class="p">[</span><span class="s">"debug_info"</span><span class="p">]</span> <span class="o">=</span> <span class="n">dsyms</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">new_output_group_info</span><span class="p">[</span><span class="s">"debug_info"</span><span class="p">]</span> <span class="o">=</span> <span class="n">depset</span><span class="p">([</span><span class="n">debug_package_info</span><span class="p">.</span><span class="n">unstripped_file</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">output_group_info</span><span class="p">):</span>
+        <span class="n">new_output_group_info</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">output_group_info</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">passthrough_providers</span> <span class="o">+</span> <span class="p">[</span>
+        <span class="n">OutputGroupInfo</span><span class="p">(</span><span class="o">**</span><span class="n">new_output_group_info</span><span class="p">),</span>
+    <span class="p">]</span>
+
+<span class="n">cc_binary</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="n">_cc_binary_impl</span><span class="p">,</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">_upstream_cc_binary</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Most of this implementation is about collecting and re-propagating the
+providers that I don't care about. The methods for doing this today are
+pretty tedious but hopefully that will <a href="https://github.com/bazelbuild/bazel/issues/26960">improve in the
+future</a>.</p>
+
+<p>The core logic once I collect the original providers is this:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">dsyms</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">output_group_info</span><span class="p">,</span> <span class="s">"dsyms"</span><span class="p">,</span> <span class="n">depset</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">dsyms</span><span class="p">:</span>
+        <span class="n">new_output_group_info</span><span class="p">[</span><span class="s">"debug_info"</span><span class="p">]</span> <span class="o">=</span> <span class="n">dsyms</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">new_output_group_info</span><span class="p">[</span><span class="s">"debug_info"</span><span class="p">]</span> <span class="o">=</span> <span class="n">depset</span><span class="p">([</span><span class="n">debug_package_info</span><span class="p">.</span><span class="n">unstripped_file</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>Here I decide that if the <code class="language-plaintext highlighter-rouge">OutputGroupInfo</code> provider from the upstream
+<code class="language-plaintext highlighter-rouge">cc_binary</code> implementation includes <code class="language-plaintext highlighter-rouge">dsyms</code>, we propagate that,
+otherwise we propagate the unstripped binary which contains all the
+debug info for Linux. I am then able to create a single <code class="language-plaintext highlighter-rouge">filegroup</code> to
+fetch whichever one is found:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">filegroup</span><span class="p">(</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">"some_binary.debug_info"</span><span class="p">,</span>
+    <span class="n">srcs</span> <span class="o">=</span> <span class="p">[</span><span class="s">":some_binary"</span><span class="p">],</span>
+    <span class="n">output_group</span> <span class="o">=</span> <span class="s">"debug_info"</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h1 id="extending-rules-with-transitions">Extending rules with transitions</h1>
+
+<p>Let's look at another use case for extending rules. This time I want to
+add a custom transition to an upstream rule. In our project we produce
+python wheels that include native extensions. In order to distribute
+these wheels we have to build them for each version of python we
+support. <code class="language-plaintext highlighter-rouge">rules_python</code> has a <code class="language-plaintext highlighter-rouge">py_wheel</code> rule that creates the wheel for
+us, but it does that targeting the "current python version" (this could
+potentially be improved upstream). The current version depends on how
+you setup python in your <code class="language-plaintext highlighter-rouge">MODULE.bazel</code> file, but we want to change it
+when we build different targets so we can target multiple python
+versions in a single build. Thankfully the way <code class="language-plaintext highlighter-rouge">rules_python</code> has
+implemented version selection is with a flag that we can write a
+transition for. To add a transition to an upstream rule, while otherwise
+maintaining the original functionality, we can do this:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">py_wheel</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">(),</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">py_wheel_rule</span><span class="p">,</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"python_version"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">string</span><span class="p">(),</span>
+    <span class="p">},</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">python_version_transition</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>This use case has a few interesting things to note. Since we don't want
+to change the functionality or providers returned by this rule, we don't
+even create an implementation function, instead opting to call super
+directly in a lambda:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">implementation</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">(),</span>
+</code></pre></div></div>
+
+<p>Then we add an attribute the rule didn't have before. This is then read
+by our transition to decide which python version to use:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"python_version"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">string</span><span class="p">(),</span>
+    <span class="p">},</span>
+</code></pre></div></div>
+
+<p>If the original rule had an appropriate attribute we could use that
+instead, but in this case we need to provide our own. Finally we add the
+transition (the contents of which aren't necessary to understand for
+this example, but can be found
+<a href="https://github.com/modular/rules_mojo/blob/87f860f96f73ce624d51fe8e836978888e14344c/mojo/private/transitions.bzl">here</a>):</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">cfg</span> <span class="o">=</span> <span class="n">python_version_transition</span><span class="p">,</span>
+</code></pre></div></div>
+
+<p>Now with our new <code class="language-plaintext highlighter-rouge">py_wheel</code> rule we can set:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">python_version</span> <span class="o">=</span> <span class="s">"3.13"</span><span class="p">,</span>
+</code></pre></div></div>
+
+<p>And all transitive dependencies will be built targeting the passed
+version instead of the default version.</p>
+
+<p>Previously to solve this same use case you potentially could have
+created a custom rule that applied this transition, and made the
+original <code class="language-plaintext highlighter-rouge">py_wheel</code> target depend on your custom rule's output, but that
+is definitely more overhead to understand and maintain for the use cases
+I commonly hit.</p>
+
+<h1 id="applying-platform-specific-transitions">Applying platform specific transitions</h1>
+
+<p>Another use case for adding a transition to an existing rule is for
+platform specific builds. A longstanding frustration in the iOS
+community is bare targets like <code class="language-plaintext highlighter-rouge">cc_library</code> or <code class="language-plaintext highlighter-rouge">swift_library</code>, don't
+have any knowledge of the platform they are being built for, even if you
+have written them in a way that only supports a single platform. This
+means that if you tried to directly build a <code class="language-plaintext highlighter-rouge">swift_library</code> whose code
+only supports iOS, you'll be greeted with a compiler error as Bazel
+attempts to build it for macOS.</p>
+
+<p>Developers have often worked around this by wrapping their libraries in
+a macro that adds an underlying platform specific target, such as an
+<code class="language-plaintext highlighter-rouge">ios_build_test</code>, that has the necessary platform transition. This adds
+complexity and causes confusion for non-Bazel developers. It also adds
+general overhead in your build when you're querying things or otherwise
+inspecting what targets exist, as every library now has additional
+underlying targets.</p>
+
+<p>With rule extensions you can eliminate this overhead by applying the
+Apple platform transition directly to <code class="language-plaintext highlighter-rouge">swift_library</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">load</span><span class="p">(</span><span class="s">"@rules_apple//apple/internal:transition_support.bzl"</span><span class="p">,</span> <span class="s">"transition_support"</span><span class="p">)</span>
+<span class="n">load</span><span class="p">(</span><span class="s">"@rules_swift//swift:swift.bzl"</span><span class="p">,</span> <span class="n">_upstream_swift_library</span> <span class="o">=</span> <span class="s">"swift_library"</span><span class="p">)</span>
+
+<span class="n">swift_library</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">(),</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">_upstream_swift_library</span><span class="p">,</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">transition_support</span><span class="p">.</span><span class="n">apple_rule_transition</span><span class="p">,</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"platform_type"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">string</span><span class="p">(</span><span class="n">default</span> <span class="o">=</span> <span class="s">"ios"</span><span class="p">),</span>
+        <span class="c1"># TODO: Extract to a constant that matches your ios_application targets
+</span>        <span class="s">"minimum_os_version"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">string</span><span class="p">(</span><span class="n">default</span> <span class="o">=</span> <span class="s">"16.0"</span><span class="p">),</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>This requires a bit of knowledge about how the transition works,
+specifically we have to add 2 attributes the transition relies on, but
+that's something that could potentially be improved.</p>
+
+<p>Once you have this extended rule, building your <code class="language-plaintext highlighter-rouge">swift_library</code> targets
+correctly builds for iOS, and they are not rebuilt when building them
+from a platform specific target's dependency tree.</p>
+
+<p>If your <code class="language-plaintext highlighter-rouge">swift_library</code> target supports multiple platforms, you can
+still use something like this while respecting inherited platform from
+your top level targets. The easiest way I found to do this would be to
+<code class="language-plaintext highlighter-rouge">select()</code> on the current platform in a macro, and provide the correct
+values given that target platform:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">load</span><span class="p">(</span><span class="s">"@rules_apple//apple/internal:transition_support.bzl"</span><span class="p">,</span> <span class="s">"transition_support"</span><span class="p">)</span>
+<span class="n">load</span><span class="p">(</span><span class="s">"@rules_swift//swift:swift.bzl"</span><span class="p">,</span> <span class="n">_upstream_swift_library</span> <span class="o">=</span> <span class="s">"swift_library"</span><span class="p">)</span>
+
+<span class="n">swift_library</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">(),</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">_upstream_swift_library</span><span class="p">,</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">transition_support</span><span class="p">.</span><span class="n">apple_rule_transition</span><span class="p">,</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"platform_type"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">string</span><span class="p">(</span><span class="n">mandatory</span> <span class="o">=</span> <span class="bp">True</span><span class="p">),</span>
+        <span class="s">"minimum_os_version"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">string</span><span class="p">(</span><span class="n">mandatory</span> <span class="o">=</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">my_swift_library</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">swift_library</span><span class="p">(</span>
+        <span class="n">platform_type</span> <span class="o">=</span> <span class="n">select</span><span class="p">({</span>
+            <span class="s">"@platforms//os:tvos"</span><span class="p">:</span> <span class="s">"tvos"</span><span class="p">,</span>
+            <span class="s">"//conditions:default"</span><span class="p">:</span> <span class="s">"ios"</span><span class="p">,</span>
+        <span class="p">}),</span>
+        <span class="n">minimum_os_version</span> <span class="o">=</span> <span class="s">"16.0"</span><span class="p">,</span> <span class="c1"># NOTE: Could select() here too if necessary
+</span>        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p>With this example building the library directly will default to iOS, but
+if you have a top level tvOS target that depends on it, it will still
+correctly compile for tvOS.</p>
+
+<h1 id="adding-an-attribute-with-aspects">Adding an attribute with aspects</h1>
+
+<p>Another powerful use case for this feature is to add aspects to
+attributes on the rule. For example if you want a rule to collect custom
+files from all of its dependencies and propagate those in its own
+runfiles, you can override an attribute from the parent, adding your
+custom aspect:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">bar</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="n">_bar_impl</span><span class="p">,</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">foo</span><span class="p">,</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"deps"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">label_list</span><span class="p">(</span><span class="n">aspects</span> <span class="o">=</span> <span class="p">[</span><span class="n">custom_aspect</span><span class="p">]),</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Then in <code class="language-plaintext highlighter-rouge">_bar_impl</code> you can do whatever processing you need to collect
+the outputs of the aspect.</p>
+
+<h1 id="other-notes">Other notes</h1>
+
+<ul>
+  <li>There are currently some limitations on what types of attributes can
+be overridden, for example you cannot override a
+<code class="language-plaintext highlighter-rouge">attr.label_keyed_string_dict</code> to add aspects. In some cases a quick
+workaround is to add a new attribute instead, and wrap your usage in a
+macro that populates the new attribute with the same value as the
+original attribute.</li>
+  <li>While it may look confusing at first, I think there's some value in
+re-using the same rule name with your extended rules so <code class="language-plaintext highlighter-rouge">bazel query
+kind(cc_binary, ...)</code> continues to work as before. This way developers
+who are using queries like this don't have to know about this
+extension.</li>
+  <li>You have to set <code class="language-plaintext highlighter-rouge">parent</code> to another Bazel rule, not a macro. This is
+sometimes difficult as many popular rulesets expose macros for their
+rules to perform pre-processing on the passed attributes. I hope as
+this feature becomes more widely used that pattern is reduced. In the
+cases where I am using this today I found I could skip the custom
+macro logic as long as I was careful about what it was trying to
+accomplish.</li>
+  <li>I would like to see how an approach like this could augment existing
+rules to add outputs for actions that already exist. For example when
+passing <code class="language-plaintext highlighter-rouge">-ftime-trace</code> to clang ideally we could create that output in
+our rule implementation but use the existing action to create it, I
+couldn't find a way to modify the <code class="language-plaintext highlighter-rouge">copts</code> to do that today. It might
+be possible with a combination of this approach and a macro.</li>
+</ul>
+
+  </div>
+</article>
+
+      </section>
+    </section>
+  </body>
+</html>

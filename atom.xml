@@ -2,21 +2,388 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2025-09-21T14:20:37-07:00</updated>
-  <id>http://smileykeith.com/</id>
-  <link rel="alternate" type="text/html" hreflang="en" href="http://smileykeith.com" />
+  <updated>2025-10-31T11:09:54-07:00</updated>
+  <id>https://smileykeith.com/</id>
+  <link rel="alternate" type="text/html" hreflang="en" href="https://smileykeith.com" />
 
   
-  <link rel="self" type="application/atom+xml" href="http://smileykeith.com/atom.xml" />
+  <link rel="self" type="application/atom+xml" href="https://smileykeith.com/atom.xml" />
   
   <rights>Copyright (c) 2025 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
   
     <entry>
+      <title type="html"><![CDATA[Bazel rule extensions]]></title>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2025/10/31/bazel-rule-extensions/" />
+      <id>https://smileykeith.com/2025/10/31/bazel-rule-extensions</id>
+      <updated>2025-10-31T10:00:00-07:00</updated>
+      <author>
+        
+          <name><![CDATA[Keith Smiley]]></name>
+        
+      </author>
+      <content type="html">
+        <![CDATA[<p>One of Bazel's best features is being able to easily write custom rules
+specific to your project. This is great for many use cases, but when
+what you really want is to enhance the behavior of existing rules,
+historically your options have been limited. What you would often do is
+wrap the existing rule in a macro, and add some number of custom rules
+to try and achieve the desired effect. When really what you want is to
+edit the existing rule, without having to re-implement all of its
+functionality (or maintain a fork).</p>
+
+<p>With Bazel 8.0, Googlers added a few new ways to extend existing rules
+that can help with this use case. In this post we will look at the aptly
+named <a href="https://docs.google.com/document/d/1p6z-shWf9sdqo_ep7dcjZCGvqN5r2jsPkJCqHHgfRp4/edit?tab=t.0#heading=h.5mcn15i0e1ch">rule extensions</a> feature and some practical use cases I have
+found for it.</p>
+
+<h1 id="basic-rule-extensions">Basic rule extensions</h1>
+
+<p>Rule extensions allow you to inherit the behavior of an existing rule,
+similar to class inheritance in object-oriented programming. Importantly
+you can make a few modifications to augment the behavior of the rule to
+your liking.</p>
+
+<p>Let's say you have a rule that concatenates the given <code class="language-plaintext highlighter-rouge">srcs</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_foo_impl</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="n">actions</span><span class="p">.</span><span class="n">declare_file</span><span class="p">(</span><span class="s">"output.txt"</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="p">.</span><span class="n">actions</span><span class="p">.</span><span class="n">run_shell</span><span class="p">(</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="n">files</span><span class="p">.</span><span class="n">srcs</span><span class="p">,</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">output</span><span class="p">],</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="s">"cat {} &gt; {}"</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="s">" "</span><span class="p">.</span><span class="n">join</span><span class="p">([</span><span class="n">src</span><span class="p">.</span><span class="n">path</span> <span class="k">for</span> <span class="n">src</span> <span class="ow">in</span> <span class="n">ctx</span><span class="p">.</span><span class="n">files</span><span class="p">.</span><span class="n">srcs</span><span class="p">]),</span> <span class="n">output</span><span class="p">.</span><span class="n">path</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">DefaultInfo</span><span class="p">(</span><span class="n">files</span> <span class="o">=</span> <span class="n">depset</span><span class="p">([</span><span class="n">output</span><span class="p">]))]</span>
+
+<span class="n">foo</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="n">_foo_impl</span><span class="p">,</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"srcs"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">label_list</span><span class="p">(</span><span class="n">allow_files</span> <span class="o">=</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Now let's assume in your project, you want the output file to be sorted.
+If you own the original rule you could of course change <code class="language-plaintext highlighter-rouge">_foo_impl</code> to
+handle that for you, but if you are relying on a more complex upstream
+rule, you may not have that luxury. Here's how we can extend this to
+post-process the file it produces:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_bar_impl</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
+    <span class="n">providers</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">()</span> <span class="c1"># Invoke 'foo' and get the providers
+</span>    <span class="c1"># NOTE: This assumes there's always only the provider we want.
+</span>    <span class="n">original_output</span> <span class="o">=</span> <span class="n">providers</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">files</span><span class="p">.</span><span class="n">to_list</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">new_output</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="n">actions</span><span class="p">.</span><span class="n">declare_file</span><span class="p">(</span><span class="s">"new_output.txt"</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="p">.</span><span class="n">actions</span><span class="p">.</span><span class="n">run_shell</span><span class="p">(</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">original_output</span><span class="p">],</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_output</span><span class="p">],</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="s">"sort {} &gt; {}"</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">original_output</span><span class="p">.</span><span class="n">path</span><span class="p">,</span> <span class="n">new_output</span><span class="p">.</span><span class="n">path</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">DefaultInfo</span><span class="p">(</span><span class="n">files</span> <span class="o">=</span> <span class="n">depset</span><span class="p">([</span><span class="n">new_output</span><span class="p">]))]</span>
+
+<span class="n">bar</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="n">_bar_impl</span><span class="p">,</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">foo</span><span class="p">,</span>  <span class="c1"># Inherit everything from 'foo'
+</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This example illustrates the core new features of rule extensions. First
+we inherit everything from <code class="language-plaintext highlighter-rouge">foo</code> with:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">parent</span> <span class="o">=</span> <span class="n">foo</span><span class="p">,</span>
+</code></pre></div></div>
+
+<p>Then we invoke the original implementation with:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">providers</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>At this point we have all of the original providers, and we can
+post-process them however we want. In this example we choose to extract
+what we need from them and return entirely different providers based on
+our new action.</p>
+
+<h1 id="manipulating-providers">Manipulating providers</h1>
+
+<p>As well as creating new providers, you can also manipulate the returned
+providers for your use case. Recently I wanted to unify how debug info
+was returned for <code class="language-plaintext highlighter-rouge">cc_binary</code> targets across macOS and Linux.
+Specifically I wanted to be able to create a <code class="language-plaintext highlighter-rouge">filegroup</code> target pointing
+to a specific <code class="language-plaintext highlighter-rouge">output_group</code> that would work on both platforms, where by
+default you would have to fetch these from different output locations on
+different platforms.</p>
+
+<p>I was able to achieve this with a rule extension of <code class="language-plaintext highlighter-rouge">cc_binary</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_cc_binary_impl</span><span class="p">(</span><span class="n">ctx</span><span class="p">):</span>
+    <span class="n">providers</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">()</span>
+
+    <span class="n">output_group_info</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">debug_package_info</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">passthrough_providers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">providers</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span> <span class="o">==</span> <span class="s">"OutputGroupInfo"</span><span class="p">:</span>
+            <span class="n">output_group_info</span> <span class="o">=</span> <span class="n">provider</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span> <span class="o">==</span> <span class="s">"struct"</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="s">"unstripped_file"</span><span class="p">):</span>  <span class="c1"># NOTE: Will require an update when this provider moves to starlark
+</span>            <span class="n">debug_package_info</span> <span class="o">=</span> <span class="n">provider</span>
+            <span class="n">passthrough_providers</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">passthrough_providers</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">provider</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">output_group_info</span><span class="p">:</span>
+        <span class="n">fail</span><span class="p">(</span><span class="s">"No OutputGroupInfo provider found"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">debug_package_info</span><span class="p">:</span>
+        <span class="n">fail</span><span class="p">(</span><span class="s">"No DebugPackageInfo provider found"</span><span class="p">)</span>
+
+    <span class="n">dsyms</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">output_group_info</span><span class="p">,</span> <span class="s">"dsyms"</span><span class="p">,</span> <span class="n">depset</span><span class="p">())</span>
+    <span class="n">new_output_group_info</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">dsyms</span><span class="p">:</span>
+        <span class="n">new_output_group_info</span><span class="p">[</span><span class="s">"debug_info"</span><span class="p">]</span> <span class="o">=</span> <span class="n">dsyms</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">new_output_group_info</span><span class="p">[</span><span class="s">"debug_info"</span><span class="p">]</span> <span class="o">=</span> <span class="n">depset</span><span class="p">([</span><span class="n">debug_package_info</span><span class="p">.</span><span class="n">unstripped_file</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">output_group_info</span><span class="p">):</span>
+        <span class="n">new_output_group_info</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">output_group_info</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">passthrough_providers</span> <span class="o">+</span> <span class="p">[</span>
+        <span class="n">OutputGroupInfo</span><span class="p">(</span><span class="o">**</span><span class="n">new_output_group_info</span><span class="p">),</span>
+    <span class="p">]</span>
+
+<span class="n">cc_binary</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="n">_cc_binary_impl</span><span class="p">,</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">_upstream_cc_binary</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Most of this implementation is about collecting and re-propagating the
+providers that I don't care about. The methods for doing this today are
+pretty tedious but hopefully that will <a href="https://github.com/bazelbuild/bazel/issues/26960">improve in the
+future</a>.</p>
+
+<p>The core logic once I collect the original providers is this:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">dsyms</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">output_group_info</span><span class="p">,</span> <span class="s">"dsyms"</span><span class="p">,</span> <span class="n">depset</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">dsyms</span><span class="p">:</span>
+        <span class="n">new_output_group_info</span><span class="p">[</span><span class="s">"debug_info"</span><span class="p">]</span> <span class="o">=</span> <span class="n">dsyms</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">new_output_group_info</span><span class="p">[</span><span class="s">"debug_info"</span><span class="p">]</span> <span class="o">=</span> <span class="n">depset</span><span class="p">([</span><span class="n">debug_package_info</span><span class="p">.</span><span class="n">unstripped_file</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>Here I decide that if the <code class="language-plaintext highlighter-rouge">OutputGroupInfo</code> provider from the upstream
+<code class="language-plaintext highlighter-rouge">cc_binary</code> implementation includes <code class="language-plaintext highlighter-rouge">dsyms</code>, we propagate that,
+otherwise we propagate the unstripped binary which contains all the
+debug info for Linux. I am then able to create a single <code class="language-plaintext highlighter-rouge">filegroup</code> to
+fetch whichever one is found:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">filegroup</span><span class="p">(</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s">"some_binary.debug_info"</span><span class="p">,</span>
+    <span class="n">srcs</span> <span class="o">=</span> <span class="p">[</span><span class="s">":some_binary"</span><span class="p">],</span>
+    <span class="n">output_group</span> <span class="o">=</span> <span class="s">"debug_info"</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h1 id="extending-rules-with-transitions">Extending rules with transitions</h1>
+
+<p>Let's look at another use case for extending rules. This time I want to
+add a custom transition to an upstream rule. In our project we produce
+python wheels that include native extensions. In order to distribute
+these wheels we have to build them for each version of python we
+support. <code class="language-plaintext highlighter-rouge">rules_python</code> has a <code class="language-plaintext highlighter-rouge">py_wheel</code> rule that creates the wheel for
+us, but it does that targeting the "current python version" (this could
+potentially be improved upstream). The current version depends on how
+you setup python in your <code class="language-plaintext highlighter-rouge">MODULE.bazel</code> file, but we want to change it
+when we build different targets so we can target multiple python
+versions in a single build. Thankfully the way <code class="language-plaintext highlighter-rouge">rules_python</code> has
+implemented version selection is with a flag that we can write a
+transition for. To add a transition to an upstream rule, while otherwise
+maintaining the original functionality, we can do this:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">py_wheel</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">(),</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">py_wheel_rule</span><span class="p">,</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"python_version"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">string</span><span class="p">(),</span>
+    <span class="p">},</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">python_version_transition</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>This use case has a few interesting things to note. Since we don't want
+to change the functionality or providers returned by this rule, we don't
+even create an implementation function, instead opting to call super
+directly in a lambda:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">implementation</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">(),</span>
+</code></pre></div></div>
+
+<p>Then we add an attribute the rule didn't have before. This is then read
+by our transition to decide which python version to use:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"python_version"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">string</span><span class="p">(),</span>
+    <span class="p">},</span>
+</code></pre></div></div>
+
+<p>If the original rule had an appropriate attribute we could use that
+instead, but in this case we need to provide our own. Finally we add the
+transition (the contents of which aren't necessary to understand for
+this example, but can be found
+<a href="https://github.com/modular/rules_mojo/blob/87f860f96f73ce624d51fe8e836978888e14344c/mojo/private/transitions.bzl">here</a>):</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">cfg</span> <span class="o">=</span> <span class="n">python_version_transition</span><span class="p">,</span>
+</code></pre></div></div>
+
+<p>Now with our new <code class="language-plaintext highlighter-rouge">py_wheel</code> rule we can set:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">python_version</span> <span class="o">=</span> <span class="s">"3.13"</span><span class="p">,</span>
+</code></pre></div></div>
+
+<p>And all transitive dependencies will be built targeting the passed
+version instead of the default version.</p>
+
+<p>Previously to solve this same use case you potentially could have
+created a custom rule that applied this transition, and made the
+original <code class="language-plaintext highlighter-rouge">py_wheel</code> target depend on your custom rule's output, but that
+is definitely more overhead to understand and maintain for the use cases
+I commonly hit.</p>
+
+<h1 id="applying-platform-specific-transitions">Applying platform specific transitions</h1>
+
+<p>Another use case for adding a transition to an existing rule is for
+platform specific builds. A longstanding frustration in the iOS
+community is bare targets like <code class="language-plaintext highlighter-rouge">cc_library</code> or <code class="language-plaintext highlighter-rouge">swift_library</code>, don't
+have any knowledge of the platform they are being built for, even if you
+have written them in a way that only supports a single platform. This
+means that if you tried to directly build a <code class="language-plaintext highlighter-rouge">swift_library</code> whose code
+only supports iOS, you'll be greeted with a compiler error as Bazel
+attempts to build it for macOS.</p>
+
+<p>Developers have often worked around this by wrapping their libraries in
+a macro that adds an underlying platform specific target, such as an
+<code class="language-plaintext highlighter-rouge">ios_build_test</code>, that has the necessary platform transition. This adds
+complexity and causes confusion for non-Bazel developers. It also adds
+general overhead in your build when you're querying things or otherwise
+inspecting what targets exist, as every library now has additional
+underlying targets.</p>
+
+<p>With rule extensions you can eliminate this overhead by applying the
+Apple platform transition directly to <code class="language-plaintext highlighter-rouge">swift_library</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">load</span><span class="p">(</span><span class="s">"@rules_apple//apple/internal:transition_support.bzl"</span><span class="p">,</span> <span class="s">"transition_support"</span><span class="p">)</span>
+<span class="n">load</span><span class="p">(</span><span class="s">"@rules_swift//swift:swift.bzl"</span><span class="p">,</span> <span class="n">_upstream_swift_library</span> <span class="o">=</span> <span class="s">"swift_library"</span><span class="p">)</span>
+
+<span class="n">swift_library</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">(),</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">_upstream_swift_library</span><span class="p">,</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">transition_support</span><span class="p">.</span><span class="n">apple_rule_transition</span><span class="p">,</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"platform_type"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">string</span><span class="p">(</span><span class="n">default</span> <span class="o">=</span> <span class="s">"ios"</span><span class="p">),</span>
+        <span class="c1"># TODO: Extract to a constant that matches your ios_application targets
+</span>        <span class="s">"minimum_os_version"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">string</span><span class="p">(</span><span class="n">default</span> <span class="o">=</span> <span class="s">"16.0"</span><span class="p">),</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>This requires a bit of knowledge about how the transition works,
+specifically we have to add 2 attributes the transition relies on, but
+that's something that could potentially be improved.</p>
+
+<p>Once you have this extended rule, building your <code class="language-plaintext highlighter-rouge">swift_library</code> targets
+correctly builds for iOS, and they are not rebuilt when building them
+from a platform specific target's dependency tree.</p>
+
+<p>If your <code class="language-plaintext highlighter-rouge">swift_library</code> target supports multiple platforms, you can
+still use something like this while respecting inherited platform from
+your top level targets. The easiest way I found to do this would be to
+<code class="language-plaintext highlighter-rouge">select()</code> on the current platform in a macro, and provide the correct
+values given that target platform:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">load</span><span class="p">(</span><span class="s">"@rules_apple//apple/internal:transition_support.bzl"</span><span class="p">,</span> <span class="s">"transition_support"</span><span class="p">)</span>
+<span class="n">load</span><span class="p">(</span><span class="s">"@rules_swift//swift:swift.bzl"</span><span class="p">,</span> <span class="n">_upstream_swift_library</span> <span class="o">=</span> <span class="s">"swift_library"</span><span class="p">)</span>
+
+<span class="n">swift_library</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">ctx</span><span class="p">.</span><span class="nb">super</span><span class="p">(),</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">_upstream_swift_library</span><span class="p">,</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">transition_support</span><span class="p">.</span><span class="n">apple_rule_transition</span><span class="p">,</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"platform_type"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">string</span><span class="p">(</span><span class="n">mandatory</span> <span class="o">=</span> <span class="bp">True</span><span class="p">),</span>
+        <span class="s">"minimum_os_version"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">string</span><span class="p">(</span><span class="n">mandatory</span> <span class="o">=</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">my_swift_library</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">swift_library</span><span class="p">(</span>
+        <span class="n">platform_type</span> <span class="o">=</span> <span class="n">select</span><span class="p">({</span>
+            <span class="s">"@platforms//os:tvos"</span><span class="p">:</span> <span class="s">"tvos"</span><span class="p">,</span>
+            <span class="s">"//conditions:default"</span><span class="p">:</span> <span class="s">"ios"</span><span class="p">,</span>
+        <span class="p">}),</span>
+        <span class="n">minimum_os_version</span> <span class="o">=</span> <span class="s">"16.0"</span><span class="p">,</span> <span class="c1"># NOTE: Could select() here too if necessary
+</span>        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p>With this example building the library directly will default to iOS, but
+if you have a top level tvOS target that depends on it, it will still
+correctly compile for tvOS.</p>
+
+<h1 id="adding-an-attribute-with-aspects">Adding an attribute with aspects</h1>
+
+<p>Another powerful use case for this feature is to add aspects to
+attributes on the rule. For example if you want a rule to collect custom
+files from all of its dependencies and propagate those in its own
+runfiles, you can override an attribute from the parent, adding your
+custom aspect:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">bar</span> <span class="o">=</span> <span class="n">rule</span><span class="p">(</span>
+    <span class="n">implementation</span> <span class="o">=</span> <span class="n">_bar_impl</span><span class="p">,</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">foo</span><span class="p">,</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"deps"</span><span class="p">:</span> <span class="n">attr</span><span class="p">.</span><span class="n">label_list</span><span class="p">(</span><span class="n">aspects</span> <span class="o">=</span> <span class="p">[</span><span class="n">custom_aspect</span><span class="p">]),</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Then in <code class="language-plaintext highlighter-rouge">_bar_impl</code> you can do whatever processing you need to collect
+the outputs of the aspect.</p>
+
+<h1 id="other-notes">Other notes</h1>
+
+<ul>
+  <li>There are currently some limitations on what types of attributes can
+be overridden, for example you cannot override a
+<code class="language-plaintext highlighter-rouge">attr.label_keyed_string_dict</code> to add aspects. In some cases a quick
+workaround is to add a new attribute instead, and wrap your usage in a
+macro that populates the new attribute with the same value as the
+original attribute.</li>
+  <li>While it may look confusing at first, I think there's some value in
+re-using the same rule name with your extended rules so <code class="language-plaintext highlighter-rouge">bazel query
+kind(cc_binary, ...)</code> continues to work as before. This way developers
+who are using queries like this don't have to know about this
+extension.</li>
+  <li>You have to set <code class="language-plaintext highlighter-rouge">parent</code> to another Bazel rule, not a macro. This is
+sometimes difficult as many popular rulesets expose macros for their
+rules to perform pre-processing on the passed attributes. I hope as
+this feature becomes more widely used that pattern is reduced. In the
+cases where I am using this today I found I could skip the custom
+macro logic as long as I was careful about what it was trying to
+accomplish.</li>
+  <li>I would like to see how an approach like this could augment existing
+rules to add outputs for actions that already exist. For example when
+passing <code class="language-plaintext highlighter-rouge">-ftime-trace</code> to clang ideally we could create that output in
+our rule implementation but use the existing action to create it, I
+couldn't find a way to modify the <code class="language-plaintext highlighter-rouge">copts</code> to do that today. It might
+be possible with a combination of this approach and a macro.</li>
+</ul>
+]]>
+      </content>
+    </entry>
+  
+    <entry>
       <title type="html"><![CDATA[Understanding Apple Debug Info]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2025/09/21/understanding-apple-debug-info/" />
-      <id>http://smileykeith.com/2025/09/21/understanding-apple-debug-info</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2025/09/21/understanding-apple-debug-info/" />
+      <id>https://smileykeith.com/2025/09/21/understanding-apple-debug-info</id>
       <updated>2025-09-21T10:00:00-07:00</updated>
       <author>
         
@@ -681,8 +1048,8 @@ toolchain handles all of this for you <a href="#fnref:1" class="reversefootnote
   
     <entry>
       <title type="html"><![CDATA[Finding unused targets with bazel]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2025/03/24/unused-bazel-targets/" />
-      <id>http://smileykeith.com/2025/03/24/unused-bazel-targets</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2025/03/24/unused-bazel-targets/" />
+      <id>https://smileykeith.com/2025/03/24/unused-bazel-targets</id>
       <updated>2025-03-24T11:00:00-07:00</updated>
       <author>
         
@@ -760,8 +1127,8 @@ can write more advanced queries for your use cases.</p>
   
     <entry>
       <title type="html"><![CDATA[Bazel caching and compressed debug info]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2025/02/14/compressed-debug-info/" />
-      <id>http://smileykeith.com/2025/02/14/compressed-debug-info</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2025/02/14/compressed-debug-info/" />
+      <id>https://smileykeith.com/2025/02/14/compressed-debug-info</id>
       <updated>2025-02-14T10:00:00-08:00</updated>
       <author>
         
@@ -847,8 +1214,8 @@ download sizes.</p>
   
     <entry>
       <title type="html"><![CDATA[Printing rpaths with objdump]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2022/03/16/objdump-rpaths/" />
-      <id>http://smileykeith.com/2022/03/16/objdump-rpaths</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2022/03/16/objdump-rpaths/" />
+      <id>https://smileykeith.com/2022/03/16/objdump-rpaths</id>
       <updated>2022-03-16T10:00:00-07:00</updated>
       <author>
         
@@ -896,8 +1263,8 @@ run on, which you can disable with <code class="language-plaintext highlighter-r
   
     <entry>
       <title type="html"><![CDATA[Debugging bazel actions]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2022/03/02/debugging-bazel-actions/" />
-      <id>http://smileykeith.com/2022/03/02/debugging-bazel-actions</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2022/03/02/debugging-bazel-actions/" />
+      <id>https://smileykeith.com/2022/03/02/debugging-bazel-actions</id>
       <updated>2022-03-02T18:00:00-08:00</updated>
       <author>
         
@@ -1055,8 +1422,8 @@ well in my experience.</li>
   
     <entry>
       <title type="html"><![CDATA[Auto linking with Mach-O binaries]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2022/02/23/lc-linker-option/" />
-      <id>http://smileykeith.com/2022/02/23/lc-linker-option</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2022/02/23/lc-linker-option/" />
+      <id>https://smileykeith.com/2022/02/23/lc-linker-option</id>
       <updated>2022-02-23T18:00:00-08:00</updated>
       <author>
         
@@ -1243,8 +1610,8 @@ requires some dependencies, but doesn't build with <code class="language-plainte
   
     <entry>
       <title type="html"><![CDATA[Silencing iOS simulator log noise]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2021/11/16/simulator-log-spew/" />
-      <id>http://smileykeith.com/2021/11/16/simulator-log-spew</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2021/11/16/simulator-log-spew/" />
+      <id>https://smileykeith.com/2021/11/16/simulator-log-spew</id>
       <updated>2021-11-16T18:00:00-08:00</updated>
       <author>
         
@@ -1292,8 +1659,8 @@ log</code></a></p>
   
     <entry>
       <title type="html"><![CDATA[Reproducible codesigning on Apple Silicon]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2021/10/05/codesign-m1/" />
-      <id>http://smileykeith.com/2021/10/05/codesign-m1</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2021/10/05/codesign-m1/" />
+      <id>https://smileykeith.com/2021/10/05/codesign-m1</id>
       <updated>2021-10-05T20:00:00-07:00</updated>
       <author>
         
@@ -1543,8 +1910,8 @@ be part of a future version of Apple's clang fork.</li>
   
     <entry>
       <title type="html"><![CDATA[Switching Xcode versions without a password]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2021/08/12/xcode-select-sudoers/" />
-      <id>http://smileykeith.com/2021/08/12/xcode-select-sudoers</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2021/08/12/xcode-select-sudoers/" />
+      <id>https://smileykeith.com/2021/08/12/xcode-select-sudoers</id>
       <updated>2021-08-12T13:40:00-07:00</updated>
       <author>
         
@@ -1651,8 +2018,8 @@ between Xcode versions.</p>
   
     <entry>
       <title type="html"><![CDATA[Locking Xcode versions in bazel]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2021/03/08/locking-xcode-in-bazel/" />
-      <id>http://smileykeith.com/2021/03/08/locking-xcode-in-bazel</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2021/03/08/locking-xcode-in-bazel/" />
+      <id>https://smileykeith.com/2021/03/08/locking-xcode-in-bazel</id>
       <updated>2021-03-08T08:40:00-08:00</updated>
       <author>
         
@@ -1824,8 +2191,8 @@ environment variable).</p>
   
     <entry>
       <title type="html"><![CDATA[Supporting relative paths: XCTest failures in Xcode]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2021/03/04/supporting-relative-paths/" />
-      <id>http://smileykeith.com/2021/03/04/supporting-relative-paths</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2021/03/04/supporting-relative-paths/" />
+      <id>https://smileykeith.com/2021/03/04/supporting-relative-paths</id>
       <updated>2021-03-04T20:48:00-08:00</updated>
       <author>
         
@@ -1976,8 +2343,8 @@ which might break in the future. You should avoid this if possible.</p>
   
     <entry>
       <title type="html"><![CDATA[Editing rpaths for _InternalSwiftSyntaxParser]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2021/03/03/editing-rpaths/" />
-      <id>http://smileykeith.com/2021/03/03/editing-rpaths</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2021/03/03/editing-rpaths/" />
+      <id>https://smileykeith.com/2021/03/03/editing-rpaths</id>
       <updated>2021-03-03T19:48:00-08:00</updated>
       <author>
         
@@ -2152,8 +2519,8 @@ version of Xcode.</p>
   
     <entry>
       <title type="html"><![CDATA[Cross compiling for Apple Silicon with Swift Package Manager]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2020/12/24/swiftpm-cross-compile/" />
-      <id>http://smileykeith.com/2020/12/24/swiftpm-cross-compile</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2020/12/24/swiftpm-cross-compile/" />
+      <id>https://smileykeith.com/2020/12/24/swiftpm-cross-compile</id>
       <updated>2020-12-24T14:32:00-08:00</updated>
       <author>
         
@@ -2226,8 +2593,8 @@ package (for architecture arm64):       Mach-O 64-bit executable arm64
   
     <entry>
       <title type="html"><![CDATA[LLDB Reproducers]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2020/09/29/lldb-reproducers/" />
-      <id>http://smileykeith.com/2020/09/29/lldb-reproducers</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2020/09/29/lldb-reproducers/" />
+      <id>https://smileykeith.com/2020/09/29/lldb-reproducers</id>
       <updated>2020-09-29T19:39:00-07:00</updated>
       <author>
         
@@ -2343,8 +2710,8 @@ will see.</li>
   
     <entry>
       <title type="html"><![CDATA[NSProgress with Asynchronous Tasks]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2015/03/14/nsprogress-with-asynchronous-tasks/" />
-      <id>http://smileykeith.com/2015/03/14/nsprogress-with-asynchronous-tasks</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2015/03/14/nsprogress-with-asynchronous-tasks/" />
+      <id>https://smileykeith.com/2015/03/14/nsprogress-with-asynchronous-tasks</id>
       <updated>2015-03-14T18:57:00-07:00</updated>
       <author>
         
@@ -2363,8 +2730,8 @@ here</a>.</p>
   
     <entry>
       <title type="html"><![CDATA[ReactiveCocoa and Core Data]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2015/03/14/reactive-cocoa-and-core-data/" />
-      <id>http://smileykeith.com/2015/03/14/reactive-cocoa-and-core-data</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2015/03/14/reactive-cocoa-and-core-data/" />
+      <id>https://smileykeith.com/2015/03/14/reactive-cocoa-and-core-data</id>
       <updated>2015-03-14T18:53:00-07:00</updated>
       <author>
         
@@ -2383,8 +2750,8 @@ integration on the thoughtbot blog
   
     <entry>
       <title type="html"><![CDATA[Writing Vim Syntax Plugins]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2015/03/14/writing-vim-syntax-plugins/" />
-      <id>http://smileykeith.com/2015/03/14/writing-vim-syntax-plugins</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2015/03/14/writing-vim-syntax-plugins/" />
+      <id>https://smileykeith.com/2015/03/14/writing-vim-syntax-plugins</id>
       <updated>2015-03-14T18:48:00-07:00</updated>
       <author>
         
@@ -2402,8 +2769,8 @@ writing Vim syntax plugins. Check it out
   
     <entry>
       <title type="html"><![CDATA[Clojure]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2015/03/14/clojure/" />
-      <id>http://smileykeith.com/2015/03/14/clojure</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2015/03/14/clojure/" />
+      <id>https://smileykeith.com/2015/03/14/clojure</id>
       <updated>2015-03-14T18:27:00-07:00</updated>
       <author>
         
@@ -2432,8 +2799,8 @@ to link these articles here regardless.</p>
   
     <entry>
       <title type="html"><![CDATA[Vim TagBar with Objective-C]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2014/02/14/vim-tagbar-with-objective-c/" />
-      <id>http://smileykeith.com/2014/02/14/vim-tagbar-with-objective-c</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2014/02/14/vim-tagbar-with-objective-c/" />
+      <id>https://smileykeith.com/2014/02/14/vim-tagbar-with-objective-c</id>
       <updated>2014-02-14T13:53:00-08:00</updated>
       <author>
         
@@ -2518,8 +2885,8 @@ improved.</p>
   
     <entry>
       <title type="html"><![CDATA[IPSEC/L2TP VPN on a Raspberry Pi running Arch Linux]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux/" />
-      <id>http://smileykeith.com/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux/" />
+      <id>https://smileykeith.com/2014/01/27/ipsec-l2tp-vpn-on-a-raspberry-pi-running-arch-linux</id>
       <updated>2014-01-27T20:49:00-08:00</updated>
       <author>
         
@@ -2830,8 +3197,8 @@ configuration.</p>
   
     <entry>
       <title type="html"><![CDATA[iTerm theme based on the time of day]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/09/03/iterm-theme-based-on-the-time-of-day/" />
-      <id>http://smileykeith.com/2013/09/03/iterm-theme-based-on-the-time-of-day</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/09/03/iterm-theme-based-on-the-time-of-day/" />
+      <id>https://smileykeith.com/2013/09/03/iterm-theme-based-on-the-time-of-day</id>
       <updated>2013-09-03T10:56:00-07:00</updated>
       <author>
         
@@ -2880,8 +3247,8 @@ This way everytime I open a new session my theme is automatically set.</p>
   
     <entry>
       <title type="html"><![CDATA[Global htaccess]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/08/14/global-htaccess/" />
-      <id>http://smileykeith.com/2013/08/14/global-htaccess</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/08/14/global-htaccess/" />
+      <id>https://smileykeith.com/2013/08/14/global-htaccess</id>
       <updated>2013-08-14T13:12:00-07:00</updated>
       <author>
         
@@ -2948,8 +3315,8 @@ to</p>
   
     <entry>
       <title type="html"><![CDATA[OS X Crash Report Symbolication]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/08/09/os-x-crash-symbolication/" />
-      <id>http://smileykeith.com/2013/08/09/os-x-crash-symbolication</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/08/09/os-x-crash-symbolication/" />
+      <id>https://smileykeith.com/2013/08/09/os-x-crash-symbolication</id>
       <updated>2013-08-09T13:26:00-07:00</updated>
       <author>
         
@@ -3125,8 +3492,8 @@ it's obviously worth it.</p>
   
     <entry>
       <title type="html"><![CDATA[The 'Best' Text Editor]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/05/22/the-best-text-editor/" />
-      <id>http://smileykeith.com/2013/05/22/the-best-text-editor</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/05/22/the-best-text-editor/" />
+      <id>https://smileykeith.com/2013/05/22/the-best-text-editor</id>
       <updated>2013-05-22T00:59:00-07:00</updated>
       <author>
         
@@ -3148,8 +3515,8 @@ it's obviously worth it.</p>
   
     <entry>
       <title type="html"><![CDATA[Objective-C on Travis-CI]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/04/11/objective-c-on-travis-ci/" />
-      <id>http://smileykeith.com/2013/04/11/objective-c-on-travis-ci</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/04/11/objective-c-on-travis-ci/" />
+      <id>https://smileykeith.com/2013/04/11/objective-c-on-travis-ci</id>
       <updated>2013-04-11T15:58:00-07:00</updated>
       <author>
         
@@ -3220,8 +3587,8 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   
     <entry>
       <title type="html"><![CDATA[OS X + ZFS]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/02/21/os-x-plus-zfs/" />
-      <id>http://smileykeith.com/2013/02/21/os-x-plus-zfs</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/02/21/os-x-plus-zfs/" />
+      <id>https://smileykeith.com/2013/02/21/os-x-plus-zfs</id>
       <updated>2013-02-21T11:28:00-08:00</updated>
       <author>
         
@@ -3240,8 +3607,8 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   
     <entry>
       <title type="html"><![CDATA[Terminal Shortcut in OS X]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/02/08/terminal-shortcut-in-os-x/" />
-      <id>http://smileykeith.com/2013/02/08/terminal-shortcut-in-os-x</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/02/08/terminal-shortcut-in-os-x/" />
+      <id>https://smileykeith.com/2013/02/08/terminal-shortcut-in-os-x</id>
       <updated>2013-02-08T09:59:00-08:00</updated>
       <author>
         
@@ -3278,8 +3645,8 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   
     <entry>
       <title type="html"><![CDATA[Automated Google Reader Backups]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/02/01/automated-google-reader-backups/" />
-      <id>http://smileykeith.com/2013/02/01/automated-google-reader-backups</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/02/01/automated-google-reader-backups/" />
+      <id>https://smileykeith.com/2013/02/01/automated-google-reader-backups</id>
       <updated>2013-02-01T12:30:00-08:00</updated>
       <author>
         
@@ -3409,8 +3776,8 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   
     <entry>
       <title type="html"><![CDATA[Boredom]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/02/01/boredom/" />
-      <id>http://smileykeith.com/2013/02/01/boredom</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/02/01/boredom/" />
+      <id>https://smileykeith.com/2013/02/01/boredom</id>
       <updated>2013-02-01T11:03:00-08:00</updated>
       <author>
         
@@ -3427,8 +3794,8 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   
     <entry>
       <title type="html"><![CDATA[Learning C]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/27/learning-c/" />
-      <id>http://smileykeith.com/2013/01/27/learning-c</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/01/27/learning-c/" />
+      <id>https://smileykeith.com/2013/01/27/learning-c</id>
       <updated>2013-01-27T22:59:00-08:00</updated>
       <author>
         
@@ -3446,8 +3813,8 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   
     <entry>
       <title type="html"><![CDATA[NSTableView vim keys]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/08/nstableview-vim-keys/" />
-      <id>http://smileykeith.com/2013/01/08/nstableview-vim-keys</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/01/08/nstableview-vim-keys/" />
+      <id>https://smileykeith.com/2013/01/08/nstableview-vim-keys</id>
       <updated>2013-01-08T16:19:00-08:00</updated>
       <author>
         
@@ -3541,8 +3908,8 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   
     <entry>
       <title type="html"><![CDATA[Backing up with Capistrano]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/05/backing-up-with-capistrano/" />
-      <id>http://smileykeith.com/2013/01/05/backing-up-with-capistrano</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/01/05/backing-up-with-capistrano/" />
+      <id>https://smileykeith.com/2013/01/05/backing-up-with-capistrano</id>
       <updated>2013-01-05T12:12:00-08:00</updated>
       <author>
         
@@ -3579,8 +3946,8 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   
     <entry>
       <title type="html"><![CDATA[Raking Podspecs]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/04/raking-podspecs/" />
-      <id>http://smileykeith.com/2013/01/04/raking-podspecs</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/01/04/raking-podspecs/" />
+      <id>https://smileykeith.com/2013/01/04/raking-podspecs</id>
       <updated>2013-01-04T11:09:00-08:00</updated>
       <author>
         
@@ -3670,8 +4037,8 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   
     <entry>
       <title type="html"><![CDATA[Spawning iTerm Windows]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/03/spawn-iterm/" />
-      <id>http://smileykeith.com/2013/01/03/spawn-iterm</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/01/03/spawn-iterm/" />
+      <id>https://smileykeith.com/2013/01/03/spawn-iterm</id>
       <updated>2013-01-03T12:34:00-08:00</updated>
       <author>
         
@@ -3707,8 +4074,8 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   
     <entry>
       <title type="html"><![CDATA[NSWindow Global Hotkey]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/03/nswindow-global-hotkey/" />
-      <id>http://smileykeith.com/2013/01/03/nswindow-global-hotkey</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/01/03/nswindow-global-hotkey/" />
+      <id>https://smileykeith.com/2013/01/03/nswindow-global-hotkey</id>
       <updated>2013-01-03T10:44:00-08:00</updated>
       <author>
         
@@ -3746,8 +4113,8 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   
     <entry>
       <title type="html"><![CDATA[Linode Setup]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2013/01/02/linode-setup/" />
-      <id>http://smileykeith.com/2013/01/02/linode-setup</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2013/01/02/linode-setup/" />
+      <id>https://smileykeith.com/2013/01/02/linode-setup</id>
       <updated>2013-01-02T15:19:00-08:00</updated>
       <author>
         
@@ -3766,8 +4133,8 @@ git submodule update <span class="nt">--init</span> <span class="nt">--recursive
   
     <entry>
       <title type="html"><![CDATA[The fear of shipping]]></title>
-      <link rel="alternate" type="text/html" href="http://smileykeith.com/2012/12/12/the-fear-of-shipping/" />
-      <id>http://smileykeith.com/2012/12/12/the-fear-of-shipping</id>
+      <link rel="alternate" type="text/html" href="https://smileykeith.com/2012/12/12/the-fear-of-shipping/" />
+      <id>https://smileykeith.com/2012/12/12/the-fear-of-shipping</id>
       <updated>2012-12-12T17:42:00-08:00</updated>
       <author>
         
