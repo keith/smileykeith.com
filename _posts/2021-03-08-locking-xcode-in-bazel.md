@@ -25,6 +25,9 @@ a `BUILD` file that contains an entry for every version you currently
 have installed. The result looks something like this:[^2]
 
 ```py
+load("@apple_support//xcode:xcode_config.bzl", "xcode_config")
+load("@apple_support//xcode:xcode_version.bzl", "xcode_version")
+
 xcode_version(
     name = "version12_4_0_12D4e",
     version = "12.4.0.12D4e",
@@ -69,6 +72,9 @@ from the example above, but only including the Xcode versions you want
 to support, it will contain:
 
 ```py
+load("@apple_support//xcode:xcode_config.bzl", "xcode_config")
+load("@apple_support//xcode:xcode_version.bzl", "xcode_version")
+
 xcode_version(
     name = "version12_4_0_12D4e",
     version = "12.4.0.12D4e",
@@ -108,6 +114,9 @@ case, one solution is to include multiple versions in your `BUILD`
 file:
 
 ```py
+load("@apple_support//xcode:xcode_config.bzl", "xcode_config")
+load("@apple_support//xcode:xcode_version.bzl", "xcode_version")
+
 xcode_version(
     name = "version12_4_0_12D4e",
     version = "12.4.0.12D4e",
