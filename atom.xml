@@ -2,14 +2,14 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title type="text"><![CDATA[Keith Smiley]]></title>
   
-  <updated>2025-10-31T13:28:45-07:00</updated>
+  <updated>2026-03-29T12:27:48-07:00</updated>
   <id>https://smileykeith.com/</id>
   <link rel="alternate" type="text/html" hreflang="en" href="https://smileykeith.com" />
 
   
   <link rel="self" type="application/atom+xml" href="https://smileykeith.com/atom.xml" />
   
-  <rights>Copyright (c) 2025 Keith Smiley</rights>
+  <rights>Copyright (c) 2026 Keith Smiley</rights>
   <generator uri="http://jekyllrb.com/" version="1.0.3">Jekyll</generator>
 
   
@@ -2049,7 +2049,10 @@ and then
 a <code class="language-plaintext highlighter-rouge">BUILD</code> file that contains an entry for every version you currently
 have installed. The result looks something like this:<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup></p>
 
-<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">xcode_version</span><span class="p">(</span>
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">load</span><span class="p">(</span><span class="s">"@apple_support//xcode:xcode_config.bzl"</span><span class="p">,</span> <span class="s">"xcode_config"</span><span class="p">)</span>
+<span class="n">load</span><span class="p">(</span><span class="s">"@apple_support//xcode:xcode_version.bzl"</span><span class="p">,</span> <span class="s">"xcode_version"</span><span class="p">)</span>
+
+<span class="n">xcode_version</span><span class="p">(</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s">"version12_4_0_12D4e"</span><span class="p">,</span>
     <span class="n">version</span> <span class="o">=</span> <span class="s">"12.4.0.12D4e"</span><span class="p">,</span>
     <span class="n">aliases</span> <span class="o">=</span> <span class="p">[</span><span class="s">"12.4.0"</span><span class="p">,</span> <span class="s">"12.4"</span><span class="p">,</span> <span class="s">"12.4.0.12D4e"</span><span class="p">],</span>
@@ -2091,7 +2094,10 @@ your project (or somewhere else if you'd prefer). Using the contents
 from the example above, but only including the Xcode versions you want
 to support, it will contain:</p>
 
-<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">xcode_version</span><span class="p">(</span>
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">load</span><span class="p">(</span><span class="s">"@apple_support//xcode:xcode_config.bzl"</span><span class="p">,</span> <span class="s">"xcode_config"</span><span class="p">)</span>
+<span class="n">load</span><span class="p">(</span><span class="s">"@apple_support//xcode:xcode_version.bzl"</span><span class="p">,</span> <span class="s">"xcode_version"</span><span class="p">)</span>
+
+<span class="n">xcode_version</span><span class="p">(</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s">"version12_4_0_12D4e"</span><span class="p">,</span>
     <span class="n">version</span> <span class="o">=</span> <span class="s">"12.4.0.12D4e"</span><span class="p">,</span>
     <span class="n">aliases</span> <span class="o">=</span> <span class="p">[</span><span class="s">"12.4.0"</span><span class="p">,</span> <span class="s">"12.4"</span><span class="p">,</span> <span class="s">"12.4.0.12D4e"</span><span class="p">],</span>
@@ -2127,7 +2133,10 @@ for testing, even if not all versions will get cache hits. In this
 case, one solution is to include multiple versions in your <code class="language-plaintext highlighter-rouge">BUILD</code>
 file:</p>
 
-<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">xcode_version</span><span class="p">(</span>
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">load</span><span class="p">(</span><span class="s">"@apple_support//xcode:xcode_config.bzl"</span><span class="p">,</span> <span class="s">"xcode_config"</span><span class="p">)</span>
+<span class="n">load</span><span class="p">(</span><span class="s">"@apple_support//xcode:xcode_version.bzl"</span><span class="p">,</span> <span class="s">"xcode_version"</span><span class="p">)</span>
+
+<span class="n">xcode_version</span><span class="p">(</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s">"version12_4_0_12D4e"</span><span class="p">,</span>
     <span class="n">version</span> <span class="o">=</span> <span class="s">"12.4.0.12D4e"</span><span class="p">,</span>
     <span class="n">aliases</span> <span class="o">=</span> <span class="p">[</span><span class="s">"12D4e"</span><span class="p">],</span>
